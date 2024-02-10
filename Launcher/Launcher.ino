@@ -83,7 +83,11 @@ int fileListCount;
 int folderListCount;
 int startIndex;
 int endIndex;
-int dispfileCount = 8;
+#if defined(STICK_C_PLUS2)
+  int dispfileCount = 8;
+#else
+  int dispfileCount = 7;
+#endif
 int selectIndex;
 boolean needRedraw;
 
