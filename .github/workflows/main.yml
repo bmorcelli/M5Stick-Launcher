@@ -117,7 +117,7 @@ jobs:
   
             # Full path to the file to be copied
             file="$baseFolder/$latestVersion/tools/partitions/custom_4Mb.csv "
-            cp custom_4Mb.csv ${file}
+            cp support_files/custom_4Mb.csv ${file}
 
             arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
                                 --build-property build.partitions=custom_4Mb \
@@ -132,7 +132,7 @@ jobs:
   
             # Full path to the file to be copied
             file="$baseFolder/$latestVersion/tools/partitions/custom_8Mb.csv "
-            cp custom_8Mb.csv ${file}
+            cp support_files/custom_8Mb.csv ${file}
 
             arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
                                 --build-property build.partitions=custom_8Mb \
@@ -157,7 +157,7 @@ jobs:
   
             # Full path to the file to be copied
             file="$baseFolder/$latestVersion/tools/partitions/custom_4Mb.csv "
-            cp custom_4Mb.csv ${file}
+            cp support_files/custom_4Mb.csv ${file}
             
             arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
                                 --build-property build.partitions=custom_4Mb \
@@ -173,8 +173,8 @@ jobs:
             # Full path to the file to be copied
             file="$baseFolder/$latestVersion/tools/partitions/custom_8Mb.csv "
             
-            cp custom_8Mb.csv ${file} ## original
-            # cp custom_8Mb_mar.csv ${file} ## original
+            cp support_files/custom_8Mb.csv ${file} ## original
+           
             
             arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
                                 --build-property build.partitions=custom_8Mb \
