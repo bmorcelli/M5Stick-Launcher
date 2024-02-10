@@ -29,6 +29,6 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
     * M5StickC and M5StickC Plus
         * Run in "~support_files\" folder:    "esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader_4Mb.bin 0x8000 partition-table_4Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xa0000 StartApp.ino.bin"
     * M5StickC Plus 2 and Cardputer
-         "esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xf0000 StartApp.ino.bin"
+        * Run in "~support_files\" folder:    "esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xf0000 StartApp.ino.bin"
 
 
