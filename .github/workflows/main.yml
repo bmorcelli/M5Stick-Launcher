@@ -1,0 +1,273 @@
+---
+name: Compile M5Stick Launcher Firmware
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      board:
+        description: 'Board to Compile'
+        type: choice
+        required: true
+        default: 'M5StickCPlus2'
+        options: ['M5Cardputer', 'M5StickCPlus2', 'M5StickCPlus', 'M5StickC']
+        
+jobs:
+  compile_sketch:
+    name: Build ${{ matrix.board.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      # max-parallel: 4
+      fail-fast: false
+      matrix:
+        board:
+          - {
+              name: "M5Cardputer",
+              fqbn: "m5stack:esp32:m5stack_cardputer",
+              extra_flags: "-DCARDPUTER",
+              libraries: "M5Cardputer M5Stack-SD-Updater M5Unified SdFat",
+              partitions: {
+                bootloader_addr: "0x0000",
+              },
+            }
+          - {
+              name: "M5StickCPlus2",
+              fqbn: "m5stack:esp32:m5stack_stickc_plus2",
+              extra_flags: "-DSTICK_C_PLUS2",
+              libraries: "M5StickCPlus2 M5Stack-SD-Updater M5Unified SdFat",
+              partitions: {
+                bootloader_addr: "0x1000",
+              },
+            }
+          - {
+              name: "M5StickCPlus",
+              fqbn: "m5stack:esp32:m5stack_stickc_plus",
+              extra_flags: "-DSTICK_C_PLUS",
+              libraries: "M5StickCPlus M5Stack-SD-Updater M5Unified SdFat",
+              partitions: {
+                bootloader_addr: "0x1000",
+              },
+            }
+          - {
+              name: "M5StickC",
+              fqbn: "m5stack:esp32:m5stack_stickc",
+              extra_flags: "-DSTICK_C",
+              # TODO: M5StickC's latest version has some dependency issues with M5Hat-JoyC library
+              libraries: "M5StickC@0.2.8 M5Stack-SD-Updater M5Unified SdFat",
+              partitions: {
+                bootloader_addr: "0x1000",
+              },
+            }
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - id: launcher_version
+        name: Get M5Stick Launcher Version
+        run: |
+          set -x
+
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            version=${{ github.ref_name }}
+          else
+            version="${GITHUB_SHA::7}"
+          fi
+
+          echo "version=${version}" > $GITHUB_OUTPUT
+
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+
+      - name: Install platform
+        run: |
+          set -x
+          
+          # arduino-cli core install esp32:esp32
+          arduino-cli core install m5stack:esp32 --additional-urls "file:///${PWD}/package_m5stack_index.json"
+
+          arduino-cli core search m5stack
+          arduino-cli board listall
+
+          arduino-cli lib install ${{ matrix.board.libraries }} --log-level warn --verbose
+      
+      - name: Install esptool
+        run: |
+          pip install -U esptool
+
+      - name: Compile StartApp for ${{ matrix.board.name }} Sketch
+        run: |
+          set -x
+
+          version=${{ steps.launcher_version.outputs.version }}
+          
+          extra_flags="${{ matrix.board.extra_flags }} -DLAUNCHER_VERSION=\"${version}\""
+          ##Teste para rodar marauder
+        
+          if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
+            baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
+            
+            # Find the latest version of the folder
+            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
+  
+            # Full path to the file to be copied
+            file="$baseFolder/$latestVersion/tools/partitions/custom_4Mb.csv "
+            cp custom_4Mb.csv ${file}
+
+            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
+                                --build-property build.partitions=custom_4Mb \
+                                --build-property upload.maximum_size=1966080  \
+                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
+                                ./StartApp/StartApp.ino
+          else
+            baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
+            
+            # Find the latest version of the folder
+            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
+  
+            # Full path to the file to be copied
+            file="$baseFolder/$latestVersion/tools/partitions/custom_8Mb.csv "
+            cp custom_8Mb.csv ${file}
+
+            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
+                                --build-property build.partitions=custom_8Mb \
+                                --build-property upload.maximum_size=3342336 \
+                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
+                                ./StartApp/StartApp.ino
+          fi
+
+      - name: Compile Launcher for ${{ matrix.board.name }} Sketch
+        run: |
+          set -x
+
+          version=${{ steps.launcher_version.outputs.version }}
+          
+          extra_flags="${{ matrix.board.extra_flags }} -DLAUNCHER_VERSION=\"${version}\""
+       
+          if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
+            baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
+            
+            # Find the latest version of the folder
+            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
+  
+            # Full path to the file to be copied
+            file="$baseFolder/$latestVersion/tools/partitions/custom_4Mb.csv "
+            cp custom_4Mb.csv ${file}
+            
+            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
+                                --build-property build.partitions=custom_4Mb \
+                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
+                                ./Launcher/Launcher.ino
+       
+          else
+                        baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
+            
+            # Find the latest version of the folder
+            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
+  
+            # Full path to the file to be copied
+            file="$baseFolder/$latestVersion/tools/partitions/custom_8Mb.csv "
+            
+            cp custom_8Mb.csv ${file} ## original
+            # cp custom_8Mb_mar.csv ${file} ## original
+            
+            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
+                                --build-property build.partitions=custom_8Mb \
+                                --build-property upload.maximum_size=3342336 \
+                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
+                                ./Launcher/Launcher.ino
+
+          fi
+
+      - name: Create ${{ matrix.board.name }} Firmware Binary
+        run: |
+          set -x
+          
+          version=${{ steps.launcher_version.outputs.version }}
+          
+          output_file="M5Launcher-${version}-${{ matrix.board.name }}.bin"
+          
+          fqbn=${{ matrix.board.fqbn }}
+          directory="${fqbn//:/.}"
+          if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
+          
+            esptool.py --chip esp32s3 merge_bin --output ${output_file} \
+              ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader.bin \
+              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
+              0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xa0000 StartApp/build/${directory}/StartApp.ino.bin
+              
+          else
+          
+            esptool.py --chip esp32s3 merge_bin --output ${output_file} \
+              ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_8Mb.bin \
+              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
+              0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
+              
+          fi
+
+          
+      - name: List all files
+        if: always()
+        continue-on-error: true
+        run: |
+          set -x
+          pwd
+          ls -all
+          tree
+
+      # TODO: Validate the firmware
+        
+      - name: Upload ${{ matrix.board.name }} Firmware Bin File
+        uses: actions/upload-artifact@v4
+        with:
+          name: Launcher-${version}-${{ matrix.board.name }}
+          path: M5Launcher-*.bin
+          if-no-files-found: error
+
+  create_release:
+    runs-on: ubuntu-latest
+    environment: github_release
+    needs: [compile_sketch]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+
+    steps:
+    - id: launcher_version
+      name: Get Launcher Version
+      run: |
+        set -x
+
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          version=${{ github.ref_name }}
+        else
+          version="${GITHUB_SHA::7}"
+        fi
+
+        echo "version=${version}" > $GITHUB_OUTPUT
+
+    - uses: actions/download-artifact@v4
+      with:
+        merge-multiple: true
+
+    - name: List all files
+      if: always()
+      run: |
+        set -x
+        pwd
+        ls -all
+        tree
+
+    - name: Create Release ${{ steps.launcher_version.outputs.version }}
+      uses: softprops/action-gh-release@v1
+      with:
+        name: M5Stick Launcher Release ${{ steps.launcher_version.outputs.version }}
+        tag_name: ${{ steps.launcher_version.outputs.version }}
+        generate_release_notes: false
+        files: |
+          Launcher-*.bin
+
