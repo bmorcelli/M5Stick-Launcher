@@ -266,7 +266,7 @@ jobs:
       with:
         name: M5Stick Launcher Release ${{ steps.launcher_version.outputs.version }}
         tag_name: ${{ steps.launcher_version.outputs.version }}
-        generate_release_notes: false
+        generate_release_notes: true
         files: |
           M5Launcher-*.bin
 
