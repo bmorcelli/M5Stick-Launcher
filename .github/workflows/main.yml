@@ -197,7 +197,7 @@ jobs:
           if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
           
             esptool.py --chip esp32s3 merge_bin --output ${output_file} \
-              ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader.bin \
+              ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_4Mb.bin \
               0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
               0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xa0000 StartApp/build/${directory}/StartApp.ino.bin
               
