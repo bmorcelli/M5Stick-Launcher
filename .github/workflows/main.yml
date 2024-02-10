@@ -268,5 +268,5 @@ jobs:
         tag_name: ${{ steps.launcher_version.outputs.version }}
         generate_release_notes: false
         files: |
-          Launcher-*.bin
+          M5Launcher-*.bin
 
