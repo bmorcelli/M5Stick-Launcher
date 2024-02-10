@@ -90,7 +90,7 @@ jobs:
           set -x
           
           # arduino-cli core install esp32:esp32
-          arduino-cli core install m5stack:esp32 --additional-urls "file:///${PWD}/package_m5stack_index.json"
+          arduino-cli core install m5stack:esp32 --additional-urls "file:///${PWD}/support_files/package_m5stack_index.json"
 
           arduino-cli core search m5stack
           arduino-cli board listall
@@ -108,7 +108,6 @@ jobs:
           version=${{ steps.launcher_version.outputs.version }}
           
           extra_flags="${{ matrix.board.extra_flags }} -DLAUNCHER_VERSION=\"${version}\""
-          ##Teste para rodar marauder
         
           if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
             baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
