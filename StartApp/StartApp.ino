@@ -39,7 +39,7 @@ void setup() {
     M5.begin();
   #endif
 
-  LNDISP.setRotation(3);
+  LNDISP.setRotation(1);
   LNDISP.setTextSize(2);
   LNDISP.fillScreen(WHITE);
   LNDISP.setCursor(0, 0);
