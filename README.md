@@ -1,6 +1,8 @@
 # M5Stick Launcher
 Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2.
 
+You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
+
 ## How to Install
 * Download the ZIP file from Releases for your device.
 * Use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
