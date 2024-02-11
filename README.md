@@ -1,5 +1,7 @@
 # M5Stick Launcher
-Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2.
+Application Launcher for M5StickC, M5StickC Plus, and M5StickC Plus 2.
+
+Cardputer isn't working yet, need testing and debug. =(
 
 Ir is mandatory that you have an [SDCard Hat](https://www.thingiverse.com/thing:6459069) to use with this Launcher and i have instructions [Here](https://www.thingiverse.com/thing:6459069), Cardputer users naturaly don´t need this Hat!
 
