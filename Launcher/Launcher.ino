@@ -174,7 +174,7 @@ void setup() {
 #endif
 
   // Print SplashScreen
-  LNDISP.setRotation(3);
+  LNDISP.setRotation(1);
   LNDISP.setTextSize(2);
   LNDISP.fillScreen(WHITE);
   LNDISP.setCursor(0, 0);
@@ -213,7 +213,6 @@ void setup() {
   pinMode(M5_BUTTON_MENU, INPUT);
 #endif
 
-  LNDISP.setRotation(3);
   LNDISP.setTextSize(2);
   
   // Verify if SD Hat or SD card is connected..
