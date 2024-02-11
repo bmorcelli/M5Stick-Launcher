@@ -1,7 +1,13 @@
 # M5Stick Launcher
 Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2.
 
+Ir is mandatory that you have an [SDCard Hat](https://www.thingiverse.com/thing:6459069) to use with this Launcher and i have instructions [Here](https://www.thingiverse.com/thing:6459069), Cardputer users naturaly don´t need this Hat!
+
 You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
+
+Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Obtaining-binaries-to-launch)
+
+
 
 ## How to Install
 * Download the ZIP file from Releases for your device.
