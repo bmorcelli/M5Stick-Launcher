@@ -195,7 +195,8 @@ void setup() {
 #if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
   if (M5.BtnA.wasPressed())  // M5 button
 #else
-  if (M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER))  // Enter
+  M5Cardputer.update();
+  if (M5Cardputer.BtnA.wasPressed() || M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER))  // Enter
 #endif
     {
       goto Launcher;
@@ -320,6 +321,7 @@ void loop() {
     if (M5.Axp.GetBtnPress())  // Power Button
 #endif
 #if defined(CARDPUTER)
+      M5Cardputer.update();
       if (M5Cardputer.Keyboard.isKeyPressed(';'))  //Arrow Up
 #endif
       {
@@ -333,6 +335,7 @@ void loop() {
 #if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
   if (M5.BtnB.wasPressed())  // Side Button
 #else
+  M5Cardputer.update();
   if (M5Cardputer.Keyboard.isKeyPressed('.'))        // Arrow Down
 #endif
   {
@@ -348,6 +351,7 @@ void loop() {
 #if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
   if (M5.BtnA.wasPressed())  // M5 button
 #else
+  M5Cardputer.update();
   if (M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER))  // Enter
 #endif
   {
