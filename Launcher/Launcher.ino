@@ -190,7 +190,7 @@ void setup() {
   LNDISP.printf("%s", LAUNCHER_VERSION);
 
 
-  while(millis()<1500) {
+  while(millis()<2500) {
     M5.update();
 #if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
   if (M5.BtnA.wasPressed())  // M5 button
