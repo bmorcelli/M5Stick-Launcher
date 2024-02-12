@@ -314,12 +314,9 @@ void loop() {
 
   M5.update();
 
-#if defined(STICK_C_PLUS2)
-  if (digitalRead(M5_BUTTON_MENU) == LOW)  // power button
-#endif
-#if defined(STICK_C_PLUS) || defined(STICK_C)
-    if (M5.Axp.GetBtnPress())  // Power Button
-#endif
+#if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
+  if (M5.BtnB.wasPressed())  // Side Button
+#else
 #if defined(CARDPUTER)
       M5Cardputer.update();
       if (M5Cardputer.Keyboard.isKeyPressed(';'))  //Arrow Up
@@ -332,9 +329,13 @@ void loop() {
         needRedraw = true;
       }
 
-#if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
-  if (M5.BtnB.wasPressed())  // Side Button
-#else
+
+#if defined(STICK_C_PLUS2)
+  if (digitalRead(M5_BUTTON_MENU) == LOW)  // power button
+#endif
+#if defined(STICK_C_PLUS) || defined(STICK_C)
+    if (M5.Axp.GetBtnPress())  // Power Button
+#endif
   M5Cardputer.update();
   if (M5Cardputer.Keyboard.isKeyPressed('.'))        // Arrow Down
 #endif
