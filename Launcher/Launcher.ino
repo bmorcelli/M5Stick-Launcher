@@ -312,10 +312,9 @@ void loop() {
     delay(250);
   }
 
-  M5.update();
-
 #if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
-  if (M5.BtnB.wasPressed())  // Side Button
+  M5.update();
+    if (M5.BtnB.wasPressed())  // Side Button
 #else
 #if defined(CARDPUTER)
       M5Cardputer.update();
@@ -331,9 +330,11 @@ void loop() {
 
 
 #if defined(STICK_C_PLUS2)
+  M5.update();
   if (digitalRead(M5_BUTTON_MENU) == LOW)  // power button
 #endif
 #if defined(STICK_C_PLUS) || defined(STICK_C)
+    M5.update();
     if (M5.Axp.GetBtnPress())  // Power Button
 #endif
   M5Cardputer.update();
