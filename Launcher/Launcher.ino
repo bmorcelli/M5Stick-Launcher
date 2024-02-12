@@ -385,7 +385,12 @@ void loop() {
 
       // Verify if the first 3 bytes are different from 0xE9 0x05 0x02 (meaning that the file have Bootloader, partitions and application)
       //
-      if (firstThreeBytes[0] != 0xE9 && firstThreeBytes[1] != 0x05 && firstThreeBytes[2] != 0x02) {
+      if (firstThreeBytes[0] == 0xE9 == firstThreeBytes[1] == 0x05 && firstThreeBytes[2] == 0x02) {
+        Serial.println("First 3 bytes are 0xE9 0x05 0x02");
+        updateFromFS(SD,PreFolder + "/" + fileList[selectIndex - folderListCount], LNSD_CS_PIN);
+        ESP.restart();
+      } else {
+        
         Serial.println("Status: Binary file is made to flash at 0x0. Starting splitting.");
         File outputFile = SD.open(PreFolder + "/Z_file.bin", FILE_WRITE);
 
@@ -506,11 +511,7 @@ void loop() {
         updateFromFS(SD,PreFolder +  "/" + fileList[selectIndex - folderListCount], LNSD_CS_PIN);
         ESP.restart();
 
-      } else {
-        Serial.println("First 3 bytes are 0xE9 0x05 0x02");
-        updateFromFS(SD,PreFolder + "/" + fileList[selectIndex - folderListCount], LNSD_CS_PIN);
-        ESP.restart();
-      }
+      } 
     }
   }
 }
