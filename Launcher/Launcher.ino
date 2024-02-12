@@ -312,43 +312,42 @@ void loop() {
     delay(250);
   }
 
-#if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
   M5.update();
-    if (M5.BtnB.wasPressed())  // Side Button
-#else
-#if defined(CARDPUTER)
-      M5Cardputer.update();
-      if (M5Cardputer.Keyboard.isKeyPressed(';'))  //Arrow Up
-#endif
-      {
-        selectIndex--;
-        if (selectIndex < 0) {
-          selectIndex = fileListCount + folderListCount - 1;
-        }
-        needRedraw = true;
-      }
-
 
 #if defined(STICK_C_PLUS2)
-  M5.update();
   if (digitalRead(M5_BUTTON_MENU) == LOW)  // power button
 #endif
 #if defined(STICK_C_PLUS) || defined(STICK_C)
-    M5.update();
     if (M5.Axp.GetBtnPress())  // Power Button
 #endif
+#if defined(CARDPUTER)
+      M5Cardputer.update();
+      if (M5Cardputer.Keyboard.isKeyPressed('.'))  //Arrow Up
+#endif
+      {
+        selectIndex++;
+        if (selectIndex > (fileListCount + folderListCount) || (selectIndex == (fileListCount + folderListCount) && PreFolder == "/")) {
+        selectIndex = 0;
+        }
+        needRedraw = true;
+        delay(150);
+      }
+
+#if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
+  if (M5.BtnB.wasPressed())  // Side Button
+#else
   M5Cardputer.update();
-  if (M5Cardputer.Keyboard.isKeyPressed('.'))        // Arrow Down
+  if (M5Cardputer.Keyboard.isKeyPressed(';'))        // Arrow Down
 #endif
   {
-    selectIndex++;
-    if (selectIndex > (fileListCount + folderListCount) || (selectIndex == (fileListCount + folderListCount) && PreFolder == "/")) {
-      selectIndex = 0;
-    }
-
-    needRedraw = true;
-    delay(150);
+      selectIndex--;
+      if (selectIndex < 0) {
+        selectIndex = fileListCount + folderListCount - 1;
+      }
+      needRedraw = true;
+      delay(150);
   }  
+
 
 #if defined(STICK_C_PLUS2) || defined(STICK_C_PLUS) || defined(STICK_C)
   if (M5.BtnA.wasPressed())  // M5 button
