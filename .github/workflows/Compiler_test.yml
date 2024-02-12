@@ -1,5 +1,5 @@
 ---
-name: Compile M5Stick Launcher Firmware
+name: Compiler test
 
 on:
   push:
