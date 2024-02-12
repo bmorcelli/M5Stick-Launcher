@@ -8,7 +8,7 @@
 // #define CARDPUTER       // 8Mb of Flash Memory -> Need custom partitioning (mandatory)
 // ============== Flawless Victory ================
 
-#define LAUNCHER_VERSION "dev"
+#define LAUNCHER_VERSION "1.1.0"
 
 #if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C) && !defined(STICK_C_PLUSv1)
 #define STICK_C_PLUS2
