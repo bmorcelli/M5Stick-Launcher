@@ -1,7 +1,6 @@
 # M5Stick Launcher
-Application Launcher for M5StickC, M5StickC Plus, and M5StickC Plus 2.
+Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2.
 
-Cardputer isn't working yet, need testing and debug. =(
 
 Ir is mandatory that you have an [SDCard Hat](https://www.thingiverse.com/thing:6459069) to use with this Launcher and i have instructions [Here](https://www.thingiverse.com/thing:6459069), Cardputer users naturaly don´t need this Hat!
 
@@ -12,7 +11,8 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
 
 
 ## How to Install
-* Download the ZIP file from Releases for your device.
+* Use M5Burner, or
+* Download the .bin file from Releases for your device.
 * Use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
 
 ## How to Use
