@@ -26,7 +26,7 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
 * Install the following libs:
     * [SdFat](https://github.com/greiman/SdFat)
     * [M5Stack-Sd-Updater](https://github.com/tobozo/M5Stack-SD-Updater/)
-    * [M5GFX] (https://github.com/m5stack/M5GFX)
+    * [M5GFX](https://github.com/m5stack/M5GFX)
     * [M5Unified](https://github.com/m5stack/M5Unified)
 
 * Open ~Launcher/Launcher.ino
@@ -42,3 +42,11 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
         * Run in "~support_files\" folder:    "esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xf0000 StartApp.ino.bin"
 
 
+## Changelog
+* 1.1.1: 
+     * Changed OTA_0 Partition size from 3Mb to 6Mb on Cardputer and M5StickCPlus2
+     * Added verification to identify MicroPython binaries and don't corrupt them with the cropping process (these apps still don't work, need more work...)
+* 1.1.0:
+     * Fixed issues that prevented M5Launcher to launch apps on Cardputer
+* 1.0.1:
+     * Fixed blackscreen and keyboard capture on Cardputer.
