@@ -1,12 +1,12 @@
 /*            M5StickCPlus2 Simple Launcher -> Discord: @bmorcelli - Pirata#5263              */
 
 
-// ============= Choose your Destiny ==============
+// ================================ Choose your Destiny ================================
 // #define STICK_C         // 4Mb of Flash Memory -> Need custom partitioning (mandatory)
 // #define STICK_C_PLUS    // 4Mb of Flash Memory -> Need custom partitioning (mandatory)
 // #define STICK_C_PLUS2   // 8Mb of Flash Memory -> Need custom partitioning (mandatory)
 // #define CARDPUTER       // 8Mb of Flash Memory -> Need custom partitioning (mandatory)
-// ============== Flawless Victory ================
+// ================================== Flawless Victory ==================================
 
 #define LAUNCHER_VERSION "1.1.0"
 
@@ -386,8 +386,10 @@ void loop() {
 
       // Verify if the first 3 bytes are different from 0xE9 0x05 0x02 (meaning that the file have Bootloader, partitions and application)
       //
-      if (firstThreeBytes[0] == 0xE9 && firstThreeBytes[1] == 0x05 && firstThreeBytes[2] == 0x02) {
-        Serial.println("First 3 bytes are 0xE9 0x05 0x02");
+      if (firstThreeBytes[0] == 0xE9 && (firstThreeBytes[1] == 0x05 || firstThreeBytes[1] == 0x06) && firstThreeBytes[2] == 0x02) {
+        // firstThreeBytes[1] == 0x05 -> C++ Apps
+        // firstThreeBytes[1] == 0x06 -> MicroPython (work in progress, might need to change bootloader in the future
+        Serial.println("Status: Binary is an apllication");
         updateFromFS(SD,PreFolder + "/" + fileList[selectIndex - folderListCount], LNSD_CS_PIN);
         ESP.restart();
       } else {
@@ -438,7 +440,7 @@ void loop() {
         LNDISP.println("                    ");
         LNDISP.println("                    ");
         long i = 0;
-        Serial.println(PartitionSize,HEX);
+        
         delay(2000);
         Serial.println("Loading .");
         while ((bytesRead = file.read(buffer, bufferSize)) > 0) {
