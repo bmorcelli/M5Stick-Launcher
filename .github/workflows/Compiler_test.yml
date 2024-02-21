@@ -200,6 +200,11 @@ jobs:
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_4Mb.bin \
               0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
               0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xa0000 StartApp/build/${directory}/StartApp.ino.bin
+
+            cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_4Mb.bin 
+            cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
+            cp Launcher/build/${directory}/Launcher.ino.bin M5Launcher-Launcher.bin 
+              
           fi
 
           if [[ "${{ matrix.board.name }}" == "M5StickCPlus2" ]]; then
@@ -208,7 +213,11 @@ jobs:
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_8Mb.bin \
               0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
               0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
-              
+
+            cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_8Mb.bin 
+            cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
+            cp Launcher/build/${directory}/Launcher.ino.bin M5Launcher-Launcher.bin 
+            
           fi
 
           if [[ "${{ matrix.board.name }}" == "M5Cardputer" ]]; then
@@ -217,9 +226,14 @@ jobs:
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_CP.bin \
               0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
               0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
+
+            cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_8Mb.bin 
+            cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
+            cp Launcher/build/${directory}/Launcher.ino.bin M5Launcher-Launcher.bin 
               
           fi
 
+          
           
       - name: List all files
         if: always()
