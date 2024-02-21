@@ -386,9 +386,12 @@ void loop() {
 
       // Verify if the first 3 bytes are different from 0xE9 0x05 0x02 (meaning that the file have Bootloader, partitions and application)
       //
-      if (firstThreeBytes[0] == 0xE9 && (firstThreeBytes[1] == 0x05 || firstThreeBytes[1] == 0x06) && firstThreeBytes[2] == 0x02) {
+      if (firstThreeBytes[0] == 0xE9 && (firstThreeBytes[1] == 0x05 || firstThreeBytes[1] == 0x06 || firstThreeBytes[1] == 0x07) && firstThreeBytes[2] == 0x02) {
+          
         // firstThreeBytes[1] == 0x05 -> C++ Apps
         // firstThreeBytes[1] == 0x06 -> MicroPython (work in progress, might need to change bootloader in the future
+        // firstThreeBytes[1] == 0x07 -> Come apps are comming with this MagicNumber (Volos Watch)
+        
         Serial.println("Status: Binary is an apllication");
         updateFromFS(SD,PreFolder + "/" + fileList[selectIndex - folderListCount], LNSD_CS_PIN);
         ESP.restart();
