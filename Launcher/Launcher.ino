@@ -8,7 +8,7 @@
 // #define CARDPUTER       // 8Mb of Flash Memory -> Need custom partitioning (mandatory)
 // ================================== Flawless Victory ==================================
 
-#define LAUNCHER_VERSION "1.1.2"
+#define LAUNCHER_VERSION "1.1.3"
 
 #if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C) && !defined(STICK_C_PLUSv1)
 #define STICK_C_PLUS2
@@ -140,7 +140,6 @@ void readFs(String folder) {
   root = SD.open(folder);
   folderListCount = 0;
   File file = root.openNextFile();
-  if (folder == "/") { file = root.openNextFile(); }  //Jump "System Volume Information"
   while (file) {
     if (file.isDirectory()) {
       String fullFolderName = file.path();
@@ -240,7 +239,6 @@ void setup() {
 void loop() {
 
   if (needRedraw == true) {
-    LNDISP.setCursor(0, 0);
     startIndex = selectIndex - 5;
     if (startIndex < 0) {
       startIndex = 0;
@@ -248,11 +246,11 @@ void loop() {
     endIndex = startIndex + dispfileCount;
     if (endIndex >= (fileListCount + folderListCount)) {
       endIndex = fileListCount + folderListCount + 1;
-      //endIndex = fileListCount - 1;
       if (PreFolder != "/") { endIndex++; }
-      // startIndex = endIndex - 12;
-      startIndex = endIndex - dispfileCount;
-      if (startIndex < 0) {
+      if (selectIndex>6) {
+        startIndex = selectIndex - 6;
+      }
+      else {
         startIndex = 0;
       }
     }
@@ -260,15 +258,17 @@ void loop() {
     
     if (fileListCount == 0 && folderListCount == 0 && PreFolder == "/") {
       LNDISP.fillScreen(WHITE);
+      LNDISP.setCursor(0, 0);
       LNDISP.setTextColor(RED);
       LNDISP.println();
       LNDISP.println("SD is empty or there");
       LNDISP.println("are no .bin in root.");
-      LNDISP.println("Example: d:\\menu.bin");
+      LNDISP.println("Example: d:\\Nemo.bin");
       delay(2000);
       readFs("/");  //  Todo: Make it comes back one folder
     } else {
       LNDISP.fillScreen(BLACK);
+      LNDISP.setCursor(0, 0);
       for (int index = startIndex; index <= endIndex; index++) {
         LNDISP.setTextColor(WHITE, BLACK); // RESET BG COLOR TO BLACK
         if (index == selectIndex) {
@@ -343,6 +343,7 @@ void loop() {
       selectIndex--;
       if (selectIndex < 0) {
         selectIndex = fileListCount + folderListCount - 1;
+        if(PreFolder!="/") {selectIndex++;}
       }
       needRedraw = true;
       delay(150);
@@ -359,12 +360,14 @@ void loop() {
     if (selectIndex < folderListCount) {
       if(PreFolder=="/") { PreFolder = PreFolder + folderList[selectIndex]; }
       else { PreFolder = PreFolder + "/" + folderList[selectIndex]; }
+      selectIndex=0;
       readFs(PreFolder);
 
     } else if (fileList[selectIndex - folderListCount] == "") {
 
       PreFolder = PreFolder.substring(0, PreFolder.lastIndexOf("/"));
       if(PreFolder == ""){ PreFolder = "/"; }
+      selectIndex=0;
       readFs(PreFolder);
 
     } else {
