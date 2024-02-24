@@ -44,6 +44,8 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
         * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32s3 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x0 bootloader_CP.bin 0x8000 partition-table_8Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xf0000 StartApp.ino.bin`
 
 ## Changelog
+* 1.1.3:
+     * Fixed menu files that ware occasionally hiding files and folders.
 * 1.1.2:
      * Adjusted Magic numbers to work with some apps (Volos Watch).
 * 1.1.1: 
