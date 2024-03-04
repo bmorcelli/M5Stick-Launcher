@@ -199,7 +199,8 @@ jobs:
             esptool.py --chip esp32s3 merge_bin --output ${output_file} \
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_4Mb.bin \
               0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
-              0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xa0000 StartApp/build/${directory}/StartApp.ino.bin
+              0x10000 Launcher/build/${directory}/Launcher.ino.bin
+              # 0xa0000 StartApp/build/${directory}/StartApp.ino.bin
 
             cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_4Mb.bin 
             cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
@@ -212,7 +213,8 @@ jobs:
             esptool.py --chip esp32s3 merge_bin --output ${output_file} \
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_8Mb.bin \
               0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
-              0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
+              0x10000 Launcher/build/${directory}/Launcher.ino.bin
+              # 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
 
             cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_8Mb.bin 
             cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
@@ -225,7 +227,8 @@ jobs:
             esptool.py --chip esp32s3 merge_bin --output ${output_file} \
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_CP.bin \
               0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
-              0x10000 Launcher/build/${directory}/Launcher.ino.bin 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
+              0x10000 Launcher/build/${directory}/Launcher.ino.bin
+              # 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
 
             cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_8Mb.bin 
             cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
