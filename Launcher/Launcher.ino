@@ -7,9 +7,9 @@
 // #define CARDPUTER       // 8Mb of Flash Memory -> Need custom partitioning (mandatory)
 // ================================== Flawless Victory ==================================
 
-#define LAUNCHER_VERSION "1.2.e"
+#define LAUNCHER_VERSION "1.2.0"
 
-#if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C) && !defined(STICK_C_PLUSv1)
+#if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C)
 #define STICK_C_PLUS2
 #endif
 
@@ -340,8 +340,7 @@ if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,6,CYAN); }
 }
 
 void loop() {
-
-// Detect rotation of M5StickCs  ==============================================================================================================
+// Detect rotation of M5StickCs  =================================================================================================
 #if defined(STICK_C_PLUS2)
   M5.begin();
   auto imu_update = M5.Imu.update();
@@ -580,11 +579,7 @@ M5.update();
         }
         file.read(firstThreeBytes, 16);
 
-        if (firstThreeBytes[0] == 0xE9 && (firstThreeBytes[1] == 0x05 || firstThreeBytes[1] == 0x06 || firstThreeBytes[1] == 0x07) && firstThreeBytes[2] == 0x02) {
-          // firstThreeBytes[1] == 0x05 -> C++ Apps
-          // firstThreeBytes[1] == 0x06 -> MicroPython (work in progress, might need to change bootloader in the future
-          // firstThreeBytes[1] == 0x07 -> Come apps are comming with this MagicNumber (Volos Watch)
-          
+        if (firstThreeBytes[0] == 0xE9) { 
           if (firstThreeBytes[1] == 0x06) {
             //Checks if there are Micropython signature
             Serial.println("Micropython file not supported..");
@@ -601,6 +596,7 @@ M5.update();
           LNDISP.setTextColor(WHITE);
           LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
           LNDISP.setTextSize(1);
+	  LNDISP.setTextColor(GREEN);
           LNDISP.println("\nApp   : " + fileList[selectIndex - folderListCount - 1]);
 
           LNDISP.drawRect(18,78,204,19,WHITE);
@@ -631,16 +627,8 @@ M5.update();
           return;
         }
         file.read(firstThreeBytes, 16);
-        // E9 && (05 || 07) && 02 == valid file
-        if (firstThreeBytes[0] == 0xE9 && (firstThreeBytes[1] == 0x05 || firstThreeBytes[1] == 0x06 || firstThreeBytes[1] == 0x07) && firstThreeBytes[2] == 0x02) {
-          // firstThreeBytes[1] == 0x05 -> C++ Apps from Arduino IDE
-	  // firstThreeBytes[1] == 0x06 -> MicroPython or ESP-IDF, idk
-          // firstThreeBytes[1] == 0x07 -> Come apps are comming with this MagicNumber (Volos Watch), depend on the version of compiler
-          if(firstThreeBytes[1] == 0x06) {
-            //Checks if there are Micropython signature
-            Serial.println("Micropython file not supported..");
-          } 
-        } else {
+        // E9
+        if (firstThreeBytes[0] != 0xE9) {
 	  LNDISP.fillScreen(BLACK);
           LNDISP.setCursor(0, 0);
           LNDISP.setTextColor(WHITE);
@@ -729,7 +717,9 @@ M5.update();
             return;
           }
           file.read(firstThreeBytes, 16);
+		
 	  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/partition-tables.html -> spiffs (0x82) is for SPIFFS Filesystem.
+		
     	  if (firstThreeBytes[3]==0xFF) Serial.println(": ------- END of Table ------- |"); 
 	  if (firstThreeBytes[3]==0x00) Serial.println(": Otadata or Factory partition |");
 	  if (firstThreeBytes[3]==0x01) Serial.println(": PHY inicialization partition |");
@@ -761,7 +751,7 @@ M5.update();
           Serial.printf("\nError: file dont reach spiffs offset %d, to read spiffs.", spiffs_offset,HEX);
           goto finish_files;
         }
-        Serial.println("Preparing launcher_temp.bin.spiffs");
+        Serial.println("Preparing to copy spiffs...");
         // check size of the Spiffs Partition, if it fits in the launcher
         // If it is larger the the Launcher Spiffs Partition, cut it to the limit
         if (spiffs_size>MAX_SPIFFS) { 
@@ -785,7 +775,8 @@ M5.update();
         LNDISP.setTextColor(WHITE);
         LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
         LNDISP.setTextSize(1);
-        LNDISP.println("\nApp   : " + fileList[selectIndex - folderListCount - 1]);
+        LNDISP.setTextColor(GREEN);
+        LNDISP.println("App   : " + fileList[selectIndex - folderListCount - 1]);
 
         LNDISP.drawRect(18,78,204,19,WHITE);
         LNDISP.fillRect(20,80,200,15,0);
@@ -802,6 +793,7 @@ M5.update();
 		
 		// Sets the size of Spiffs partition
 		PartitionSize = spiffs_size;
+		LNDISP.setTextColor(BLUE);
 	        LNDISP.println("Spiffs: " + fileList[selectIndex - folderListCount - 1] + ".spiffs");
 	
 	      	LNDISP.drawRect(18,78,204,19,WHITE);
