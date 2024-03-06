@@ -2,6 +2,11 @@
 Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2.
 
 
+<p align="center" width="100%">
+    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> 
+</p>
+
+
 Ir is mandatory that you have an [SDCard Hat](https://www.thingiverse.com/thing:6459069) to use with this Launcher and i have instructions [Here](https://www.thingiverse.com/thing:6459069), Cardputer users naturaly don´t need this Hat!
 
 You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
@@ -21,29 +26,36 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
 * Choose your .bin file and press M5 (Enter)
 * After installed, when turn on the device, if you don't press anything, the installed program will be launched.
 
-
 ## Install from source
 * Install the following libs:
     * [SdFat](https://github.com/greiman/SdFat)
-    * [M5Stack-Sd-Updater](https://github.com/tobozo/M5Stack-SD-Updater/)
     * [M5GFX](https://github.com/m5stack/M5GFX)
     * [M5Unified](https://github.com/m5stack/M5Unified)
 
 * Open ~Launcher/Launcher.ino
+* Choose your device, uncommenting the line
 * Build Launcher project in Arduino IDE, and "Export Compiled Binary"
 * Copy the binary generated in `~Launcher/build/{your-device}/Launcher.ino.bin` the the folder `~support_files/` (there are some binaries inside there)
-* Open ~StartApp/StartApp.ino
-* Build FirstApp project in Arduino IDE, and "Export Compiled Binary"
-* Copy the binary generated in `~FirstApp/build/{your-device}/FirstApp.ino.bin` the the folder `~support_files/` (there are some binaries inside there)
 * use esptool to flash in your device
     * M5StickC and M5StickC Plus
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader_4Mb.bin 0x8000 partition-table_4Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xa0000 StartApp.ino.bin`
+        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader_4Mb.bin 0x8000 partition-table_4Mb.bin 0x10000 Launcher.ino.bin`
     * M5StickC Plus 2
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xf0000 StartApp.ino.bin`
+        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
     * Cardputer
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32s3 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x0 bootloader_CP.bin 0x8000 partition-table_8Mb.bin 0xe000 ota_data_initial.bin  0x10000 Launcher.ino.bin  0xf0000 StartApp.ino.bin`
+        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32s3 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x0 bootloader_CP.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
 
 ## Changelog
+* 1.2.0:
+     * Excluded ota_data.bin file as it is not needed
+     * Excluded StartApp application
+     * Excluded OTA_1 partitions form .csv files because i found out it is not needed
+     * Realocated free spaces into "SPIFFS" partition, giving room to improvements, and support to applications that use it (OrcaOne)
+     * Added Bootscreen with battery monitor
+     * Added Restart option and battery monitor to launcher
+     * Added auto orientation to M5StickCs
+     * Laucher does not create .bak files anymore!!
+     * .bin file handling to avoid some errors: File is too big, file is not valid, etc etc..
+     
 * 1.1.3:
      * Fixed menu files that ware occasionally hiding files and folders.
 * 1.1.2:
