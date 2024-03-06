@@ -32,7 +32,7 @@ jobs:
               name: "M5Cardputer",
               fqbn: "m5stack:esp32:m5stack_cardputer",
               extra_flags: "-DCARDPUTER",
-              libraries: "M5Cardputer M5Stack-SD-Updater M5Unified SdFat",
+              libraries: "M5Cardputer M5Unified SdFat",
               partitions: {
                 bootloader_addr: "0x0000",
               },
@@ -41,7 +41,7 @@ jobs:
               name: "M5StickCPlus2",
               fqbn: "m5stack:esp32:m5stack_stickc_plus2",
               extra_flags: "-DSTICK_C_PLUS2",
-              libraries: "M5StickCPlus2 M5Stack-SD-Updater M5Unified SdFat",
+              libraries: "M5StickCPlus2 M5Unified SdFat",
               partitions: {
                 bootloader_addr: "0x1000",
               },
@@ -50,7 +50,7 @@ jobs:
               name: "M5StickCPlus",
               fqbn: "m5stack:esp32:m5stack_stickc_plus",
               extra_flags: "-DSTICK_C_PLUS",
-              libraries: "M5StickCPlus M5Stack-SD-Updater M5Unified SdFat",
+              libraries: "M5StickCPlus M5Unified SdFat",
               partitions: {
                 bootloader_addr: "0x1000",
               },
@@ -100,46 +100,6 @@ jobs:
       - name: Install esptool
         run: |
           pip install -U esptool
-
-      - name: Compile StartApp for ${{ matrix.board.name }} Sketch
-        run: |
-          set -x
-
-          version=${{ steps.launcher_version.outputs.version }}
-          
-          extra_flags="${{ matrix.board.extra_flags }} -DLAUNCHER_VERSION=\"${version}\""
-        
-          if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
-            baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
-            
-            # Find the latest version of the folder
-            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
-  
-            # Full path to the file to be copied
-            file="$baseFolder/$latestVersion/tools/partitions/custom_4Mb.csv "
-            cp support_files/custom_4Mb.csv ${file}
-
-            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
-                                --build-property build.partitions=custom_4Mb \
-                                --build-property upload.maximum_size=1966080  \
-                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
-                                ./StartApp/StartApp.ino
-          else
-            baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
-            
-            # Find the latest version of the folder
-            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
-  
-            # Full path to the file to be copied
-            file="$baseFolder/$latestVersion/tools/partitions/custom_8Mb.csv "
-            cp support_files/custom_8Mb.csv ${file}
-
-            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
-                                --build-property build.partitions=custom_8Mb \
-                                --build-property upload.maximum_size=3342336 \
-                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
-                                ./StartApp/StartApp.ino
-          fi
 
       - name: Compile Launcher for ${{ matrix.board.name }} Sketch
         run: |
@@ -198,12 +158,10 @@ jobs:
           
             esptool.py --chip esp32s3 merge_bin --output ${output_file} \
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_4Mb.bin \
-              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
+              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin \
               0x10000 Launcher/build/${directory}/Launcher.ino.bin
-              # 0xa0000 StartApp/build/${directory}/StartApp.ino.bin
 
             cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_4Mb.bin 
-            cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
             cp Launcher/build/${directory}/Launcher.ino.bin M5Launcher-Launcher.bin 
               
           fi
@@ -212,12 +170,10 @@ jobs:
                    
             esptool.py --chip esp32s3 merge_bin --output ${output_file} \
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_8Mb.bin \
-              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
+              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin \
               0x10000 Launcher/build/${directory}/Launcher.ino.bin
-              # 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
 
             cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_8Mb.bin 
-            cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
             cp Launcher/build/${directory}/Launcher.ino.bin M5Launcher-Launcher.bin 
             
           fi
@@ -226,12 +182,10 @@ jobs:
                    
             esptool.py --chip esp32s3 merge_bin --output ${output_file} \
               ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_CP.bin \
-              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin 0xe000 support_files/ota_data_initial.bin \
+              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin \
               0x10000 Launcher/build/${directory}/Launcher.ino.bin
-              # 0xf0000 StartApp/build/${directory}/StartApp.ino.bin
 
             cp Launcher/build/${directory}/Launcher.ino.partitions.bin M5Launcher-partitions_8Mb.bin 
-            cp StartApp/build/${directory}/StartApp.ino.bin M5Launcher-StartApp.bin 
             cp Launcher/build/${directory}/Launcher.ino.bin M5Launcher-Launcher.bin 
               
           fi
