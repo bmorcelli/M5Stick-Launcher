@@ -305,12 +305,26 @@ if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,6,CYAN); }
       if (M5Cardputer.Keyboard.isPressed() && !(M5Cardputer.Keyboard.isKeyPressed(KEY_ENTER)))  // any key but Enter
     #endif
         {
+	  LNDISP.fillScreen(BLACK);
+	  #if defined(STICK_C)
+	  M5.Axp.ScreenBreath(7);
+	  #else
+	  LNDISP.setBrightness(0);
+	  #endif
           ESP.restart();
         } 
   }
   
   // If nothing is done, check if there are any app installed in the ota partition, if it does, restart device to start installed App.
-  if(err == ESP_OK) { ESP.restart(); }
+  if(err == ESP_OK) { 
+	  LNDISP.fillScreen(BLACK);
+	  #if defined(STICK_C)
+	  M5.Axp.ScreenBreath(7);
+	  #else
+	  LNDISP.setBrightness(0);
+	  #endif
+	  ESP.restart(); 
+  }
 
   // If M5 or Enter button is pressed, continue from here
   Launcher:
@@ -533,6 +547,12 @@ M5.update();
 #endif
   {
     if (selectIndex==0) { //when Reboot is selected
+		  LNDISP.fillScreen(BLACK);
+		  #if defined(STICK_C)
+		  M5.Axp.ScreenBreath(7);
+		  #else
+		  LNDISP.setBrightness(0);
+		  #endif
 		  ESP.restart(); 
 		
     } else if (selectIndex < (folderListCount +1 )) { //When select a Folder
@@ -606,6 +626,13 @@ M5.update();
 
 	  // Restart ESP after updates
 	  file.close();
+		
+	  LNDISP.fillScreen(BLACK);
+	  #if defined(STICK_C)
+	  M5.Axp.ScreenBreath(7);
+	  #else
+	  LNDISP.setBrightness(0);
+	  #endif
           ESP.restart();        
         } else {
 	  LNDISP.fillScreen(BLACK);
@@ -804,6 +831,13 @@ M5.update();
 
         // Restart ESP after updates
 	file.close();
+	
+	LNDISP.fillScreen(BLACK);
+	#if defined(STICK_C)
+	M5.Axp.ScreenBreath(7);
+	#else
+	LNDISP.setBrightness(0);
+	#endif
         ESP.restart();
 
       } 
