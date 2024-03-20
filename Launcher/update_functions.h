@@ -1,7 +1,11 @@
 #include "Update.h"
 
 void DrawPercentage(int percent) {
+  #ifndef STICK_C
   LNDISP.fillRect(20,80,percent*2,15,WHITE);
+  #else
+  LNDISP.fillRect(12,50,percent*1.34,11,WHITE);
+  #endif
 }
 
 
