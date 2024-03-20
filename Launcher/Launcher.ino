@@ -265,26 +265,28 @@ int battery_percent = 0;
 #endif
 
 
-#ifndef STICK_C
-int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
-LNDISP.drawRect(197,0,43,11,0);
-LNDISP.fillRect(197,0,43,11,0);	
-LNDISP.drawRect(198,0,42,10,WHITE);
-LNDISP.fillRect(200,2,38,6,WHITE);	
-
-if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,6,RED); }
-if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,6,YELLOW); }
-if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,6,CYAN); }
+#if defined(STICK_C)
+	int battery_percent_norm = (battery_percent * 20) / 100; // 20 pixels wide square
+	LNDISP.drawRect(135,0,25,11,0);
+	LNDISP.fillRect(135,0,25,11,0);	
+	LNDISP.drawRect(136,0,24,10,WHITE);
+	LNDISP.fillRect(138,2,20,6,WHITE);	
+	
+	if(battery_percent<26) { LNDISP.fillRect(138,2,battery_percent_norm,6,RED); }
+	if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(138,2,battery_percent_norm,6,YELLOW); }
+	if(battery_percent>49) { LNDISP.fillRect(138,2,battery_percent_norm,6,CYAN); }
+	
 #else
-int battery_percent_norm = (battery_percent * 20) / 100; // 20 pixels wide square
-LNDISP.drawRect(135,0,25,11,0);
-LNDISP.fillRect(135,0,25,11,0);	
-LNDISP.drawRect(136,0,24,10,WHITE);
-LNDISP.fillRect(138,2,20,6,WHITE);	
-
-if(battery_percent<26) { LNDISP.fillRect(138,2,battery_percent_norm,6,RED); }
-if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(138,2,battery_percent_norm,6,YELLOW); }
-if(battery_percent>49) { LNDISP.fillRect(138,2,battery_percent_norm,6,CYAN); }
+	
+	int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
+	LNDISP.drawRect(197,0,43,11,0);
+	LNDISP.fillRect(197,0,43,11,0);	
+	LNDISP.drawRect(198,0,42,10,WHITE);
+	LNDISP.fillRect(200,2,38,6,WHITE);	
+	
+	if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,6,RED); }
+	if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,6,YELLOW); }
+	if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,6,CYAN); }
 #endif
 // End of Battery draw
 
@@ -384,6 +386,8 @@ void loop() {
 #elif defined(STICK_C)
   M5.begin();
   rot = 3;
+  newrot=3;
+  slope=0;
 #endif
 
 #ifndef CARDPUTER
@@ -487,26 +491,26 @@ void loop() {
 	
 
 
-	#ifndef STICK_C
-	int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
-	LNDISP.drawRect(197,0,43,17,0);
-  	LNDISP.fillRect(197,0,43,17,0);	
-	LNDISP.drawRect(198,0,42,16,WHITE);
-	LNDISP.fillRect(200,2,38,12,0);	
-	
-	if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,12,RED); }
-	if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,12,YELLOW); }
-	if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,12,GREEN); }
-	#else
-	int battery_percent_norm = (battery_percent * 20) / 100; // 20 pixels wide square
-	LNDISP.drawRect(135,0,25,11,0);
-	LNDISP.fillRect(135,0,25,11,0);	
-	LNDISP.drawRect(136,0,24,10,WHITE);
-	LNDISP.fillRect(138,2,20,6,WHITE);	
-	
-	if(battery_percent<26) { LNDISP.fillRect(138,2,battery_percent_norm,6,RED); }
-	if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(138,2,battery_percent_norm,6,YELLOW); }
-	if(battery_percent>49) { LNDISP.fillRect(138,2,battery_percent_norm,6,CYAN); }
+	#if defined(STICK_C)
+		int battery_percent_norm = (battery_percent * 20) / 100; // 20 pixels wide square
+		LNDISP.drawRect(135,0,25,11,0);
+		LNDISP.fillRect(135,0,25,11,0);	
+		LNDISP.drawRect(136,0,24,10,WHITE);
+		LNDISP.fillRect(138,2,20,6,WHITE);	
+		
+		if(battery_percent<26) { LNDISP.fillRect(138,2,battery_percent_norm,6,RED); }
+		if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(138,2,battery_percent_norm,6,YELLOW); }
+		if(battery_percent>49) { LNDISP.fillRect(138,2,battery_percent_norm,6,CYAN); }
+	  #else
+		int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
+		LNDISP.drawRect(197,0,43,17,0);
+	  	LNDISP.fillRect(197,0,43,17,0);	
+		LNDISP.drawRect(198,0,42,16,WHITE);
+		LNDISP.fillRect(200,2,38,12,0);	
+		
+		if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,12,RED); }
+		if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,12,YELLOW); }
+		if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,12,GREEN); }
 	#endif
 	// End of Battery draw
     needRedraw = false;
@@ -645,21 +649,21 @@ M5.update();
           LNDISP.fillScreen(BLACK);
           LNDISP.setCursor(0, 0);
           LNDISP.setTextColor(WHITE);
-	  #ifndef STICK_C
-          LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
-          LNDISP.setTextSize(1);
-          #else
-	  LNDISP.println("\n     -## M5Launcher ##- \n        Installing ");
-	  #endif
+	  #if defined(STICK_C)
+	  	LNDISP.println("\n     -## M5Launcher ##- \n        Installing ");
+  	  #else
+		LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
+          	LNDISP.setTextSize(1);
+          #endif
 	  LNDISP.setTextColor(GREEN);
           LNDISP.println("\nApp   : " + fileList[selectIndex - folderListCount - 1]);
 
-          #ifndef STICK_C
-          LNDISP.drawRect(18,78,204,19,WHITE);
-          LNDISP.fillRect(20,80,200,15,0);
-	  #else
+          #if defined(STICK_C)
           LNDISP.drawRect(10,48,138,15,WHITE);
           LNDISP.fillRect(12,50,134,11,0);
+	#else
+          LNDISP.drawRect(18,78,204,19,WHITE);
+          LNDISP.fillRect(20,80,200,15,0);
 	  #endif
 
 
@@ -841,20 +845,22 @@ M5.update();
         LNDISP.fillScreen(BLACK);
         LNDISP.setCursor(0, 0);
         LNDISP.setTextColor(WHITE);
-	#ifndef STICK_C
+	#if defined(STICK_C)
+	LNDISP.println("\n     -## M5Launcher ##- \n        Installing ");
+        #else
         LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
         LNDISP.setTextSize(1);
-        #else
-	LNDISP.println("\n     -## M5Launcher ##- \n        Installing ");
 	#endif
+        
         LNDISP.setTextColor(GREEN);
         LNDISP.println("App   : " + fileList[selectIndex - folderListCount - 1]);
-        #ifndef STICK_C
-        LNDISP.drawRect(18,78,204,19,WHITE);
-        LNDISP.fillRect(20,80,200,15,0);
-	#else
+        
+	#if defined(STICK_C)
         LNDISP.drawRect(10,48,138,15,WHITE);
         LNDISP.fillRect(12,50,134,11,0);
+	#else
+	LNDISP.drawRect(18,78,204,19,WHITE);
+        LNDISP.fillRect(20,80,200,15,0);
 	#endif
 
         performUpdate(file, PartitionSize, U_FLASH); // ----------------------------------------------------------------- Install Flash app
