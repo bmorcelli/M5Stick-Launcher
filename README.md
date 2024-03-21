@@ -38,11 +38,11 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
 * Copy the binary generated in `~Launcher/build/{your-device}/Launcher.ino.bin` the the folder `~support_files/` (there are some binaries inside there)
 * use esptool to flash in your device
     * M5StickC and M5StickC Plus
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader_4Mb.bin 0x8000 partition-table_4Mb.bin 0x10000 Launcher.ino.bin`
+        * Run in "~support_files\" folder:    `esptool -p COMx -b 115200 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader_4Mb.bin 0x8000 partition-table_4Mb.bin 0x10000 Launcher.ino.bin`
     * M5StickC Plus 2
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
+        * Run in "~support_files\" folder:    `esptool -p COMx -b 115200 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
     * Cardputer
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 460800 --before default_reset --after hard_reset --chip esp32s3 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x0 bootloader_CP.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
+        * Run in "~support_files\" folder:    `esptool -p COMx -b 115200 --before default_reset --after hard_reset --chip esp32s3 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x0 bootloader_CP.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
 
 ## Changelog
 * 1.2.1:
