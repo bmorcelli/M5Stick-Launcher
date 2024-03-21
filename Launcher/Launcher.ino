@@ -7,7 +7,7 @@
 // #define CARDPUTER       // 8Mb of Flash Memory -> Need custom partitioning (mandatory)
 // ================================== Flawless Victory ==================================
 
-#define LAUNCHER_VERSION "1.2.0"
+#define LAUNCHER_VERSION "1.2.1"
 
 #if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C)
 #define STICK_C_PLUS2
@@ -202,15 +202,16 @@ void setup() {
   slope=map(data.accel.x*100,-30,100,0,50);
   if (slope>11) {  rot=1; }
   else { rot=3; }
- #elif defined(STICK_C_PLUS2)
+ #elif defined(STICK_C_PLUS)
   M5.begin();
   auto imu_update = M5.Imu.Init();
   M5.IMU.getAccelData(&accX, &accY, &accZ);
   slope=map(accX*100,-30,100,0,50);
   if (slope>11) {  rot=1; }
   else { rot=3; }
-#else 
+#elif defined(STICK_C)
 M5.begin();
+slope=0;
 rot = 3;
 #endif
   
@@ -239,12 +240,12 @@ rot = 3;
   LNDISP.print("> Press Enter or  M5 <");
   LNDISP.setRotation(rot);
   LNDISP.setTextSize(2);
-#else
+#elif defined(STICK_C)
   LNDISP.fillScreen(WHITE);
   LNDISP.setCursor(0, 0);
   LNDISP.setTextSize(1);
   LNDISP.setTextColor(BLACK);
-  LNDISP.println("     -## M5Launcher ##- ");
+  LNDISP.println("\n\n     -## M5Launcher ##- ");
   LNDISP.println("          Press M5      ");
   LNDISP.println("     to start Launcher  ");
   LNDISP.print  ("                v.");
@@ -349,9 +350,9 @@ int battery_percent = 0;
 #if defined(M5_BUTTON_MENU)
   pinMode(M5_BUTTON_MENU, INPUT);
 #endif
-
+#ifndef STICK_C
   LNDISP.setTextSize(2);
-  
+#endif
   // Verify if SD Hat or SD card is connected..
   int i = 0;
   SPI2_SD.begin(LNSD_CLK_PIN, LNSD_MISO_PIN, LNSD_MOSI_PIN, LNSD_CS_PIN);
