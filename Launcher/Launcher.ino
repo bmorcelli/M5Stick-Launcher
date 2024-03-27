@@ -86,7 +86,7 @@ bool needRedraw=true;
 int rot=3;
 
 #if defined(STICK_C_PLUS2) || defined(CARDPUTER) 
-  uint32_t MaxPartitionSize = 0x600000; // 6Mb of size.
+  uint32_t MaxPartitionSize = 0x500000; // 5Mb of size.
   #define MAX_SPIFFS 0x100000
 #else
   uint32_t MaxPartitionSize = 0x300000; // 3Mb of size.
