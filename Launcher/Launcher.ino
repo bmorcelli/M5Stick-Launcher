@@ -27,11 +27,8 @@
   #include "M5Launcher-image.h"
 #endif
 
-#if defined(STICK_C)
-//  #include <M5StackUpdater.h>              // This one must be the last to declare in all devices, except STICK_C! such a noughty boy! 
-#endif
-#if defined(STICK_C)
 
+#if defined(STICK_C)
 #include <M5StickC.h>
   #define LNSD_CLK_PIN 0
   #define LNSD_MISO_PIN 36
@@ -69,9 +66,6 @@
   #define LNDISP M5Cardputer.Display
 #endif
 
-#ifndef STICK_C
-//  #include <M5StackUpdater.h>      // This one must be the last to declare in all devices, except STICK_C! such a noughty boy! 
-#endif
 
 #define MAX_FILES 256
 #define MAX_FOLDERS 256
@@ -209,11 +203,12 @@ void setup() {
   slope=map(accX*100,-30,100,0,50);
   if (slope>11) {  rot=1; }
   else { rot=3; }
-#elif defined(STICK_C)
-M5.begin();
-slope=0;
-rot = 3;
-#endif
+	
+ #elif defined(STICK_C)
+  M5.begin();
+  slope=0;
+  rot = 3;
+ #endif
   
   // Print SplashScreen
 #if defined(STICK_C_PLUS2) || defined(CARDPUTER) 
