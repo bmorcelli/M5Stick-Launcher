@@ -46,7 +46,7 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
 
 ## Changelog
 * 1.3.0:
-     * Added support to Micropython Apps for Cardputer
+     * Added support to Micropython Apps, with 1Mb FAT partition to Cardputer and StickCPlus2 and 64kb to StickC and Plus1.1
 * 1.2.1:
      * Launcher now lower the LCD power and fill the screen black before restart, to prevent lcd burn when using apps that don't use the Screen
      * Fixed display things and positions for the M5StickC
