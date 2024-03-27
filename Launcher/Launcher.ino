@@ -7,7 +7,7 @@
 // #define CARDPUTER       // 8Mb of Flash Memory -> Need custom partitioning (mandatory)
 // ================================== Flawless Victory ==================================
 
-#define LAUNCHER_VERSION "1.2.0"
+#define LAUNCHER_VERSION "1.2.1"
 
 #if !defined(CARDPUTER) && !defined(STICK_C_PLUS2) && !defined(STICK_C_PLUS) && !defined(STICK_C)
 #define STICK_C_PLUS2
@@ -27,11 +27,8 @@
   #include "M5Launcher-image.h"
 #endif
 
-#if defined(STICK_C)
-//  #include <M5StackUpdater.h>              // This one must be the last to declare in all devices, except STICK_C! such a noughty boy! 
-#endif
-#if defined(STICK_C)
 
+#if defined(STICK_C)
 #include <M5StickC.h>
   #define LNSD_CLK_PIN 0
   #define LNSD_MISO_PIN 36
@@ -69,9 +66,6 @@
   #define LNDISP M5Cardputer.Display
 #endif
 
-#ifndef STICK_C
-//  #include <M5StackUpdater.h>      // This one must be the last to declare in all devices, except STICK_C! such a noughty boy! 
-#endif
 
 #define MAX_FILES 256
 #define MAX_FOLDERS 256
@@ -202,14 +196,19 @@ void setup() {
   slope=map(data.accel.x*100,-30,100,0,50);
   if (slope>11) {  rot=1; }
   else { rot=3; }
-#else
+ #elif defined(STICK_C_PLUS)
   M5.begin();
   auto imu_update = M5.Imu.Init();
   M5.IMU.getAccelData(&accX, &accY, &accZ);
   slope=map(accX*100,-30,100,0,50);
   if (slope>11) {  rot=1; }
   else { rot=3; }
-#endif
+	
+ #elif defined(STICK_C)
+  M5.begin();
+  slope=0;
+  rot = 3;
+ #endif
   
   // Print SplashScreen
 #if defined(STICK_C_PLUS2) || defined(CARDPUTER) 
@@ -236,15 +235,15 @@ void setup() {
   LNDISP.print("> Press Enter or  M5 <");
   LNDISP.setRotation(rot);
   LNDISP.setTextSize(2);
-#else
+#elif defined(STICK_C)
   LNDISP.fillScreen(WHITE);
   LNDISP.setCursor(0, 0);
-  LNDISP.setTextSize(2);
+  LNDISP.setTextSize(1);
   LNDISP.setTextColor(BLACK);
-  LNDISP.println(" -## M5Launcher ##- ");
-  LNDISP.println("      Press M5      ");
-  LNDISP.println(" to start Launcher  ");
-  LNDISP.print  ("           v.");
+  LNDISP.println("\n\n     -## M5Launcher ##- ");
+  LNDISP.println("          Press M5      ");
+  LNDISP.println("     to start Launcher  ");
+  LNDISP.print  ("                v.");
   LNDISP.printf("%s", LAUNCHER_VERSION);
 #endif
 
@@ -261,16 +260,30 @@ int battery_percent = 0;
 	battery_percent = ((b - 3.0) / 1.2) * 100;
 #endif
 
-int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
-LNDISP.drawRect(197,0,43,11,0);
-LNDISP.fillRect(197,0,43,11,0);	
-LNDISP.drawRect(198,0,42,10,WHITE);
-LNDISP.fillRect(200,2,38,6,WHITE);	
 
-if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,6,RED); }
-if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,6,YELLOW); }
-if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,6,CYAN); }
-
+#if defined(STICK_C)
+	int battery_percent_norm = (battery_percent * 20) / 100; // 20 pixels wide square
+	LNDISP.drawRect(135,0,25,11,0);
+	LNDISP.fillRect(135,0,25,11,0);	
+	LNDISP.drawRect(136,0,24,10,WHITE);
+	LNDISP.fillRect(138,2,20,6,WHITE);	
+	
+	if(battery_percent<26) { LNDISP.fillRect(138,2,battery_percent_norm,6,RED); }
+	if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(138,2,battery_percent_norm,6,YELLOW); }
+	if(battery_percent>49) { LNDISP.fillRect(138,2,battery_percent_norm,6,CYAN); }
+	
+#else
+	
+	int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
+	LNDISP.drawRect(197,0,43,11,0);
+	LNDISP.fillRect(197,0,43,11,0);	
+	LNDISP.drawRect(198,0,42,10,WHITE);
+	LNDISP.fillRect(200,2,38,6,WHITE);	
+	
+	if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,6,RED); }
+	if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,6,YELLOW); }
+	if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,6,CYAN); }
+#endif
 // End of Battery draw
 
 
@@ -332,9 +345,9 @@ if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,6,CYAN); }
 #if defined(M5_BUTTON_MENU)
   pinMode(M5_BUTTON_MENU, INPUT);
 #endif
-
+#ifndef STICK_C
   LNDISP.setTextSize(2);
-  
+#endif
   // Verify if SD Hat or SD card is connected..
   int i = 0;
   SPI2_SD.begin(LNSD_CLK_PIN, LNSD_MISO_PIN, LNSD_MOSI_PIN, LNSD_CS_PIN);
@@ -360,12 +373,17 @@ void loop() {
   auto imu_update = M5.Imu.update();
   auto data = M5.Imu.getImuData();
   slope=map(data.accel.x*100,-30,100,0,50);
-#elif defined(STICK_C_PLUS) || defined(STICK_C)
+#elif defined(STICK_C_PLUS)
   M5.begin();
   // Detect rotation of M5StickCs
   auto imu_update = M5.Imu.Init();
   M5.IMU.getAccelData(&accX, &accY, &accZ);
   slope=map(accX*100,-30,100,0,50);
+#elif defined(STICK_C)
+  M5.begin();
+  rot = 3;
+  newrot=3;
+  slope=0;
 #endif
 
 #ifndef CARDPUTER
@@ -467,16 +485,29 @@ void loop() {
 		battery_percent = ((b - 3.0) / 1.2) * 100;
 	#endif
 	
-	int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
-	LNDISP.drawRect(197,0,43,17,0);
-  	LNDISP.fillRect(197,0,43,17,0);	
-	LNDISP.drawRect(198,0,42,16,WHITE);
-	LNDISP.fillRect(200,2,38,12,0);	
-	
-	if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,12,RED); }
-	if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,12,YELLOW); }
-	if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,12,GREEN); }
-	
+
+
+	#if defined(STICK_C)
+		int battery_percent_norm = (battery_percent * 20) / 100; // 20 pixels wide square
+		LNDISP.drawRect(135,0,25,11,0);
+		LNDISP.fillRect(135,0,25,11,0);	
+		LNDISP.drawRect(136,0,24,10,WHITE);
+		LNDISP.fillRect(138,2,20,6,WHITE);	
+		
+		if(battery_percent<26) { LNDISP.fillRect(138,2,battery_percent_norm,6,RED); }
+		if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(138,2,battery_percent_norm,6,YELLOW); }
+		if(battery_percent>49) { LNDISP.fillRect(138,2,battery_percent_norm,6,CYAN); }
+	  #else
+		int battery_percent_norm = (battery_percent * 38) / 100; // 38 pixels wide square
+		LNDISP.drawRect(197,0,43,17,0);
+	  	LNDISP.fillRect(197,0,43,17,0);	
+		LNDISP.drawRect(198,0,42,16,WHITE);
+		LNDISP.fillRect(200,2,38,12,0);	
+		
+		if(battery_percent<26) { LNDISP.fillRect(200,2,battery_percent_norm,12,RED); }
+		if(battery_percent>25 || battery_percent<50) { LNDISP.fillRect(200,2,battery_percent_norm,12,YELLOW); }
+		if(battery_percent>49) { LNDISP.fillRect(200,2,battery_percent_norm,12,GREEN); }
+	#endif
 	// End of Battery draw
     needRedraw = false;
     delay(150);
@@ -614,13 +645,23 @@ M5.update();
           LNDISP.fillScreen(BLACK);
           LNDISP.setCursor(0, 0);
           LNDISP.setTextColor(WHITE);
-          LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
-          LNDISP.setTextSize(1);
+	  #if defined(STICK_C)
+	  	LNDISP.println("\n     -## M5Launcher ##- \n        Installing ");
+  	  #else
+		LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
+          	LNDISP.setTextSize(1);
+          #endif
 	  LNDISP.setTextColor(GREEN);
           LNDISP.println("\nApp   : " + fileList[selectIndex - folderListCount - 1]);
 
+          #if defined(STICK_C)
+          LNDISP.drawRect(10,48,138,15,WHITE);
+          LNDISP.fillRect(12,50,134,11,0);
+	#else
           LNDISP.drawRect(18,78,204,19,WHITE);
           LNDISP.fillRect(20,80,200,15,0);
+	  #endif
+
 
           performUpdate(file, file.size(), U_FLASH); // ----------------------------------------------------------------- Install Flash app
 
@@ -693,7 +734,7 @@ M5.update();
             LNDISP.fillScreen(BLACK);
             LNDISP.setCursor(0, 0);
             LNDISP.setTextColor(WHITE);
-            LNDISP.println(" -## M5Launcher ##- \n\n Binary is too big \n should I continue? \n\nEnter/M5 to continue\n\ any key to cancel ");
+            LNDISP.println(" -## M5Launcher ##- \n Binary is too big \n should I continue? \nEnter/M5 to continue\n\ any key to cancel ");
             delay(500); // to avoid jumping verifications
 
           while(1) {
@@ -800,13 +841,23 @@ M5.update();
         LNDISP.fillScreen(BLACK);
         LNDISP.setCursor(0, 0);
         LNDISP.setTextColor(WHITE);
+	#if defined(STICK_C)
+	LNDISP.println("\n     -## M5Launcher ##- \n        Installing ");
+        #else
         LNDISP.println("\n -## M5Launcher ##- \n     Installing    ");
         LNDISP.setTextSize(1);
+	#endif
+        
         LNDISP.setTextColor(GREEN);
         LNDISP.println("App   : " + fileList[selectIndex - folderListCount - 1]);
-
-        LNDISP.drawRect(18,78,204,19,WHITE);
+        
+	#if defined(STICK_C)
+        LNDISP.drawRect(10,48,138,15,WHITE);
+        LNDISP.fillRect(12,50,134,11,0);
+	#else
+	LNDISP.drawRect(18,78,204,19,WHITE);
         LNDISP.fillRect(20,80,200,15,0);
+	#endif
 
         performUpdate(file, PartitionSize, U_FLASH); // ----------------------------------------------------------------- Install Flash app
 
