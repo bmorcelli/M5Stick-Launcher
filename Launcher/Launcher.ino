@@ -320,9 +320,9 @@ int battery_percent = 0;
         {
 	  LNDISP.fillScreen(BLACK);
 	  #if defined(STICK_C) || defined(STICK_C_PLUS)
-	  M5.Axp.ScreenBreath(7);
+	  //M5.Axp.ScreenBreath(7);
 	  #else
-	  LNDISP.setBrightness(0);
+	  //LNDISP.setBrightness(0);
 	  #endif
           ESP.restart();
         } 
@@ -332,9 +332,9 @@ int battery_percent = 0;
   if(err == ESP_OK) { 
 	  LNDISP.fillScreen(BLACK);
 	  #if defined(STICK_C) || defined(STICK_C_PLUS)
-	  M5.Axp.ScreenBreath(7);
+	  //M5.Axp.ScreenBreath(7);
 	  #else
-	  LNDISP.setBrightness(0);
+	  //LNDISP.setBrightness(0);
 	  #endif
 	  ESP.restart(); 
   }
@@ -580,9 +580,9 @@ M5.update();
     if (selectIndex==0) { //when Reboot is selected
 		  LNDISP.fillScreen(BLACK);
 		  #if defined(STICK_C) || defined(STICK_C_PLUS)
-		  M5.Axp.ScreenBreath(7);
+		  //M5.Axp.ScreenBreath(7);
 		  #else
-		  LNDISP.setBrightness(0);
+		  //LNDISP.setBrightness(0);
 		  #endif
 		  ESP.restart(); 
 		
@@ -885,9 +885,9 @@ M5.update();
 	
 	LNDISP.fillScreen(BLACK);
 	#if defined(STICK_C) || defined(STICK_C_PLUS)
-	M5.Axp.ScreenBreath(7);
+	//M5.Axp.ScreenBreath(7);
 	#else
-	LNDISP.setBrightness(0);
+	//LNDISP.setBrightness(0);
 	#endif
         ESP.restart();
 
