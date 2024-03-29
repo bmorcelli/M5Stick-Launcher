@@ -319,11 +319,6 @@ int battery_percent = 0;
     #endif
         {
 	  LNDISP.fillScreen(BLACK);
-	  #if defined(STICK_C) || defined(STICK_C_PLUS)
-	  //M5.Axp.ScreenBreath(7);
-	  #else
-	  //LNDISP.setBrightness(0);
-	  #endif
           ESP.restart();
         } 
   }
@@ -331,11 +326,6 @@ int battery_percent = 0;
   // If nothing is done, check if there are any app installed in the ota partition, if it does, restart device to start installed App.
   if(err == ESP_OK) { 
 	  LNDISP.fillScreen(BLACK);
-	  #if defined(STICK_C) || defined(STICK_C_PLUS)
-	  //M5.Axp.ScreenBreath(7);
-	  #else
-	  //LNDISP.setBrightness(0);
-	  #endif
 	  ESP.restart(); 
   }
 
@@ -579,11 +569,6 @@ M5.update();
   {
     if (selectIndex==0) { //when Reboot is selected
 		  LNDISP.fillScreen(BLACK);
-		  #if defined(STICK_C) || defined(STICK_C_PLUS)
-		  //M5.Axp.ScreenBreath(7);
-		  #else
-		  //LNDISP.setBrightness(0);
-		  #endif
 		  ESP.restart(); 
 		
     } else if (selectIndex < (folderListCount +1 )) { //When select a Folder
@@ -884,11 +869,6 @@ M5.update();
 	file.close();
 	
 	LNDISP.fillScreen(BLACK);
-	#if defined(STICK_C) || defined(STICK_C_PLUS)
-	//M5.Axp.ScreenBreath(7);
-	#else
-	//LNDISP.setBrightness(0);
-	#endif
         ESP.restart();
 
       } 
