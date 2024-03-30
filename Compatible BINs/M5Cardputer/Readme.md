@@ -6,10 +6,12 @@
   * Bruce: https://github.com/pr3y/m5-bruce/
   * CarDashboard: https://github.com/VolosR/miniCar
   * CP_DemoPlus: https://github.com/WuSiYu/M5Cardputer-UserDemo-Plus
+  * Evil-Cardputer: https://github.com/7h30th3r0n3/Evil-M5Core2
   * EvilPortal: https://github.com/marivaaldo/evil-portal-m5stack
   * Gameboy: Max 64kb rom size.. link unavailable
   * M5Card_WebRadio: https://github.com/cyberwisk/M5Cardputer_WebRadio
   * Marauder: https://github.com/marivaaldo/ESP32Marauder/tree/feature/add-m5cardputer-support
+  * MicroHydra: https://github.com/echo-lalia/Cardputer-MicroHydra
   * Nemo: https://github.com/n0xa/m5stick-nemo
   * Palnagochi: https://github.com/viniciusbo/m5-palnagotchi
   * UserDemo: https://github.com/m5stack/M5Cardputer
