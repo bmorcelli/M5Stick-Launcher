@@ -7,7 +7,7 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 </p>
 
 
-Ir is mandatory that you have an [SDCard Hat](https://www.thingiverse.com/thing:6459069) to use with this Launcher and i have instructions [Here](https://www.thingiverse.com/thing:6459069), Cardputer users naturaly don´t need this Hat!
+It is mandatory that you have an [SDCard Hat](https://www.thingiverse.com/thing:6459069) to use with this Launcher and i have instructions [Here](https://www.thingiverse.com/thing:6459069), Cardputer users naturaly don´t need this Hat!
 
 You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
 
@@ -46,7 +46,7 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
 
 ## Changelog
 * 1.3.0:
-     * Added support to Micropython Apps, with 1Mb FAT partition to Cardputer and StickCPlus2 and 64kb to StickC and Plus1.1
+     * Added support to Micropython based binaries (MicroHydra), with 1Mb FAT partition to Cardputer and StickCPlus2 and 64kb to StickC and Plus1.1
 * 1.2.1:
      * Launcher now lower the LCD power and fill the screen black before restart, to prevent lcd burn when using apps that don't use the Screen
      * Fixed display things and positions for the M5StickC
@@ -67,7 +67,7 @@ Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https:/
      * Adjusted Magic numbers to work with some apps (Volos Watch).
 * 1.1.1: 
      * Changed OTA_0 Partition size from 3Mb to 6Mb on Cardputer and M5StickCPlus2
-     * Added verification to identify MicroPython binaries and don't corrupt them with the cropping process (these apps still don't work, need more work...)
+     * ~~Added verification to identify MicroPython binaries and don't corrupt them with the cropping process (these apps still don't work, need more work...)~~
 * 1.1.0:
      * Fixed issues that prevented M5Launcher to launch apps on Cardputer
 * 1.0.1:
