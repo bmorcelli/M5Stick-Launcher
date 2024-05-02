@@ -3,7 +3,7 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 
 
 <p align="center" width="100%">
-    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> => <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New Launcher.jpg?raw=true" width="240" height="135"> 
+    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true">  <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New Launcher.jpg?raw=true" width="240" height="135"> 
 </p>
 
 ## With M5Launcher you'll be able to:
@@ -31,7 +31,7 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 * Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Obtaining-binaries-to-launch)
 
 ## How to Install
-* Use the Flasher: [M5Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/flash0.html). (Unavailable for cardputer, yet)
+* Use the Flasher: [M5Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/flash0.html).
 * Use M5Burner, or
 * Download the .bin file from Releases for your device and use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
 
