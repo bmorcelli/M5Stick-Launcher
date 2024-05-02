@@ -3,7 +3,7 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 
 
 <p align="center" width="100%">
-    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> => <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New M5Launcher.jpg?raw=true"> 
+    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> => <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New Launcher.jpg?raw=true"> 
 </p>
 
 ## With M5Launcher you'll be able to:
