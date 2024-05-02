@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  
+  <meta charset="utf-8" />
+    <title>M5Launcher Web Flasher</title>
+    <meta
+      name="description"
+      content="Easily allows users to install the M5Launcher on M5Cardputer, M5StickC, M5stickC plus & M5stickC Plus2"
+    />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="color-scheme" content="dark light" />
+  
+
+    
+    <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #00dd00;
+      background-color: #202124;
+    }
+      .content {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 12px;
+      }
+      h2 {
+        margin-top: 2em;
+      }
+      h3 {
+        margin-top: 1.5em;
+      }
+    a {
+      color: #e0d204;
+      text-decoration: none;
+    }
+ 
+    a:hover {
+      text-decoration: underline;
+    }
+      .invisible {
+        visibility: hidden;
+      }
+      .hidden {
+        display: none;
+      }
+      esp-web-install-button[install-unsupported] {
+        visibility: inherit;
+      }
+      .content pre {
+        max-width: 100%;
+        overflow-y: scroll;
+      }
+      .footer {
+        margin-top: 24px;
+        border-top: 1px solid #ccc;
+        padding-top: 24px;
+        text-align: center;
+      }
+      .footer .initiative {
+        font-style: italic;
+        margin-top: 16px;
+      }
+      table {
+        border-spacing: 0;
+      }
+      td {
+        padding: 8px;
+        border-bottom: 1px solid #ccc;
+      }
+      .radios li {
+        list-style: none;
+        line-height: 2em;
+      }
+	  .logo {
+        max-width: 400px;
+		display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+	  .wrapper {
+        display: flex;
+        justify-content: center;
+      }
+	  .back1usb
+	   height: 18%;
+	   width: 20%;
+	   padding: 10px;
+	   text-align: center;
+	   }
+	   .back2usb
+	   height: 18%;
+	   width: 20%;
+	   padding: 10px;
+	   text-align: center;
+	   }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #333;
+          color: #fff;
+        }
+        a {
+          color: #58a6ff;
+        }
+      }
+    </style>
+    <script type="module" src="https://unpkg.com/esp-web-tools@8.0.1/dist/web/install-button.js?module"></script>
+  </head>
+  <body>
+  	<h1 align="center">-= M5 Launcher =-</h1>
+    <img src="New Launcher.jpg" alt="Logo" class="logo">   
+    
+      <center>
+    <div class="content">
+      <p>Connect your device then select the "Flash" option and push connect.</p>
+      <ul class="radios">
+<li>
+  <label><input type="radio" name="type" value="M5Cardputer" /> FLASH to M5Cardputer</label>
+</li>
+		<li>
+          <label><input type="radio" name="type" value="M5stickC" /> FLASH to M5stickC</label>
+        </li>
+		<li>
+          <label><input type="radio" name="type" value="M5stickCP" /> FLASH to M5stickC Plus</label>
+        </li>
+		<li>
+          <label><input type="radio" name="type" value="M5stickCP2" /> FLASH to M5stickC Plus2</label>
+        </li>
+      </ul>
+      <p class="button-row" align="center">
+        <esp-web-install-button class="invisible"></esp-web-install-button>
+      </p>
+      </center>
+      <div class="footer">
+        Flasher by <a href="https://github.com/bmorcelli"
+          >bmorcelli</a
+        > &mdash;
+        Installer powered by <a href="https://esphome.github.io/esp-web-tools/">ESP Web Tools</a> 🛠️
+		
+		<br>
+
+    </div>
+    <script>
+      document.querySelectorAll('input[name="type"]').forEach(radio =>
+        radio.addEventListener("change", () => {
+          const button = document.querySelector('esp-web-install-button');
+          button.manifest = `Launcher/manifest_${radio.value}.json`;
+          button.classList.remove('invisible');
+        }
+      ));
+	    
+    </script>
+  </body>
+</html>
