@@ -3,48 +3,54 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 
 
 <p align="center" width="100%">
-    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> 
+    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> => <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New M5Launcher.jpg?raw=true"> 
 </p>
 
+## With M5Launcher you'll be able to:
+### OTA Update
+- Install binaries from M5Burner repository (yes, online, without the need of a USB Cable)
+- Install binaries from a WebUI, that you can start from CFG option, installing binaries you have on your computer or smartphone
+- Install binaries from your SD Card
 
-It is mandatory that you have an [SDCard Hat](https://www.thingiverse.com/thing:6459069) to use with this Launcher and i have instructions [Here](https://www.thingiverse.com/thing:6459069), Cardputer users naturaly don´t need this Hat!
+### SD Card Management
+- Create new Folders,
+- Delete files and folders,
+- Rename files,
+- Copy and paste files,
+- Install binaries
 
-You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
+### Customization
+- You can change brightness
+- change rotation (StickCs)
+- Start WebUI
+- set to see all files on SD Card (see only .bins is default)
 
-Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Obtaining-binaries-to-launch)
-
-
+## tips
+* Having an SD card is good for better experience, but not really needed. [SDCard Hat for M5StickCs](https://www.thingiverse.com/thing:6459069) 
+* You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
+* Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Obtaining-binaries-to-launch)
 
 ## How to Install
+* Use the Flasher: [M5Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/flash0.html). (Unavailable for cardputer, yet)
 * Use M5Burner, or
-* Download the .bin file from Releases for your device.
-* Use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
+* Download the .bin file from Releases for your device and use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
 
 ## How to Use
 * Turn your Device on
 * Press M5 (Enter) in the Launcher Start Screen to start Launcher
-* Choose your .bin file and press M5 (Enter)
+* Choose OTA to install new binaries from M5Burner repo
 * After installed, when turn on the device, if you don't press anything, the installed program will be launched.
 
 ## Install from source
-* Install the following libs:
-    * [SdFat](https://github.com/greiman/SdFat)
-    * [M5GFX](https://github.com/m5stack/M5GFX)
-    * [M5Unified](https://github.com/m5stack/M5Unified)
-
-* Open ~Launcher/Launcher.ino
-* Choose your device, uncommenting the line
-* Build Launcher project in Arduino IDE, and "Export Compiled Binary"
-* Copy the binary generated in `~Launcher/build/{your-device}/Launcher.ino.bin` the the folder `~support_files/` (there are some binaries inside there)
-* use esptool to flash in your device
-    * M5StickC and M5StickC Plus
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 115200 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 40m --flash_size detect 0x1000 bootloader_4Mb.bin 0x8000 partition-table_4Mb.bin 0x10000 Launcher.ino.bin`
-    * M5StickC Plus 2
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 115200 --before default_reset --after hard_reset --chip esp32 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x1000 bootloader_8Mb.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
-    * Cardputer
-        * Run in "~support_files\" folder:    `esptool -p COMx -b 115200 --before default_reset --after hard_reset --chip esp32s3 write_flash --flash_mode dio --flash_freq 80m --flash_size detect 0x0 bootloader_CP.bin 0x8000 partition-table_8Mb.bin 0x10000 Launcher.ino.bin`
+Sourcecode will be released in the future..
 
 ## Changelog
+* 2.0.0:
+     * SD: added Folder creation, delete an rename files and folders, copy and paste files
+     * OTA (Over-The-Air update): Added feature to list the programs available in M5Burner and install it fro the internet.
+     * WebUI: Added a WebUI where you can manage your SD Card and install new binaries wirelessly
+     * Some other minnor features
+     * 
 * 1.3.0:
      * Added support to Micropython based binaries (MicroHydra), with 1Mb FAT partition to Cardputer and StickCPlus2 and 64kb to StickC and Plus1.1
 * 1.2.1:
