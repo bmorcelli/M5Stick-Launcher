@@ -45,6 +45,11 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 Sourcecode will be released in the future..
 
 ## Changelog
+* 2.0.1:
+     * Fixed UIFlow Instalation https://github.com/bmorcelli/M5Stick-Launcher/issues/20
+     * Fixed Folder creation on WebUI https://github.com/bmorcelli/M5Stick-Launcher/issues/18
+     * Fexed problem that preven webUI to open in some cases https://github.com/bmorcelli/M5Stick-Launcher/issues/16
+     * Now M5Launcher formats FAT vfs partition, so make sure you have saved your data into SDCard when using MicroPython, UIFlow or MicroHydra https://github.com/bmorcelli/M5Stick-Launcher/issues/19
 * 2.0.0:
      * SD: added Folder creation, delete an rename files and folders, copy and paste files
      * OTA (Over-The-Air update): Added feature to list the programs available in M5Burner and install it fro the internet.
