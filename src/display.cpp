@@ -57,6 +57,33 @@ void setSpriteDisplay(int x, int y, uint16_t fc, int size, uint16_t bg) {
     sprite.setTextSize(size);
     sprite.setTextColor(fc,bg);
 }
+/***************************************************************************************
+** Function name: coreFooter
+** Description:   Draw Core2 footer
+***************************************************************************************/
+void coreFooter(uint16_t color) {
+  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
+  tft.setTextColor(color);
+  tft.setTextSize(FONT_M);
+  tft.drawCentreString("PREV",WIDTH/6,HEIGHT+15,1);
+  tft.drawCentreString("SEL",WIDTH/2,HEIGHT+15,1);
+  tft.drawCentreString("NEXT",5*WIDTH/6,HEIGHT+15,1);
+}
+/***************************************************************************************
+** Function name: coreFooter2
+** Description:   Draw Core2 footer
+***************************************************************************************/
+void coreFooter2(uint16_t color) {
+  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
+  tft.setTextColor(color);
+  tft.setTextSize(FONT_M);
+  tft.drawCentreString("Skip",WIDTH/6,HEIGHT+15,1);
+  tft.drawCentreString("LAUNCHER",WIDTH/2,HEIGHT+15,1);
+  tft.drawCentreString("Skip",5*WIDTH/6,HEIGHT+15,1);
+}
+
+
+
 
 /***************************************************************************************
 ** Function name: BootScreen
@@ -124,24 +151,29 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   
   #ifndef STICK_C
   String texto = "More information";
-  setSpriteDisplay(int(sprite.width()/2 - 3*texto.length()), 98, FGCOLOR+0x2222, FONT_P,BGCOLOR);
+  setSpriteDisplay(int(sprite.width()/2 - 3*texto.length()), sprite.height()-FONT_M*9, FGCOLOR, FONT_P,BGCOLOR);
   sprite.println(texto);
 
   texto = String(currentIndex+1) + " of " + String(doc.size());
   sprite.setCursor(int(sprite.width()/2 - 3*texto.length()),sprite.getCursorY());
   //setSpriteDisplay(int(sprite.width()/2 - 3*texto.length()), 108, TFT_DARKGREEN, 1,BGCOLOR);
   sprite.println(texto);
-  sprite.drawRoundRect(sprite.width()/2 - 6*11, 96, 12*11,19,3,FGCOLOR+0x2222);
+  sprite.drawRoundRect(sprite.width()/2 - 6*11, sprite.height()-FONT_M*10, 12*11,19,3,FGCOLOR);
   #else
 
   String texto = String(currentIndex+1) + " of " + String(doc.size());
-  setSpriteDisplay(int(sprite.width()/2 - 3*texto.length()), sprite.height()-FONT_M*6, FGCOLOR+0x2222, FONT_P,BGCOLOR);
+  setSpriteDisplay(int(sprite.width()/2 - 3*texto.length()), sprite.height()-FONT_M*6, FGCOLOR, FONT_P,BGCOLOR);
   sprite.println(texto);
 
   #endif
 
 
   sprite.pushSprite(10,10);
+
+  #if defined(CORE2)
+  coreFooter();
+  #endif  
+
   int bar = int(WIDTH/(doc.size()));
   if (bar<5) bar = 5;
   tft.fillRect((WIDTH*currentIndex)/doc.size(),HEIGHT-5,bar,5,FGCOLOR);
@@ -192,6 +224,10 @@ void displayCurrentVersion(String name, String author, String version, String pu
     int div = versions.size();
     if(div==0) div = 1;
 
+    #if defined(CORE2)
+    coreFooter(ALCOLOR);
+    #endif
+
     int bar = int(WIDTH/div);
     if (bar<5) bar = 5;
     tft.fillRect((WIDTH*versionIndex)/div,HEIGHT-5,bar,5,ALCOLOR);
@@ -229,11 +265,11 @@ void displayRedStripe(String text) {
 ***************************************************************************************/
 void progressHandler(int progress, size_t total) {
 #ifndef STICK_C
-  int barWidth = map(progress, 0, total, 0, 200);
-  if(barWidth <7) {
-    tft.fillRect(6, 6, WIDTH-12, HEIGHT-12, BGCOLOR);
-    if (prog_handler == 1) tft.drawRect(18, HEIGHT - 28, 204, 17, ALCOLOR);
-    else tft.drawRect(18, HEIGHT - 47, 204, 17, FGCOLOR);
+  int barWidth = map(progress, 0, total, 0, WIDTH-40);
+  if(barWidth <=1) {
+    tft.fillRect(6, HEIGHT/2, WIDTH-12, HEIGHT-12, BGCOLOR);
+    if (prog_handler == 1) tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
+    else tft.drawRect(18, HEIGHT - 47, WIDTH-36, 17, FGCOLOR);
     
     String txt;
     switch(prog_handler) {
@@ -254,7 +290,7 @@ void progressHandler(int progress, size_t total) {
 #else
   
   int barWidth = map(progress, 0, total, 0, 100);
-  if(barWidth <5) {
+  if(barWidth <=1) {
     tft.fillRect(6, 6, WIDTH-12, HEIGHT-12, BGCOLOR);
     tft.drawRect(6, 6, WIDTH-12, HEIGHT-12, BGCOLOR);
     if (prog_handler == 1) tft.drawRect(28, HEIGHT - 28, 104, 17, ALCOLOR);
@@ -288,7 +324,7 @@ void progressHandler(int progress, size_t total) {
 void drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
     int menuSize = options.size();
     if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
-
+    menu_op.setAttribute(PSRAM_ENABLE,true);
     menu_op.createSprite(WIDTH*0.7, (FONT_M*8+4)*menuSize + 10);
     menu_op.fillRoundRect(0,0,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,bgcolor);
     
@@ -344,8 +380,9 @@ void drawMainMenu(int index) {
                                 "Launcher settings." };
 
 #endif
-    sprite.deleteSprite();
-    sprite.createSprite(WIDTH - 20, HEIGHT - 20);
+    //sprite.deleteSprite();
+    sprite.setAttribute(PSRAM_ENABLE,true);
+    //sprite.createSprite(WIDTH - 20, HEIGHT - 20);
     sprite.fillRect(0, 0, WIDTH, HEIGHT, BGCOLOR);
     setSpriteDisplay(2, 2, FGCOLOR, 1, BGCOLOR);
 #ifndef STICK_C
@@ -369,6 +406,7 @@ void drawMainMenu(int index) {
 #else
     sprite.drawCentreString(messages[index], sprite.width() / 2, 18, 1);
 #endif
+    Serial.println("push Sprite");
     sprite.pushSprite(10,10);
     drawDeviceBorder();
     drawBatteryStatus();
@@ -409,7 +447,6 @@ void drawBatteryStatus() {
 ** Function name: listFiles
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
-#define MAX_ITEMS 7
 void listFiles(int index, String fileList[][3]) {
     sprite.fillRect(0,0,sprite.width(),sprite.height(),BGCOLOR);
     sprite.setCursor(0,0);
@@ -439,12 +476,17 @@ void listFiles(int index, String fileList[][3]) {
     }
     
     sprite.pushSprite(10,10);
+
+    #if defined(CORE2)
+    coreFooter();
+    #endif    
 }
 
 
 void displayScanning() {
     //Show Scanning display
     menu_op.deleteSprite();
+    menu_op.setAttribute(PSRAM_ENABLE,true);
     menu_op.createSprite(WIDTH*0.7, FONT_M*16);
     menu_op.fillRoundRect(0,0,WIDTH*0.7,FONT_M*16,5,BGCOLOR);
     
@@ -468,11 +510,13 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     if (redraw) { 
       drawOptions(index,options, TFT_RED, BGCOLOR);
       if(bright){
-        #if !defined(STICK_C_PLUS)
+        #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
         int bl = MINBRIGHT + round(((255 - MINBRIGHT) * (4 - index) * 0.25)); // 4 is the number of options
         analogWrite(BACKLIGHT, bl);
-        #else
+        #elif defined(STICK_C) || defined(STICK_C_PLUS)
         axp192.ScreenBreath(100*(4 - index) * 0.25);  // 4 is the number of options
+        #elif defined(CORE2)
+        M5.Display.setBrightness(100*(4 - index) * 0.25);
         #endif
       }
       redraw=false;
@@ -578,7 +622,8 @@ void loopVersions() {
       delay(200);
 
       loopOptions(options);
-      sprite.createSprite(WIDTH-20,HEIGHT-20);
+      //sprite.setAttribute(PSRAM_ENABLE,true);
+      //sprite.createSprite(WIDTH-20,HEIGHT-20);
       // On fail installing will run the following line
       redraw = true;
     }
@@ -600,9 +645,10 @@ void loopVersions() {
 **********************************************************************/
 void loopFirmware(){  
   currentIndex=0;
-  sprite.deleteSprite();
+  //sprite.deleteSprite();
   delay(200); //debounce from previous btn press
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
+  sprite.setAttribute(PSRAM_ENABLE,true);
+  //sprite.createSprite(WIDTH-20,HEIGHT-20);
   displayCurrentItem(doc, currentIndex);
 
   while(1){
@@ -633,9 +679,9 @@ void loopFirmware(){
           int time = millis();          // Saves the moment when the btn was pressed
           while(checkSelPress()) { 
 
-            if((millis()-time)>150) tft.drawArc(WIDTH/2,HEIGHT/2,25,15,0,360*(millis()-time)/450,ALCOLOR,BGCOLOR,false);
+            if((millis()-time)>150) tft.drawArc(WIDTH/2,HEIGHT/2,25,15,0,360*(millis()-time)/1000,ALCOLOR,BGCOLOR,false);
           }  // while pressed the btn, hold the code to count the time
-          if((millis()-time)>450) break;// check how many ms it was kept held on and stop the loop if more than 250ms
+          if((millis()-time)>1000) break;// check how many ms it was kept held on and stop the loop if more than 250ms
           else loopVersions();          // goes to the Version information
         #else
         loopVersions();

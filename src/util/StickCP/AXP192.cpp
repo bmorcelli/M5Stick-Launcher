@@ -1,3 +1,5 @@
+#if defined(STICK_C_PLUS) || defined(STICK_C)
+
 #include "AXP192.h"
 
 AXP192::AXP192() {
@@ -377,7 +379,7 @@ float AXP192::GetVBusCurrent() {
     return ReData * ADCLSB;
 }
 
-float AXP192::GetTempInAXP192() {
+float AXP192::GetTempInAXP192_Stick() {
     float ADCLSB             = 0.1;
     const float OFFSET_DEG_C = -144.7;
     uint16_t ReData          = Read12Bit(0x5E);
@@ -438,3 +440,4 @@ void AXP192::SetPeripherialsPower(uint8_t state) {
     // uint8_t data;
     // Set EXTEN to enable 5v boost
 }
+#endif

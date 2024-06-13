@@ -1,5 +1,6 @@
 #include "mykeyboard.h"
 #include "display.h"
+#include "globals.h"
 
 #if defined(CARDPUTER) || defined(STICK_C_PLUS2)
   #include <driver/adc.h>
@@ -13,6 +14,10 @@
 
 #elif defined (STICK_C_PLUS)
   AXP192 axp192;
+
+#elif defined (CORE2)
+  //AXP axp192;
+
 #endif
 
 /* Verifies Upper Btn to go to previous item */
@@ -21,8 +26,11 @@ bool checkNextPress(){
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed('/') || Keyboard.isKeyPressed('.'))
-  #else    
+  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C)
     if(digitalRead(DW_BTN)==LOW) 
+  #elif defined(CORE2)
+    M5.update();
+    if(M5.BtnC.isHolding() || M5.BtnC.isPressed())               // read touchscreen
   #endif
   { return true; }
 
@@ -38,6 +46,9 @@ bool checkPrevPress() {
   #elif defined(CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed(',') || Keyboard.isKeyPressed(';'))
+  #elif defined(CORE2)
+    M5.update();
+    if(M5.BtnA.isHolding() || M5.BtnA.isPressed())               // read touchscreen
   #endif
   { return true; }
 
@@ -49,8 +60,14 @@ bool checkSelPress(){
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed(KEY_ENTER))
-  #else
+  
+  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C)
     if(digitalRead(SEL_BTN)==LOW) 
+  
+  #elif defined(CORE2)
+    M5.update();
+    if(M5.BtnB.isHolding() || M5.BtnB.isPressed())               // read touchscreen
+  
   #endif
   { return true; }
 
@@ -64,10 +81,13 @@ bool checkSelPress(){
 ***************************************************************************************/
 int getBattery() {
   int percent=0;
-  #if defined(STICK_C_PLUS)
+  #if defined(STICK_C_PLUS) || defined(STICK_C)
   float b = axp192.GetBatVoltage();
   percent = ((b - 3.0) / 1.2) * 100;
-  
+
+  #elif defined(CORE2)
+  percent = M5.Power.getBatteryLevel();
+
   #else
   
     #if defined(CARDPUTER)

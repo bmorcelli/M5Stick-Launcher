@@ -6,6 +6,11 @@
 #include <functional>
 #include <vector>
 
+#if defined (CORE2)
+  //#include <util/Core2/M5Core2.h>
+  #include <util/Unified/M5Unified.h>
+#endif
+
 extern int prog_handler;    // 0 - Flash, 1 - SPIFFS, 2 - Download
 
 extern bool sdcardMounted;
@@ -34,6 +39,9 @@ extern const int bufSize;
 
 //Used to handle the update in webUI
 extern bool update;
+
+//Used to choose SPIFFS or not
+extern bool askSpiffs;
 
 //Don't let open OTA after use WebUI due t oRAM handling
 extern bool stopOta;

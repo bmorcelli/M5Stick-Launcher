@@ -87,6 +87,8 @@ bool GetJsonFromM5() {
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/test/cardputer.json";
   #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/stickc.json";
+  #elif defined(CORE2)
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core2.json";  
   #endif
   closeSdCard();
 
@@ -171,6 +173,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
           prog_handler = 2; //Download handler
 
           // Ler dados enquanto disponível
+          progressHandler(downloaded, size);
           while (http.connected() && (len > 0 || len == -1)) {
             // Ler dados em partes
             int size_av = stream->available();
@@ -212,6 +215,14 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   //Release RAM Memory from Json Objects
   sprite.deleteSprite();
   menu_op.deleteSprite();
+  if(spiffs && askSpiffs) {
+    options = {
+      {"SPIFFS No", [&](){ spiffs = false; }},
+      {"SPIFFS Yes", [&](){ spiffs = true; }},
+    };
+    delay(200);
+    loopOptions(options);
+  }
 
   if(spiffs && spiffs_size>MAX_SPIFFS) spiffs_size=MAX_SPIFFS;
   if (app_size>MAX_APP) app_size = MAX_APP;
@@ -228,6 +239,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   httpUpdate.rebootOnUpdate(false);
   /* Install App */
   prog_handler = 0;
+  progressHandler(0, 500);
   httpUpdate.onProgress(progressHandler);
   httpUpdate.setLedPin(LED, LED_ON);
 
@@ -267,6 +279,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
     displayRedStripe("Connecting SPIFFs");
     
     // Install Spiffs
+    progressHandler(0, 500);
     httpUpdate.onProgress(progressHandler);
     
     if(!httpUpdate.updateSpiffsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size)) {

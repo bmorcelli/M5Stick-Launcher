@@ -23,6 +23,7 @@ bool sdcardMounted;
 bool onlyBins;
 bool returnToMenu;
 bool update;
+bool askSpiffs;
 bool stopOta;
 //bool command;
 size_t file_size;
@@ -48,6 +49,7 @@ void setBrightnessMenu();
 void setBrightness(int bright, bool save = true);
 void getBrightness(); 
 bool gsetOnlyBins(bool set = false, bool value = true);
+bool gsetAskSpiffs(bool set = false, bool value = true);
 int gsetRotation(bool set = false);
 void backToMenu();
 
@@ -59,13 +61,16 @@ void backToMenu();
 void setBrightness(int bright, bool save) {
   if(bright>100) bright=100;
 
-  #if !defined(STICK_C_PLUS)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
+  #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
+  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); ; // 4 is the number of options
   analogWrite(BACKLIGHT, bl);
-  #else
+  #elif defined(STICK_C) || defined(STICK_C_PLUS)
   axp192.ScreenBreath(bright);
+  #elif defined(CORE2)
+  M5.Display.setBrightness(bright);  
   #endif
-  
+
+ 
   EEPROM.begin(EEPROMSIZE); // open eeprom
   EEPROM.write(2, bright); //set the byte
   EEPROM.commit(); // Store data to EEPROM
@@ -82,23 +87,28 @@ void getBrightness() {
   EEPROM.end(); // Free EEPROM memory
   if(bright>100) { 
     bright = 100;
-    #if !defined(STICK_C_PLUS)
-    int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
-    analogWrite(BACKLIGHT, bl);
-    #else
-    axp192.ScreenBreath(bright);
-    #endif
 
+#if defined(STICK_C_PLUS2) || defined(CARDPUTER)
+  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
+  analogWrite(BACKLIGHT, bl);
+#elif defined(STICK_C) || defined(STICK_C_PLUS)
+  axp192.ScreenBreath(bright);
+#elif defined(CORE2)
+  M5.Display.setBrightness(bright);  
+#endif
     setBrightness(100);
 
   }
-  
-  #if !defined(STICK_C_PLUS)
+
+#if defined(STICK_C_PLUS2) || defined(CARDPUTER)
   int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
   analogWrite(BACKLIGHT, bl);
-  #else
+#elif defined(STICK_C) || defined(STICK_C_PLUS)
   axp192.ScreenBreath(bright);
-  #endif
+#elif defined(CORE2)
+  M5.Display.setBrightness(bright);
+#endif
+
 }
 
 /*********************************************************************
@@ -126,6 +136,33 @@ bool gsetOnlyBins(bool set, bool value) {
   EEPROM.end(); // Free EEPROM memory
   return result;
 }
+
+/*********************************************************************
+**  Function: gsetAskSpiffs                             
+**  get onlyBins from EEPROM
+**********************************************************************/
+bool gsetAskSpiffs(bool set, bool value) {
+  EEPROM.begin(EEPROMSIZE);
+  int spiffs = EEPROM.read(EEPROMSIZE-2);
+  bool result = false;
+
+  if(spiffs>1) { 
+    set=true;
+  } 
+   
+  if(spiffs==0) result = false;
+  else result = true;
+
+  if(set) {
+    result=value;
+    askSpiffs=value;         //update the global variable
+    EEPROM.write(EEPROMSIZE-2, result);
+    EEPROM.commit();
+  }
+  EEPROM.end(); // Free EEPROM memory
+  return result;
+}
+
 /*********************************************************************
 **  Function: gsetRotation                             
 **  get onlyBins from EEPROM
@@ -176,6 +213,14 @@ void setBrightnessMenu() {
 *********************************************************************/
 void setup() {
   Serial.begin(115200);
+  
+  log_d("Total heap: %d", ESP.getHeapSize());
+  log_d("Free heap: %d", ESP.getFreeHeap());
+  if(psramInit()) log_d("PSRAM Started");
+  if(psramFound()) log_d("PSRAM Found");
+  else log_d("PSRAM Not Found");
+  log_d("Total PSRAM: %d", ESP.getPsramSize());
+  log_d("Free PSRAM: %d", ESP.getFreePsram());
 
   // declare variables
   size_t currentIndex=0;  
@@ -187,14 +232,16 @@ void setup() {
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
 
+  tft.init();
   // Setup GPIOs and stuff
-  #if  defined(STICK_C_PLUS2)
+  #if defined(STICK_C_PLUS2)
     pinMode(UP_BTN, INPUT);
   #elif defined(STICK_C_PLUS)
     axp192.begin();
-
   #endif
-  
+  #if defined(CORE2)
+    M5.begin(); // inicia os periféricos do CORE2 exceto o TFT.
+  #endif
  
   #ifndef CARDPUTER
   pinMode(SEL_BTN, INPUT);
@@ -206,8 +253,9 @@ void setup() {
   pinMode(10, INPUT);
   #endif
 
-  tft.init();
+  
   rotation = gsetRotation();
+  askSpiffs=gsetAskSpiffs();
   tft.setRotation(rotation);
   resetTftDisplay();
 
@@ -234,26 +282,31 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
   EEPROM.commit();       // Store data to EEPROM
 }
   EEPROM.end(); // Free EEPROM memory
-
   
-
   getBrightness();  
   onlyBins=gsetOnlyBins();
-  sprite.createSprite(WIDTH-15,HEIGHT-15);
+  tft.setAttribute(PSRAM_ENABLE,true);
+  sprite.setAttribute(PSRAM_ENABLE,true);
+  sprite.createSprite(WIDTH-20,HEIGHT-20);
+
   //Start Bootscreen timer
   int i = millis();
   while(millis()<i+5000) { // increased from 2500 to 5000
     initDisplay();        //Inicia o display
+    #if defined(CORE2)
+    coreFooter2();
+    #endif    
   
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed(KEY_ENTER))
-  #else
+  #elif !defined(CORE2)
     if(digitalRead(SEL_BTN)==LOW) 
+  #elif defined(CORE2)
+    if(checkSelPress())        
   #endif
      {
         tft.fillScreen(TFT_BLACK);
-        delay(50);
         goto Launcher;
       }
 
@@ -264,6 +317,8 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
     if(digitalRead(UP_BTN)==LOW || digitalRead(DW_BTN)==LOW) 
   #elif defined(STICK_C_PLUS)
     if(axp192.GetBtnPress() || digitalRead(DW_BTN)==LOW)
+  #elif defined(CORE2)
+    if(checkNextPress() || checkPrevPress())    
   #endif 
       {
         tft.fillScreen(TFT_BLACK);
@@ -279,8 +334,7 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
 
   // If M5 or Enter button is pressed, continue from here
   Launcher:
-  delay(200);
-
+  tft.fillScreen(TFT_BLACK);
 }
 
 /**********************************************************************
@@ -292,11 +346,14 @@ void loop() {
   int index = 0;
   int opt = 3; // there are 3 options> 1 list SD files, 2 OTA and 3 Config
   stopOta = false; // variable used in WebUI, and to prevent open OTA after webUI without restart
-  tft.fillRect(0,0,WIDTH,HEIGHT,BGCOLOR);
+  
   if(!setupSdCard()) index=1; //if SD card is not present, paint SD square grey and auto select OTA
   while(1){
     if (redraw) { 
       drawMainMenu(index); 
+      #if defined(CORE2)
+      coreFooter();
+      #endif
       redraw = false; 
       delay(200); 
     }
@@ -306,14 +363,14 @@ void loop() {
       else if(index>0) index--;
       redraw = true;
     }
-    /* DW Btn to next item */
+    // DW Btn to next item 
     if(checkNextPress()) { 
       index++;
       if((index+1)>opt) index = 0;
       redraw = true;
     }
 
-    /* Select and run function */
+    // Select and run function 
     if(checkSelPress()) { 
       if(index == 0) {  
         if(setupSdCard()) { 
@@ -365,6 +422,10 @@ void loop() {
           if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false); }});
           else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true); }});
         }
+        
+        if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); }});
+        else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true); }});
+
         #ifndef CARDPUTER
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
         #endif

@@ -41,9 +41,14 @@ bool eraseFAT() {
 ** Description:   Start SD Card
 ***************************************************************************************/
 bool setupSdCard() {
+  #if !defined(CORE2) // Core2 uses the same SPI bus as TFT
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
   delay(10);
-  if (!SD.begin(SDCARD_CS, sdcardSPI)) { 
+  if (!SD.begin(SDCARD_CS, sdcardSPI))  
+  #else
+  if (!SD.begin(SDCARD_CS)) 
+  #endif
+  {
     sdcardSPI.end(); // Closes SPI connections and release pin header.
     //Serial.println("Failed to mount SDCARD");
     sdcardMounted = false;
@@ -62,7 +67,9 @@ bool setupSdCard() {
 ***************************************************************************************/
 void closeSdCard() {
   SD.end();
+  #if !defined(CORE2)
   sdcardSPI.end(); // Closes SPI connections and release pins.
+  #endif
   //Serial.println("SD Card Unmounted...");
   sdcardMounted = false;
 }
@@ -399,14 +406,9 @@ void loopSD(){
     /* Select to install */
     if(checkSelPress()) { 
       delay(200);
-      
-      #if defined(CARDPUTER)
-      Keyboard.update();
-      if(Keyboard.isKeyPressed(KEY_ENTER)) 
-      #else
-      if(digitalRead(SEL_BTN)==LOW) 
-      #endif
+      if(checkSelPress()) 
       {
+        while(checkSelPress()) yield();
         // Definição da matriz "Options" 
         if(fileList[index][2]=="folder") {
           options = {
@@ -501,7 +503,8 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
     
     prog_handler = 0; // Install flash update
     if (command==U_SPIFFS) prog_handler = 1; // Install flash update
-
+    
+    progressHandler(0, 500);
     while (updateSource.available() > 0 && written < updateSize) {
       bytesRead = updateSource.readBytes(buf, sizeof(buf));
       written += Update.write(buf, bytesRead);
@@ -534,6 +537,7 @@ void updateFromSD(String path) {
   tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,ALCOLOR);
   tft.setTextColor(ALCOLOR);
   tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);
+  displayRedStripe("Preparing..");
 
   if (!file) goto Exit;
   if (!file.seek(0x8000)) goto Exit; 
@@ -577,6 +581,16 @@ void updateFromSD(String path) {
       }
     }
     if (!file.seek(0x10000)) goto Exit;
+
+    if(spiffs && askSpiffs) {
+      options = {
+        {"SPIFFS No", [&](){ spiffs = false; }},
+        {"SPIFFS Yes", [&](){ spiffs = true; }},
+      };
+      delay(200);
+      loopOptions(options);
+    }
+
     performUpdate(file, app_size, U_FLASH);
 
     if(spiffs) {

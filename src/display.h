@@ -12,6 +12,7 @@
 #define BGCOLOR TFT_BLACK
 
 // Declaração dos objetos TFT
+
 extern TFT_eSPI tft; 
 extern TFT_eSprite sprite;
 extern TFT_eSprite menu_op;
@@ -35,8 +36,6 @@ void displayRedStripe(String text);
 
 void progressHandler(int progress, size_t total);
 
-void downloadHandler();
-
 void drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor);
 
 void drawMainMenu(int index = 0);
@@ -44,5 +43,9 @@ void drawMainMenu(int index = 0);
 void listFiles(int index, String fileList[][3]);
 
 void displayScanning();
+
+void coreFooter(uint16_t color = FGCOLOR);
+
+void coreFooter2(uint16_t color = FGCOLOR);
 
 #endif

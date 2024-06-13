@@ -190,7 +190,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
           else prog_handler = 1;
           //Erase FAT partition
           eraseFAT();
-
+          progressHandler(0, 500);
           Update.onProgress(progressHandler);
         } else { displayRedStripe("FAIL 160: " + String(Update.getError())); delay(3000); }
       }
