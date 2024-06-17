@@ -35,8 +35,6 @@ const char* root_ca3 =
 ** Description:   Connects to wifiNetwork
 ***************************************************************************************/
 void wifiConnect(String ssid, int encryptation, bool isAP) {
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH-12,HEIGHT-12);
 
   if(!isAP) {
 
@@ -54,15 +52,13 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 
     WiFi.begin(ssid, pwd);
 
-    resetSpriteDisplay(0, 0, FGCOLOR,FONT_P);
-    sprite.fillRect(0,0,sprite.width(),sprite.height(),BGCOLOR);
+    resetTftDisplay(10, 10, FGCOLOR,FONT_P);
 
-    sprite.print("Connecting to: " + ssid + ".");
+    tftprint("Connecting to: " + ssid + ".",10);
+    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
-      sprite.print(".");
-      sprite.pushSprite(6,6);
-      tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+      tftprint(".",10);
     }
 
   } else { //Running in Access point mode
@@ -81,28 +77,27 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 ** Description:   Gets JSON from github server
 ***************************************************************************************/
 bool GetJsonFromM5() {
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH,HEIGHT);
   #if defined(CARDPUTER) 
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/test/cardputer.json";
   #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/stickc.json";
   #elif defined(CORE2)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core2.json";  
+  #elif defined(CORE2)
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core.json";  
   #endif
   closeSdCard();
 
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     int httpResponseCode=-1;
-    resetSpriteDisplay(sprite.width()/2 - 6*String("Getting info from").length(),32);
-    sprite.fillRect(0,0,sprite.width(),sprite.height(),BGCOLOR);
-    sprite.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
-    sprite.drawCentreString("Getting info from", WIDTH/2, HEIGHT/3,1);
-    sprite.drawCentreString("M5Burner repo", WIDTH/2, HEIGHT/3+FONT_M*9,1);
-    sprite.pushSprite(0,0);
+    resetTftDisplay(WIDTH/2 - 6*String("Getting info from").length(),32);
+    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+    tft.drawCentreString("Getting info from", WIDTH/2, HEIGHT/3,1);
+    tft.drawCentreString("M5Burner repo", WIDTH/2, HEIGHT/3+FONT_M*9,1);
 
-    sprite.setCursor(8,  HEIGHT/3+FONT_M*9*2);
+    tft.setCursor(18,  HEIGHT/3+FONT_M*9*2);
     while(httpResponseCode<0) { 
       http.begin(serverUrl);
       http.useHTTP10(true);
@@ -110,15 +105,11 @@ bool GetJsonFromM5() {
       if (httpResponseCode > 0) {
         DeserializationError error;
         deserializeJson(doc, http.getStream());
-        sprite.deleteSprite();
-        sprite.createSprite(WIDTH-20,HEIGHT-20);
         delay(100);
-        //displayCurrentItem(doc, currentIndex); //Show first item
         return true;
         break;
       } else {
-        sprite.print(".");
-        sprite.pushSprite(0,0);
+        tftprint(".",10);
         http.end();
         delay(1000);
       }
@@ -140,9 +131,6 @@ void downloadFirmware(String file_str, String fileName, String folder) {
     delay(2000);
     return;
   }
-
-  sprite.deleteSprite();//Delete Sprite, it consumes a lot of RAM
-  menu_op.deleteSprite();
 
   tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
@@ -213,8 +201,6 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   uint32_t app_offset = 0x10000;
 
   //Release RAM Memory from Json Objects
-  sprite.deleteSprite();
-  menu_op.deleteSprite();
   if(spiffs && askSpiffs) {
     options = {
       {"SPIFFS No", [&](){ spiffs = false; }},
@@ -239,6 +225,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   httpUpdate.rebootOnUpdate(false);
   /* Install App */
   prog_handler = 0;
+  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
   progressHandler(0, 500);
   httpUpdate.onProgress(progressHandler);
   httpUpdate.setLedPin(LED, LED_ON);
@@ -293,7 +280,6 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 
   // Só chega aqui se der errado
   SAIR:
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
   delay(5000);
 }
 

@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -78,3 +79,4 @@ void M5Timer::restartTimer(int_fast8_t id) {
         _timer_info[id].setPreviousMsec(m5gfx::millis());
     }
 }
+#endif

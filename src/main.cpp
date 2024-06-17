@@ -66,7 +66,7 @@ void setBrightness(int bright, bool save) {
   analogWrite(BACKLIGHT, bl);
   #elif defined(STICK_C) || defined(STICK_C_PLUS)
   axp192.ScreenBreath(bright);
-  #elif defined(CORE2)
+  #elif defined(M5STACK)
   M5.Display.setBrightness(bright);  
   #endif
 
@@ -93,7 +93,7 @@ void getBrightness() {
   analogWrite(BACKLIGHT, bl);
 #elif defined(STICK_C) || defined(STICK_C_PLUS)
   axp192.ScreenBreath(bright);
-#elif defined(CORE2)
+#elif defined(M5STACK)
   M5.Display.setBrightness(bright);  
 #endif
     setBrightness(100);
@@ -105,7 +105,7 @@ void getBrightness() {
   analogWrite(BACKLIGHT, bl);
 #elif defined(STICK_C) || defined(STICK_C_PLUS)
   axp192.ScreenBreath(bright);
-#elif defined(CORE2)
+#elif defined(M5STACK)
   M5.Display.setBrightness(bright);
 #endif
 
@@ -185,6 +185,7 @@ int gsetRotation(bool set){
     tft.setRotation(result);
     EEPROM.write(0, result);    // Left rotation
     EEPROM.commit();
+    tft.fillScreen(BGCOLOR);
   }
   EEPROM.end(); // Free EEPROM memory
   return result;
@@ -213,14 +214,6 @@ void setBrightnessMenu() {
 *********************************************************************/
 void setup() {
   Serial.begin(115200);
-  
-  log_d("Total heap: %d", ESP.getHeapSize());
-  log_d("Free heap: %d", ESP.getFreeHeap());
-  if(psramInit()) log_d("PSRAM Started");
-  if(psramFound()) log_d("PSRAM Found");
-  else log_d("PSRAM Not Found");
-  log_d("Total PSRAM: %d", ESP.getPsramSize());
-  log_d("Free PSRAM: %d", ESP.getFreePsram());
 
   // declare variables
   size_t currentIndex=0;  
@@ -231,7 +224,6 @@ void setup() {
   //Define variables to identify if there is an app installed after Launcher 
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
-
   tft.init();
   // Setup GPIOs and stuff
   #if defined(STICK_C_PLUS2)
@@ -239,10 +231,9 @@ void setup() {
   #elif defined(STICK_C_PLUS)
     axp192.begin();
   #endif
-  #if defined(CORE2)
+  #if defined(M5STACK)
     M5.begin(); // inicia os periféricos do CORE2 exceto o TFT.
   #endif
- 
   #ifndef CARDPUTER
   pinMode(SEL_BTN, INPUT);
   pinMode(DW_BTN, INPUT);
@@ -253,7 +244,6 @@ void setup() {
   pinMode(10, INPUT);
   #endif
 
-  
   rotation = gsetRotation();
   askSpiffs=gsetAskSpiffs();
   tft.setRotation(rotation);
@@ -265,7 +255,7 @@ void setup() {
 
   EEPROM.begin(EEPROMSIZE); // open eeprom
 if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(3) > 1 || EEPROM.read(4) > 19 || EEPROM.read(5) > 19) {
-#if defined(CARDPUTER)
+#if defined(CARDPUTER) || defined(M5STACK)
   EEPROM.write(0, 1);    // Right rotation for cardputer
 #else
   EEPROM.write(0, 3);    // Left rotation
@@ -282,27 +272,24 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
   EEPROM.commit();       // Store data to EEPROM
 }
   EEPROM.end(); // Free EEPROM memory
-  
   getBrightness();  
   onlyBins=gsetOnlyBins();
   tft.setAttribute(PSRAM_ENABLE,true);
-  sprite.setAttribute(PSRAM_ENABLE,true);
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
-
+  initDisplay(true);
   //Start Bootscreen timer
   int i = millis();
   while(millis()<i+5000) { // increased from 2500 to 5000
     initDisplay();        //Inicia o display
-    #if defined(CORE2)
+    #if defined(M5STACK)
     coreFooter2();
     #endif    
   
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed(KEY_ENTER))
-  #elif !defined(CORE2)
+  #elif !defined(M5STACK)
     if(digitalRead(SEL_BTN)==LOW) 
-  #elif defined(CORE2)
+  #elif defined(M5STACK)
     if(checkSelPress())        
   #endif
      {
@@ -316,8 +303,8 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
   #elif defined(STICK_C_PLUS2)
     if(digitalRead(UP_BTN)==LOW || digitalRead(DW_BTN)==LOW) 
   #elif defined(STICK_C_PLUS)
-    if(axp192.GetBtnPress() || digitalRead(DW_BTN)==LOW)
-  #elif defined(CORE2)
+    if((axp192.GetBtnPress() || digitalRead(DW_BTN)==LOW) && (millis()-i>2000))
+  #elif defined(M5STACK)
     if(checkNextPress() || checkPrevPress())    
   #endif 
       {
@@ -344,14 +331,14 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
 void loop() {
   bool redraw = true;
   int index = 0;
-  int opt = 3; // there are 3 options> 1 list SD files, 2 OTA and 3 Config
+  int opt = 4; // there are 3 options> 1 list SD files, 2 OTA and 3 Config
   stopOta = false; // variable used in WebUI, and to prevent open OTA after webUI without restart
   
   if(!setupSdCard()) index=1; //if SD card is not present, paint SD square grey and auto select OTA
   while(1){
     if (redraw) { 
       drawMainMenu(index); 
-      #if defined(CORE2)
+      #if defined(M5STACK)
       coreFooter();
       #endif
       redraw = false; 
@@ -375,6 +362,7 @@ void loop() {
       if(index == 0) {  
         if(setupSdCard()) { 
           loopSD(); 
+          tft.fillScreen(BGCOLOR);
           redraw=true;
         }
         else {
@@ -388,7 +376,7 @@ void loop() {
           if (WiFi.status() != WL_CONNECTED) {
             int nets;
             WiFi.mode(WIFI_MODE_STA);
-            displayScanning();
+            displayRedStripe("Scanning...", TFT_WHITE, FGCOLOR);
             nets=WiFi.scanNetworks();
             //delay(3000);
             options = { };
@@ -406,6 +394,7 @@ void loop() {
             closeSdCard();
             if(GetJsonFromM5()) loopFirmware();
           }
+          tft.fillScreen(BGCOLOR);
           redraw=true;
         } 
         else {
@@ -414,7 +403,13 @@ void loop() {
         } 
 
       }
-      if(index == 2) {  
+      if(index == 2) {
+        loopOptionsWebUi();
+        tft.fillScreen(BGCOLOR);
+        redraw=true;        
+      }
+
+      if(index == 3) {  
         options = {
           {"Brightness", [=]() { setBrightnessMenu(); }},
         };
@@ -429,12 +424,11 @@ void loop() {
         #ifndef CARDPUTER
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
         #endif
-
-        options.push_back({"Start WebUI",  [=]() { loopOptionsWebUi(); }});
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         
         delay(200);
         loopOptions(options);
+        tft.fillScreen(BGCOLOR);
         redraw=true;
       }
       returnToMenu = false;

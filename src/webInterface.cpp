@@ -43,7 +43,7 @@ void webUIMyNet() {
   if (WiFi.status() != WL_CONNECTED) {
     int nets;
     WiFi.mode(WIFI_MODE_STA);
-    displayScanning();
+    displayRedStripe("Scanning...", TFT_WHITE, FGCOLOR);
     nets=WiFi.scanNetworks();
     options = { };
     for(int i=0; i<nets; i++){
@@ -56,7 +56,6 @@ void webUIMyNet() {
     //If it is already connected, just start the network
     startWebUi("",0,false); 
   }
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
   // On fail installing will run the following line
 }
 /**********************************************************************
@@ -72,7 +71,6 @@ void loopOptionsWebUi() {
   delay(200);
 
   loopOptions(options);
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
   // On fail installing will run the following line
 }
 
@@ -463,31 +461,29 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   disableCore1WDT(); // disable WDT
   disableLoopWDT();  // disable WDT
 
-  tft.fillScreen(BGCOLOR);
   tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,ALCOLOR,BGCOLOR);
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH-14, HEIGHT-14);
-  setSpriteDisplay(0,0,ALCOLOR,FONT_P);
-  sprite.drawCentreString("-= M5Launcher WebUI =-",sprite.width()/2,0,1);
+  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  setTftDisplay(7,7,ALCOLOR,FONT_P,BGCOLOR);
+  tft.drawCentreString("-= M5Launcher WebUI =-",WIDTH/2,0,8);
   String txt;
   if(!mode_ap) txt = WiFi.localIP().toString();
   else txt = WiFi.softAPIP().toString();
   
 #ifndef STICK_C
-  sprite.drawCentreString("http://m5launcher.local", sprite.width()/2,15,1);
-  setSpriteDisplay(0,40,TFT_WHITE,FONT_P);
+  tft.drawCentreString("http://m5launcher.local", WIDTH/2,22,1);
+  setTftDisplay(7,47,TFT_WHITE,FONT_P,BGCOLOR);
 #else
-  sprite.drawCentreString("http://m5launcher.local", sprite.width()/2,10,1);
-  setSpriteDisplay(0,19,TFT_WHITE,FONT_P);
+  tft.drawCentreString("http://m5launcher.local", WIDTH/2,17,1);
+  setTftDisplay(7,26,TFT_WHITE,FONT_P,BGCOLOR);
 #endif
-  sprite.setTextSize(FONT_M);
-  sprite.print("IP: ");   sprite.println(txt);
-  sprite.println("Usr: " + String(default_httpuser) + "\nPwd: " + String(default_httppassword));
+  tft.setTextSize(FONT_M);
+  tft.print("IP: ");   tftprintln(txt,10,1);
+  tftprintln("Usr: " + String(default_httpuser),10,1);
+  tftprintln("Pwd: " + String(default_httppassword),10,1);
 
-  setSpriteDisplay(0,sprite.height()-32,ALCOLOR,FONT_P);
+  setTftDisplay(7,HEIGHT-39,ALCOLOR,FONT_P);
 
-  sprite.drawCentreString("press " + String(BTN_ALIAS) + " to stop", sprite.width()/2,sprite.height()-8,1);
-  sprite.pushSprite(7,7);
+  tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", WIDTH/2,HEIGHT-15,1);
 
   while (!checkSelPress())
   {
@@ -514,10 +510,6 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   WiFi.mode(WIFI_OFF);
   stopOta = true; // used to verify if webUI was opened before to stop OTA and request restart
   
-
-  //log_i("Enabling Watchdogs");
-  enableCore0WDT(); // enable WDT
-  enableCore1WDT(); // enable WDT
-  enableLoopWDT();
+  tft.fillScreen(BGCOLOR);
 }
 

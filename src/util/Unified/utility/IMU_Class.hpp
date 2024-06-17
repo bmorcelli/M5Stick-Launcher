@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -265,4 +266,5 @@ namespace m5
   typedef IMU_Class::imu_3d_t imu_3d_t;
   typedef IMU_Class::imu_data_t imu_data_t;
 }
+#endif
 #endif

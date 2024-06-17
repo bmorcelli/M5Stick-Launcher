@@ -6,9 +6,6 @@
 #elif defined (STICK_C_PLUS) || defined (STICK_C) 
   #include <util/StickCP/AXP192.h>
   extern AXP192 axp192;
-#elif defined (CORE2)  
-  //#include <util/Core2/AXP.h>
-  //extern AXP axp192;
 #endif
 
 

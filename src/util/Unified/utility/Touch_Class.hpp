@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -124,4 +125,5 @@ namespace m5
     bool update_detail(touch_detail_t* dt, std::uint32_t msec);
   };
 }
+#endif
 #endif

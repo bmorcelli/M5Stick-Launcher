@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -216,4 +217,5 @@ printf("idx:%d len:%d ax:%d ay:%d az:%d gx:%d gy:%d gz:%d\n", idx, len, buf[0], 
     return res;
   }
 }
+#endif
 #endif

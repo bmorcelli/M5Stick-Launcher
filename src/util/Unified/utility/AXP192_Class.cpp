@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -361,3 +362,4 @@ namespace m5
     return buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3];
   }
 }
+#endif

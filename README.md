@@ -46,15 +46,14 @@ Sourcecode will be released in the future..
 
 ## Changelog
 * 2.1.0:
-     * [ ] Core2 compatibility
-          * [ ] find out tft pins for TFT-eSPI lib
-          * [ ] find out how to use touchscreen
-          * [ ] draw the screens for this device
+     * [x] Core2 compatibility
+     * [x] Turn SPIFFs update optional (turne off by default) (config.conf)
+     * [x] De-Sprite-fy the screens for Core devices (No PSRam, unable to handle huge Sprites)
+     * [x] Make keyboard work with touchscreen capture in Core devices
      * [ ] Multiple files upload on WebUI
      * [ ] LittleFs management on WebUI
      * [ ] Dedicated btn for WebUI on main screen
-     * [ ] Save more SSIDs and pwd and connect automatically (config.conf)
-     * [ ] Turn SPIFFs update optional (turne off by default) (config.conf)
+     * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
      * [ ] change default folder for download (config.conf)
      * [ ] Update FAT vfs partition to make compatible with UIFlow2 (update.h and HTTPUpdate.h libraries fork and rework)
 * 2.0.1:

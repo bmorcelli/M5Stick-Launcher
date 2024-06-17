@@ -141,7 +141,8 @@ String HTTPUpdate::getLastErrorString(void)
         StreamString error;
         Update.printError(error);
         error.trim(); // remove line ending
-        return String("Update error: ") + error;
+        
+        return "E:" + error + "-Unsupported";
     }
 
     // error from http client

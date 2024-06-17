@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -121,4 +122,5 @@ class M5Timer {
     uint8_t _enable_count = 0;
 };
 
+#endif
 #endif

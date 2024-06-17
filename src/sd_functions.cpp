@@ -41,7 +41,7 @@ bool eraseFAT() {
 ** Description:   Start SD Card
 ***************************************************************************************/
 bool setupSdCard() {
-  #if !defined(CORE2) // Core2 uses the same SPI bus as TFT
+  #if !defined(M5STACK) // Core2 uses the same SPI bus as TFT
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
   delay(10);
   if (!SD.begin(SDCARD_CS, sdcardSPI))  
@@ -67,7 +67,7 @@ bool setupSdCard() {
 ***************************************************************************************/
 void closeSdCard() {
   SD.end();
-  #if !defined(CORE2)
+  #if !defined(M5STACK)
   sdcardSPI.end(); // Closes SPI connections and release pins.
   #endif
   //Serial.println("SD Card Unmounted...");
@@ -367,8 +367,6 @@ void loopSD(){
   String PreFolder = "/";
   tft.fillScreen(BGCOLOR);
   tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
 
   readFs(Folder, fileList);
 
@@ -419,8 +417,6 @@ void loopSD(){
           };
           delay(200);
           loopOptions(options);
-          sprite.deleteSprite();
-          sprite.createSprite(WIDTH-20,HEIGHT-20);   
           tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);  
           reload = true;     
           redraw = true;
@@ -434,8 +430,6 @@ void loopSD(){
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           delay(200);
           loopOptions(options);
-          sprite.deleteSprite();
-          sprite.createSprite(WIDTH-20,HEIGHT-20);
           tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
           reload = true;  
           redraw = true;
@@ -457,8 +451,6 @@ void loopSD(){
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           delay(200);
           loopOptions(options);
-          sprite.deleteSprite();
-          sprite.createSprite(WIDTH-20,HEIGHT-20);
           tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
           reload = true;  
           redraw = true;
@@ -477,6 +469,12 @@ void loopSD(){
       if(Keyboard.isKeyPressed('`')) break;
     #endif
   }
+  //clear fileList memory
+  for(int i=0; i<MAXFILES; i++) {
+    fileList[i][0] = "";
+    fileList[i][1] = "";
+    fileList[i][2] = "";
+  }
   closeSdCard();
   setupSdCard();  
 }
@@ -487,8 +485,6 @@ void loopSD(){
 void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   // command = U_SPIFFS = 100
   // command = U_FLASH = 0
-  sprite.deleteSprite();
-  menu_op.deleteSprite();
   Serial.begin(115200);
   //Erase FAT partition
   eraseFAT();
@@ -503,8 +499,10 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
     
     prog_handler = 0; // Install flash update
     if (command==U_SPIFFS) prog_handler = 1; // Install flash update
-    
+
+    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     progressHandler(0, 500);
+
     while (updateSource.available() > 0 && written < updateSize) {
       bytesRead = updateSource.readBytes(buf, sizeof(buf));
       written += Update.write(buf, bytesRead);
@@ -521,7 +519,7 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   else
   {
     uint8_t error = Update.getError();
-    displayRedStripe("Update error: " + String(error));
+    displayRedStripe("E:" + String(error) + "-Unsupported");
     delay(2000);
   }
 }
@@ -534,9 +532,6 @@ void updateFromSD(String path) {
   uint8_t firstThreeBytes[16];
   File file = SD.open(path);
   resetTftDisplay();
-  tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,ALCOLOR);
-  tft.setTextColor(ALCOLOR);
-  tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);
   displayRedStripe("Preparing..");
 
   if (!file) goto Exit;
@@ -589,6 +584,8 @@ void updateFromSD(String path) {
       };
       delay(200);
       loopOptions(options);
+      tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+      progressHandler(0, 500);
     }
 
     performUpdate(file, app_size, U_FLASH);

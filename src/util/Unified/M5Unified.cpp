@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -1441,3 +1442,4 @@ for (int i = 0; i < 0x50; ++i)
     if (i >= 0) { Log.setDisplay(getDisplay(i)); }
   }
 }
+#endif

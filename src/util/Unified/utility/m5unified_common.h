@@ -1,3 +1,4 @@
+#if defined(M5STACK)
 // Copyright (c) M5Stack. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -35,5 +36,6 @@ typedef enum {
   I2S_NUM_MAX,
 } i2s_port_t;
 
+#endif
 #endif
 #endif

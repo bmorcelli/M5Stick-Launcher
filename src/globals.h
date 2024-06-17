@@ -6,8 +6,7 @@
 #include <functional>
 #include <vector>
 
-#if defined (CORE2)
-  //#include <util/Core2/M5Core2.h>
+#if defined (M5STACK)
   #include <util/Unified/M5Unified.h>
 #endif
 
