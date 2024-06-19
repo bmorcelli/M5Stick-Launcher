@@ -86,14 +86,11 @@ String humanReadableSize(uint64_t bytes) {
 }
 
 // list all of the files, if ishtml=true, return html rather than simple text
-String listFiles(bool ishtml, String folder) {
+String listFiles(String folder) {
   //log_i("Listfiles Start");
   String returnText = "";
   Serial.println("Listing files stored on SD");
 
-  if (ishtml) {
-    returnText += "<table><tr><th align='left'>Name</th><th style=\"text-align=center;\">Size</th><th></th></tr>\n";
-  }
   File root = SD.open(folder);
   File foundfile = root.openNextFile();
   if (folder=="//") folder = "/";
@@ -101,21 +98,10 @@ String listFiles(bool ishtml, String folder) {
   String PreFolder = folder;
   PreFolder = PreFolder.substring(0, PreFolder.lastIndexOf("/"));
   if(PreFolder=="") PreFolder= "/";
-  returnText += "<tr><th align='left'><a onclick=\"listFilesButton('"+ PreFolder + "')\" href='javascript:void(0);'>... </a></th><th align='left'></th><th></th></tr>\n";
 
   if (folder=="/") folder = "";
   while (foundfile) {
-    if(foundfile.isDirectory()) {
-      if (ishtml) {
-        returnText += "<tr align='left'><td><a onclick=\"listFilesButton('"+ String(foundfile.path()) + "')\" href='javascript:void(0);'>\n" + String(foundfile.name()) + "</a></td>";
-        returnText += "<td></td>\n";
-        returnText += "<td><i style=\"color: #e0d204;\" class=\"gg-folder\" onclick=\"listFilesButton('" + String(foundfile.path()) + "')\"></i>&nbsp&nbsp";
-        returnText += "<i style=\"color: #e0d204;\" class=\"gg-rename\"  onclick=\"renameFile(\'" + String(foundfile.path()) + "\', \'" + String(foundfile.name()) + "\')\"></i>&nbsp&nbsp\n";
-        returnText += "<i style=\"color: #e0d204;\" class=\"gg-trash\"  onclick=\"downloadDeleteButton(\'" + String(foundfile.path()) + "\', \'delete\')\"></i></td></tr>\n\n";
-      } else {
-        returnText += "Folder: " + String(foundfile.name()) + " Size: " + humanReadableSize(foundfile.size()) + "\n";
-      }
-    }
+    if(foundfile.isDirectory()) returnText+="Fo:" + String(foundfile.path()) + ":0\n";
     foundfile = root.openNextFile();
   }
   root.close();
@@ -125,27 +111,12 @@ String listFiles(bool ishtml, String folder) {
   root = SD.open(folder);
   foundfile = root.openNextFile();
   while (foundfile) {
-    if(!(foundfile.isDirectory())) {
-      if (ishtml) {
-        returnText += "<tr align='left'><td>" + String(foundfile.name());
-        if (String(foundfile.name()).substring(String(foundfile.name()).lastIndexOf('.') + 1).equalsIgnoreCase("bin")) returnText+= "&nbsp<i class=\"rocket\" onclick=\"startUpdate(\'" + String(foundfile.path()) + "\')\"></i>";
-        returnText += "</td>\n";
-        returnText += "<td style=\"font-size: 10px; text-align=center;\">" + humanReadableSize(foundfile.size()) + "</td>\n";
-        returnText += "<td><i class=\"gg-arrow-down-r\" onclick=\"downloadDeleteButton(\'"+ String(foundfile.path()) + "\', \'download\')\"></i>&nbsp&nbsp\n";
-        returnText += "<i class=\"gg-rename\"  onclick=\"renameFile(\'" + String(foundfile.path()) + "\', \'" + String(foundfile.name()) + "\')\"></i>&nbsp&nbsp\n";
-        returnText += "<i class=\"gg-trash\"  onclick=\"downloadDeleteButton(\'" + String(foundfile.path()) + "\', \'delete\')\"></i></td></tr>\n\n";
-      } else {
-        returnText += "File: " + String(foundfile.name()) + " Size: " + humanReadableSize(foundfile.size()) + "\n";
-      }
-    }
+    if(!(foundfile.isDirectory())) returnText+="Fi:" + String(foundfile.path()) + ":" + humanReadableSize(foundfile.size()) + "\n";
     foundfile = root.openNextFile();
   }
   root.close();
   foundfile.close();
 
-  if (ishtml) {
-    returnText += "</table>";
-  }
   //log_i("ListFiles End");
   return returnText;
 }
@@ -328,7 +299,7 @@ void configureWebServer() {
       } else {
         String folder = "/";
       }
-      request->send(200, "text/plain", listFiles(true, folder));
+      request->send(200, "text/plain", listFiles(folder));
 
     } else {
       return request->requestAuthentication();

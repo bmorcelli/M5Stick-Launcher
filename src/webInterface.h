@@ -9,7 +9,7 @@
 
 // function defaults
 String humanReadableSize(uint64_t bytes);
-String listFiles(bool ishtml, String folder);
+String listFiles(String folder);
 String processor(const String& var);
 String readLineFromFile(File myFile);
 
@@ -525,26 +525,60 @@ function rebootButton() {
 }
 
 function listFilesButton(folders) {
-  xmlhttp=new XMLHttpRequest();
-  document.getElementById("actualFolder").value = "";
+  var xmlhttp = new XMLHttpRequest();
   document.getElementById("actualFolder").value = folders;
+  var PreFolder = folders.substring(0,folders.lastIndexOf('/'));
+  if (PreFolder == "") { PreFolder = "/"; }
 
   xmlhttp.onload = function() {
-      if (xmlhttp.status === 200) {
-          document.getElementById("details").innerHTML = xmlhttp.responseText;
-      } else {
-          console.error('Erro na requisição: ' + xmlhttp.status);
-      }
+    if (xmlhttp.status === 200) {
+      var responseText = xmlhttp.responseText;
+      var lines = responseText.split('\n');
+      var tableContent = "<table><tr><th align='left'>Name</th><th style=\"text-align=center;\">Size</th><th></th></tr>\n";
+	  tableContent+="<tr><th align='left'><a onclick=\"listFilesButton('"+ PreFolder + "')\" href='javascript:void(0);'>... </a></th><th align='left'></th><th></th></tr>\n"
+
+      lines.forEach(function(line) {
+        if (line) {
+          var type = line.substring(0, 2);
+          var path = line.substring(3,line.lastIndexOf(':'));
+          var filename = line.substring(line.lastIndexOf('/') + 1, line.lastIndexOf(':'));
+          var size = line.substring(line.lastIndexOf(':')+1);
+          if (type === "Fo") {
+			tableContent += "<tr align='left'><td><a onclick=\"listFilesButton('"+ path + "')\" href='javascript:void(0);'>\n" + filename + "</a></td>";
+			tableContent += "<td></td>\n";
+			tableContent += "<td><i style=\"color: #e0d204;\" class=\"gg-folder\" onclick=\"listFilesButton('" + path + "')\"></i>&nbsp&nbsp";
+			tableContent += "<i style=\"color: #e0d204;\" class=\"gg-rename\"  onclick=\"renameFile(\'" + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
+			tableContent += "<i style=\"color: #e0d204;\" class=\"gg-trash\"  onclick=\"downloadDeleteButton(\'" + path + "\', \'delete\')\"></i></td></tr>\n\n";
+          } else if (type === "Fi") {
+			tableContent += "<tr align='left'><td>" + filename;
+			if (filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() === "bin") {
+				tableContent+= "&nbsp<i class=\"rocket\" onclick=\"startUpdate(\'" + path + "\')\"></i>";
+			}
+			tableContent += "</td>\n";
+			tableContent += "<td style=\"font-size: 10px; text-align=center;\">" + size + "</td>\n";
+			tableContent += "<td><i class=\"gg-arrow-down-r\" onclick=\"downloadDeleteButton(\'" + path + "\', \'download\')\"></i>&nbsp&nbsp\n";
+			tableContent += "<i class=\"gg-rename\"  onclick=\"renameFile(\'" + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
+			tableContent += "<i class=\"gg-trash\"  onclick=\"downloadDeleteButton(\'" + path + "\', \'delete\')\"></i></td></tr>\n\n";			  
+          }
+        }
+      });
+
+      tableContent += "</table>";
+      document.getElementById("details").innerHTML = tableContent;
+    } else {
+      console.error('Erro na requisição: ' + xmlhttp.status);
+    }
   };
+
   xmlhttp.onerror = function() {
-      console.error('Erro na rede ou falha na requisição.');
+    console.error('Erro na rede ou falha na requisição.');
   };
 
   xmlhttp.open("GET", "/listfiles?folder=" + folders, true);
   xmlhttp.send();  
 
   document.getElementById("detailsheader").innerHTML = "<h3>Files<h3>";
-  document.getElementById("updetailsheader").innerHTML = "<h3>Folder Actions:  <button onclick=\"showUploadButtonFancy('" + folders + "')\">Upload File</button><button onclick=\"showCreateFolder('" + folders + "')\">Create Folder</button><h3>"
+  document.getElementById("updetailsheader").innerHTML = "<h3>Folder Actions: <button onclick=\"showUploadButtonFancy('" + folders + "')\">Upload File</button><button onclick=\"showCreateFolder('" + folders + "')\">Create Folder</button><h3>"
   document.getElementById("updetails").innerHTML = "";
 
   document.getElementById("OTAdetails").style.display = 'none';

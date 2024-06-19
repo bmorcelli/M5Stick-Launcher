@@ -83,7 +83,7 @@ bool GetJsonFromM5() {
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/stickc.json";
   #elif defined(CORE2)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core2.json";  
-  #elif defined(CORE2)
+  #elif defined(CORE)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core.json";  
   #endif
   closeSdCard();

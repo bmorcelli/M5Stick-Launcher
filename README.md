@@ -45,17 +45,17 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 Sourcecode will be released in the future..
 
 ## Changelog
-* 2.1.0:
+* 2.1.0 (Future):
+     * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
+     * [ ] change default folder for download (config.conf)
+     * [ ] Update FAT vfs partition to make compatible with UIFlow2 (update.h and HTTPUpdate.h libraries fork and rework)
+* 2.0.2:
      * [x] Core2 compatibility
      * [x] Turn SPIFFs update optional (turne off by default) (config.conf)
      * [x] De-Sprite-fy the screens for Core devices (No PSRam, unable to handle huge Sprites)
      * [x] Make keyboard work with touchscreen capture in Core devices
+     * [x] Dedicated btn for WebUI on main screen
      * [ ] Multiple files upload on WebUI
-     * [ ] LittleFs management on WebUI
-     * [ ] Dedicated btn for WebUI on main screen
-     * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
-     * [ ] change default folder for download (config.conf)
-     * [ ] Update FAT vfs partition to make compatible with UIFlow2 (update.h and HTTPUpdate.h libraries fork and rework)
 * 2.0.1:
      * Fixed UIFlow Instalation https://github.com/bmorcelli/M5Stick-Launcher/issues/20
      * Fixed Folder creation on WebUI https://github.com/bmorcelli/M5Stick-Launcher/issues/18

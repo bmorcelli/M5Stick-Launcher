@@ -565,10 +565,13 @@ void loopVersions() {
     const char* published_at = Version["published_at"];
     const char* file = Version["file"];  
     bool spiffs = Version["spiffs"].as<bool>();
+    //bool FAT = Version["f"].as<bool>();
     bool nb = Version["nb"].as<bool>();
     uint32_t app_size = Version["app_size"].as<uint32_t>();
     uint32_t spiffs_size = Version["spiffs_size"].as<uint32_t>();
     uint32_t spiffs_offset = Version["spiffs_offset"].as<uint32_t>();
+    //uint32_t FAT_size = Version["fs"].as<uint32_t>();
+    //uint32_t FAT_offset = Version["fo"].as<uint32_t>();    
     if(redraw){
       
       displayCurrentVersion(String(name), String(author), String(version), String(published_at), versionIndex, versions);

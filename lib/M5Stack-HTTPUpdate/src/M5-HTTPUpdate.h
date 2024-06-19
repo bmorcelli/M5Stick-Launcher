@@ -31,7 +31,7 @@
 #include <WiFiClient.h>
 #include <WiFiUdp.h>
 #include <HTTPClient.h>
-#include <Update.h>
+#include <CustomUpdate.h>
 
 /// note we use HTTP client errors too so we start at 100
 #define HTTP_UE_TOO_LESS_SPACE              (-100)
@@ -91,12 +91,14 @@ public:
                                const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
     t_httpUpdate_return updateSpiffs(WiFiClient& client, const String& url, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
+    t_httpUpdate_return updateFAT(WiFiClient& client, const String& url, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
     t_httpUpdate_return update(HTTPClient& httpClient,
                                const String& currentVersion = "", 
                                HTTPUpdateRequestCB requestCB = NULL);
 
     t_httpUpdate_return updateSpiffs(HTTPClient &httpClient, const String &currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
+    t_httpUpdate_return updateFAT(HTTPClient &httpClient, const String &currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
 
     // Functions to download from offset to end of partition
@@ -115,7 +117,7 @@ public:
     String getLastErrorString(void);
 
 protected:
-    t_httpUpdate_return handleUpdate(HTTPClient& http, const String& currentVersion, bool spiffs = false, HTTPUpdateRequestCB requestCB = NULL, uint32_t size = 0);
+    t_httpUpdate_return handleUpdate(HTTPClient& http, const String& currentVersion, int command = 0, HTTPUpdateRequestCB requestCB = NULL, uint32_t size = 0);
     bool runUpdate(Stream& in, uint32_t size, String md5, int command = U_FLASH);
 
     // Set the error and potentially use a CB to notify the application
