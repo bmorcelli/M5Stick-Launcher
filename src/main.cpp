@@ -40,6 +40,7 @@ uint8_t buff[4096] = {0};
 #include "onlineLauncher.h"
 #include "sd_functions.h"
 #include "webInterface.h"
+#include "partitioner.h"
 
 
 //Functions in this file;
@@ -424,6 +425,8 @@ void loop() {
         #ifndef CARDPUTER
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
         #endif
+        options.push_back({"Partition Set",  [=]() { partitioner(); }});
+        options.push_back({"PartitList",  [=]() { partList(); }});
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         
         delay(200);

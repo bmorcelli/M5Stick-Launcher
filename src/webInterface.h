@@ -278,6 +278,19 @@ const char index_html[] PROGMEM = R"rawliteral(
     right: 10px; /* Ajuste conforme necessário */
     font-size: 16px;
   }
+
+  .drop-area {
+    border: 2px dashed #00dd00;
+    padding: 100px;
+    margin-top: 50px;
+    display: none;
+  }
+
+  .highlight {
+    background-color: #303134;
+    color: #ad007c65;
+  }
+
   </style>
 </head>
 <body>
@@ -320,6 +333,9 @@ const char index_html[] PROGMEM = R"rawliteral(
     </p>
     <p id="updetailsheader"></p>
     <p id="updetails"></p>
+    <div id="drop-area" class="drop-area" ondrop="drop(event, document.getElementById('actualFolder').value)">
+        <p style="text-align: center;">Drag and drop files here</p>
+    </div>      
   </div>
 
 <script>
@@ -704,6 +720,57 @@ function abortHandler(event) {
 window.addEventListener("load", function() {
   listFilesButton("/");
 });
+
+// Drag and drop event listeners
+window.addEventListener("load", function() {
+  var dropArea = _("drop-area");
+  dropArea.addEventListener("dragenter", dragEnter, false);
+  dropArea.addEventListener("dragover", dragOver, false);
+  dropArea.addEventListener("dragleave", dragLeave, false);
+  dropArea.addEventListener("drop", drop, false);
+});
+
+function dragEnter(event) {
+  event.stopPropagation();
+  event.preventDefault();
+  this.classList.add("highlight");
+}
+
+function dragOver(event) {
+  event.stopPropagation();
+  event.preventDefault();
+  this.classList.add("highlight");
+}
+
+function dragLeave(event) {
+  event.stopPropagation();
+  event.preventDefault();
+  this.classList.remove("highlight");
+}
+
+function drop(event, folder) {
+  event.stopPropagation();
+  event.preventDefault();
+  _("drop-area").classList.remove("highlight");
+  
+  var files = event.dataTransfer.files;
+  var fs = document.getElementById("actualFS").value;
+
+  var formdata = new FormData();
+  for (var i = 0; i < files.length; i++) {
+    formdata.append("files[]", files[i]);
+  }
+  formdata.append("folder", folder);
+
+  var ajax = new XMLHttpRequest();
+  ajax.upload.addEventListener("progress", progressHandler, false);
+  ajax.addEventListener("load", completeHandler, false);
+  ajax.addEventListener("error", errorHandler, false);
+  ajax.addEventListener("abort", abortHandler, false);
+  ajax.open("POST", "/");
+  ajax.send(formdata);
+}
+
 
 </script>
 </body>
