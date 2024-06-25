@@ -70,6 +70,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
   } 
 
   delay(200);
+
 }
 
 /***************************************************************************************
@@ -78,7 +79,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 ***************************************************************************************/
 bool GetJsonFromM5() {
   #if defined(CARDPUTER) 
-  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/test/cardputer.json";
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/cardputer.json";
   #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/stickc.json";
   #elif defined(CORE2)
@@ -86,7 +87,6 @@ bool GetJsonFromM5() {
   #elif defined(CORE)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core.json";  
   #endif
-  closeSdCard();
 
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;

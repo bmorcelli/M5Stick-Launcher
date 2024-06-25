@@ -10,6 +10,12 @@
   #include <util/Unified/M5Unified.h>
 #endif
 
+extern size_t MAX_SPIFFS;
+extern size_t MAX_APP;
+extern size_t MAX_FAT0;
+extern size_t MAX_FAT1;
+
+
 extern int prog_handler;    // 0 - Flash, 1 - SPIFFS, 2 - Download
 
 extern bool sdcardMounted;

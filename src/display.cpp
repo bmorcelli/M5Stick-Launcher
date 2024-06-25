@@ -75,26 +75,26 @@ void initDisplay(bool doAll) {
     else if (cor==1) tft.setTextColor(0x33c5,BGCOLOR);
     else tft.setTextColor(0x0ce0,BGCOLOR);
     tftprint(String(random(0,9)),10);
-
+    String txt;
+    int show = random(0,40);
+    int _x=tft.getCursorX();
+    int _y=tft.getCursorY();
+    
     while(tft.getCursorY()<(HEIGHT-12)) {
       cor = random(0,3);
       tft.setTextSize(FONT_P);
-      int show = random(0,40);
-      int _x=tft.getCursorX();
-      int _y=tft.getCursorY();
+      show = random(0,40);
       if(show==0 || doAll) {
-        if (cor==0) tft.setTextColor(0x35e5,BGCOLOR);
-        else if (cor==1) tft.setTextColor(0x33c5,BGCOLOR);
-        else tft.setTextColor(0x0ce0,BGCOLOR);
+        if (cor==0) { tft.setTextColor(0x33c5,BGCOLOR); txt=String(cor); }
+        else if (cor==1) { tft.setTextColor(0x35e5,BGCOLOR); txt=String(cor); }
+        else { txt=" "; }
         
         if(_x>=(WIDTH-10)) {_x=10; _y+=8; }
         else if(_x<10) { _x = 10; }
         if(_y>=(HEIGHT-12)) break;
         tft.setCursor(_x,_y);
-        int r=random(0,3);
-        String txt;
-        if (r==2) txt=" ";
-        else txt=String(r);
+        _x+=6;
+        
         tft.print(txt);
         tft.setTextSize(FONT_G);
         tft.setTextColor(TFT_GREEN);
@@ -276,8 +276,9 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
 void progressHandler(int progress, size_t total) {
 #ifndef STICK_C
   int barWidth = map(progress, 0, total, 0, WIDTH-40);
-  if(barWidth <1) {
+  if(progress == 0) {
     tft.setTextColor(ALCOLOR);
+    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);    
 
     if (prog_handler == 1) tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
@@ -297,8 +298,11 @@ void progressHandler(int progress, size_t total) {
     }
     displayRedStripe(txt);
   }
+  
   if (prog_handler == 1) tft.fillRect(20, HEIGHT - 26, barWidth, 13, ALCOLOR);
   else tft.fillRect(20, HEIGHT - 45, barWidth, 13, FGCOLOR);
+
+
 #else
   
   int barWidth = map(progress, 0, total, 0, 100);

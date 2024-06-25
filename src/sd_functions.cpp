@@ -29,10 +29,24 @@ bool eraseFAT() {
   if (err != ESP_OK) {
       //log_e("Failed to erase partition: %s", esp_err_to_name(err));
       return false;
-  } else {
-      //log_i("Partition erased successfully");
-      return true;
+  } 
+
+  // Find FAT partition with its name
+  partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "sys");
+  if (!partition) {
+      //log_e("Failed to find partition");
+      goto Exit;
   }
+
+  // erase all FAT partition
+  err = esp_partition_erase_range(partition, 0, partition->size);
+  if (err != ESP_OK) {
+      return false;
+  }
+  Exit:
+  return true;
+
+
 
 }
 
@@ -430,7 +444,6 @@ void loopSD(){
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           delay(200);
           loopOptions(options);
-          tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
           reload = true;  
           redraw = true;
         }
@@ -451,7 +464,6 @@ void loopSD(){
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           delay(200);
           loopOptions(options);
-          tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
           reload = true;  
           redraw = true;
         } else {
@@ -462,6 +474,9 @@ void loopSD(){
         }
         redraw = true;
       }
+      tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+      tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+      redraw = true;
     }
 
     #ifdef CARDPUTER
@@ -477,35 +492,33 @@ void loopSD(){
   }
   closeSdCard();
   setupSdCard();  
+  tft.fillScreen(BGCOLOR);
 }
 /***************************************************************************************
 ** Function name: performUpdate
 ** Description:   this function performs the update 
 ***************************************************************************************/
 void performUpdate(Stream &updateSource, size_t updateSize, int command) {
+  // command = U_FAT = 300
   // command = U_SPIFFS = 100
   // command = U_FLASH = 0
-  Serial.begin(115200);
-  //Erase FAT partition
-  eraseFAT();
 
+  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  progressHandler(0, 500);
 
   if (Update.begin(updateSize, command)) {
-    Update.onProgress(progressHandler); 
     int written = 0;
     uint8_t buf[1024];
     int bytesRead;
     size_t totalSize = updateSize;
     
     prog_handler = 0; // Install flash update
-    if (command==U_SPIFFS) prog_handler = 1; // Install flash update
-
-    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-    progressHandler(0, 500);
+    if (command==U_SPIFFS || command==U_FAT) prog_handler = 1; // Install flash update
 
     while (updateSource.available() > 0 && written < updateSize) {
       bytesRead = updateSource.readBytes(buf, sizeof(buf));
       written += Update.write(buf, bytesRead);
+      progressHandler(written, updateSize);
     }
     if (Update.end()) {
       //Serial.println("OTA done!");
@@ -519,7 +532,7 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   else
   {
     uint8_t error = Update.getError();
-    displayRedStripe("E:" + String(error) + "-Unsupported");
+    displayRedStripe("E:" + String(error) + "-Wrong Partition Scheme");
     delay(2000);
   }
 }
@@ -577,6 +590,7 @@ void updateFromSD(String path) {
     }
     if (!file.seek(0x10000)) goto Exit;
 
+    prog_handler = 0; // Install flash update
     if(spiffs && askSpiffs) {
       options = {
         {"SPIFFS No", [&](){ spiffs = false; }},
@@ -585,8 +599,10 @@ void updateFromSD(String path) {
       delay(200);
       loopOptions(options);
       tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+      
       progressHandler(0, 500);
     }
+    
 
     performUpdate(file, app_size, U_FLASH);
 

@@ -16,6 +16,10 @@
 
 
 // Public Globals
+size_t MAX_SPIFFS = 0;
+size_t MAX_APP = 0;
+size_t MAX_FAT0 = 0;
+size_t MAX_FAT1 = 0;
 int prog_handler;    // 0 - Flash, 1 - SPIFFS
 int currentIndex;
 int rotation;
@@ -208,6 +212,50 @@ void setBrightnessMenu() {
   delay(200);
 }
 
+/*********************************************************************
+**  Function: get_partition_sizes                                    
+**  Get the size of the partitions to be used when installing
+*********************************************************************/
+void get_partition_sizes() {
+    // Obter a tabela de partições
+    const esp_partition_t* partition;
+    esp_partition_iterator_t it = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL);
+
+    // Iterar sobre as partições do tipo APP
+    while (it != NULL) {
+        partition = esp_partition_get(it);
+        if (partition != NULL && partition->subtype == ESP_PARTITION_SUBTYPE_APP_OTA_0) {
+            MAX_APP = partition->size;
+        }
+        it = esp_partition_next(it);
+    }
+    esp_partition_iterator_release(it);
+
+    // Iterar sobre as partições do tipo DATA
+    it = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NULL);
+    while (it != NULL) {
+        partition = esp_partition_get(it);
+        if (partition != NULL) {
+            if (partition->subtype == ESP_PARTITION_SUBTYPE_DATA_SPIFFS) {
+                MAX_SPIFFS = partition->size;
+            } else if (partition->subtype == ESP_PARTITION_SUBTYPE_DATA_FAT) {
+                if (MAX_FAT0 == 0) {
+                    MAX_FAT0 = partition->size;
+                } else if (MAX_FAT1 == 0) {
+                    MAX_FAT1 = partition->size;
+                }
+            }
+        }
+        it = esp_partition_next(it);
+    }
+    esp_partition_iterator_release(it);
+
+    // Logar os tamanhos das partições
+    ESP_LOGI("Partition Sizes", "MAX_APP: %d", MAX_APP);
+    ESP_LOGI("Partition Sizes", "MAX_SPIFFS: %d", MAX_SPIFFS);
+    ESP_LOGI("Partition Sizes", "MAX_FAT0: %d", MAX_FAT0);
+    ESP_LOGI("Partition Sizes", "MAX_FAT1: %d", MAX_FAT1);
+}
 
 /*********************************************************************
 **  Function: setup                                    
@@ -225,6 +273,8 @@ void setup() {
   //Define variables to identify if there is an app installed after Launcher 
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
+  get_partition_sizes();
+
   tft.init();
   // Setup GPIOs and stuff
   #if defined(STICK_C_PLUS2)
@@ -377,7 +427,7 @@ void loop() {
           if (WiFi.status() != WL_CONNECTED) {
             int nets;
             WiFi.mode(WIFI_MODE_STA);
-            displayRedStripe("Scanning...", TFT_WHITE, FGCOLOR);
+            displayRedStripe("Scanning...");
             nets=WiFi.scanNetworks();
             //delay(3000);
             options = { };
@@ -425,8 +475,9 @@ void loop() {
         #ifndef CARDPUTER
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
         #endif
-        options.push_back({"Partition Set",  [=]() { partitioner(); }});
-        options.push_back({"PartitList",  [=]() { partList(); }});
+        options.push_back({"Part Change",  [=]() { partitioner(); }});
+        options.push_back({"Part List",  [=]() { partList(); }});
+        options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         
         delay(200);
