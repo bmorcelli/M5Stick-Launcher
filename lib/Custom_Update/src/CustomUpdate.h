@@ -31,7 +31,8 @@
 #define U_FLASH   0
 #define U_SPIFFS  100
 #define U_AUTH    200
-#define U_FAT     300
+#define U_FAT_vfs 300
+#define U_FAT_sys 400
 
 #define ENCRYPTED_BLOCK_SIZE 16
 

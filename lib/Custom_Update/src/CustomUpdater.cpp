@@ -150,14 +150,22 @@ bool UpdateClass::begin(size_t size, int command, int ledPin, uint8_t ledOn, con
             }
         }
     }
-    else if (command == U_FAT) {
-        _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, label);
-        _paroffset = 0;
+    else if (command == U_FAT_vfs) {
+        _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "vfs");
+        _paroffset = 0x1000;
         if(!_partition){
             _error = UPDATE_ERROR_NO_PARTITION;
             return false;
         }
     }
+    else if (command == U_FAT_sys) {
+        _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "sys");
+        _paroffset = 0x1000;
+        if(!_partition){
+            _error = UPDATE_ERROR_NO_PARTITION;
+            return false;
+        }
+    }    
     else {
         _error = UPDATE_ERROR_BAD_ARGUMENT;
         log_e("bad command %u", command);
@@ -254,7 +262,7 @@ bool UpdateClass::_verifyHeader(uint8_t data) {
             return false;
         }
         return true;
-    } else if(_command == U_SPIFFS || _command == U_FAT) {
+    } else if(_command == U_SPIFFS || _command == U_FAT_vfs || _command == U_FAT_sys) {
         return true;
     } 
     return false;
@@ -273,7 +281,7 @@ bool UpdateClass::_verifyEnd() {
         }
         _reset();
         return true;
-    } else if(_command == U_SPIFFS || _command == U_FAT) {
+    } else if(_command == U_SPIFFS || _command == U_FAT_vfs || _command == U_FAT_sys) {
         _reset();
         return true;
     } 

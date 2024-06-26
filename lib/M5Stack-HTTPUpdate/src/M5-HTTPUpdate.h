@@ -91,20 +91,18 @@ public:
                                const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
     t_httpUpdate_return updateSpiffs(WiFiClient& client, const String& url, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
-    t_httpUpdate_return updateFAT(WiFiClient& client, const String& url, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
     t_httpUpdate_return update(HTTPClient& httpClient,
                                const String& currentVersion = "", 
                                HTTPUpdateRequestCB requestCB = NULL);
 
     t_httpUpdate_return updateSpiffs(HTTPClient &httpClient, const String &currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
-    t_httpUpdate_return updateFAT(HTTPClient &httpClient, const String &currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
 
     // Functions to download from offset to end of partition
     t_httpUpdate_return updateFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
     
-    t_httpUpdate_return updateSpiffsFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
+    t_httpUpdate_return updateVfsFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, int command = U_SPIFFS, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
 
     // Notification callbacks
