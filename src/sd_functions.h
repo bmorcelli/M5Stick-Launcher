@@ -5,9 +5,9 @@
 #include <CustomUpdate.h>
 
 extern SPIClass sdcardSPI;
-
+#ifndef STICK_C_PLUS
 bool eraseFAT();
-
+#endif
 bool setupSdCard();
 
 void closeSdCard();

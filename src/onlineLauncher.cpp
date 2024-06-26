@@ -230,9 +230,11 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   httpUpdate.onProgress(progressHandler);
   httpUpdate.setLedPin(LED, LED_ON);
 
+#ifndef STICK_C_PLUS
   //Erase FAT partition
   eraseFAT();
-  
+#endif
+
 #ifndef STICK_C
   tft.drawRect(18, HEIGHT - 47, 204, 17, FGCOLOR);        
   if (spiffs) tft.drawRect(18, HEIGHT - 28, 204, 17, ALCOLOR);

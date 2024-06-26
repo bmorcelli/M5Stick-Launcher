@@ -43,7 +43,7 @@ void webUIMyNet() {
   if (WiFi.status() != WL_CONNECTED) {
     int nets;
     WiFi.mode(WIFI_MODE_STA);
-    displayRedStripe("Scanning...", TFT_WHITE, FGCOLOR);
+    displayRedStripe("Scanning...");
     nets=WiFi.scanNetworks();
     options = { };
     for(int i=0; i<nets; i++){
@@ -157,8 +157,10 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
         if(Update.begin(file_size,command)) {
           if(command == 0) prog_handler = 0;
           else prog_handler = 1;
+        #ifndef STICK_C_PLUS
           //Erase FAT partition
           eraseFAT();
+        #endif
           progressHandler(0, 500);
           Update.onProgress(progressHandler);
         } else { displayRedStripe("FAIL 160: " + String(Update.getError())); delay(3000); }

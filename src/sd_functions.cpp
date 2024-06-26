@@ -10,6 +10,7 @@ String fileToCopy;
 // Protected global variables
 String fileList[MAXFILES][3];
 
+#ifndef STICK_C_PLUS
 /***************************************************************************************
 ** Function name: eraseFAT
 ** Description:   erase FAT partition to micropython compatibilities
@@ -46,10 +47,8 @@ bool eraseFAT() {
   Exit:
   return true;
 
-
-
 }
-
+#endif
 /***************************************************************************************
 ** Function name: setupSdCard
 ** Description:   Start SD Card
@@ -511,7 +510,12 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
     uint8_t buf[1024];
     int bytesRead;
     size_t totalSize = updateSize;
-    
+
+  #ifndef STICK_C_PLUS
+    //Erase FAT partition
+    eraseFAT();
+  #endif
+
     prog_handler = 0; // Install flash update
     if (command==U_SPIFFS || command==U_FAT) prog_handler = 1; // Install flash update
 

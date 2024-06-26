@@ -249,6 +249,7 @@ void get_partition_sizes() {
         it = esp_partition_next(it);
     }
     esp_partition_iterator_release(it);
+    if(MAX_SPIFFS==0 && askSpiffs) gsetAskSpiffs(true, false);
 
     // Logar os tamanhos das partições
     ESP_LOGI("Partition Sizes", "MAX_APP: %d", MAX_APP);
@@ -273,7 +274,6 @@ void setup() {
   //Define variables to identify if there is an app installed after Launcher 
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
-  get_partition_sizes();
 
   tft.init();
   // Setup GPIOs and stuff
@@ -297,6 +297,7 @@ void setup() {
 
   rotation = gsetRotation();
   askSpiffs=gsetAskSpiffs();
+  get_partition_sizes();
   tft.setRotation(rotation);
   resetTftDisplay();
 
@@ -472,12 +473,16 @@ void loop() {
         if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); }});
         else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true); }});
 
-        #ifndef CARDPUTER
+      #ifndef CARDPUTER
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
-        #endif
+      #endif
+      #if !defined(CORE) || !defined(CORE2)
         options.push_back({"Part Change",  [=]() { partitioner(); }});
         options.push_back({"Part List",  [=]() { partList(); }});
+      #endif
+      #ifndef STICK_C_PLUS
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
+      #endif
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         
         delay(200);
