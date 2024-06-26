@@ -12,8 +12,7 @@
 
 extern size_t MAX_SPIFFS;
 extern size_t MAX_APP;
-extern size_t MAX_FAT0;
-extern size_t MAX_FAT1;
+extern size_t MAX_FAT[2];
 
 
 extern int prog_handler;    // 0 - Flash, 1 - SPIFFS, 2 - Download

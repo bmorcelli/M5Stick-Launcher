@@ -18,8 +18,7 @@
 // Public Globals
 size_t MAX_SPIFFS = 0;
 size_t MAX_APP = 0;
-size_t MAX_FAT0 = 0;
-size_t MAX_FAT1 = 0;
+size_t MAX_FAT[2] = { 0, 0 };
 int prog_handler;    // 0 - Flash, 1 - SPIFFS
 int currentIndex;
 int rotation;
@@ -239,10 +238,10 @@ void get_partition_sizes() {
             if (partition->subtype == ESP_PARTITION_SUBTYPE_DATA_SPIFFS) {
                 MAX_SPIFFS = partition->size;
             } else if (partition->subtype == ESP_PARTITION_SUBTYPE_DATA_FAT) {
-                if (MAX_FAT0 == 0) {
-                    MAX_FAT0 = partition->size;
-                } else if (MAX_FAT1 == 0) {
-                    MAX_FAT1 = partition->size;
+                if (MAX_FAT[0] == 0) {
+                    MAX_FAT[0] = partition->size;
+                } else if (MAX_FAT[1] == 0) {
+                    MAX_FAT[1] = partition->size;
                 }
             }
         }
@@ -254,8 +253,8 @@ void get_partition_sizes() {
     // Logar os tamanhos das partições
     ESP_LOGI("Partition Sizes", "MAX_APP: %d", MAX_APP);
     ESP_LOGI("Partition Sizes", "MAX_SPIFFS: %d", MAX_SPIFFS);
-    ESP_LOGI("Partition Sizes", "MAX_FAT0: %d", MAX_FAT0);
-    ESP_LOGI("Partition Sizes", "MAX_FAT1: %d", MAX_FAT1);
+    ESP_LOGI("Partition Sizes", "MAX_FAT0: %d", MAX_FAT[0]);
+    ESP_LOGI("Partition Sizes", "MAX_FAT1: %d", MAX_FAT[1]);
 }
 
 /*********************************************************************

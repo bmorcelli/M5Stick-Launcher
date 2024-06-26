@@ -62,7 +62,7 @@ bool setupSdCard() {
   if (!SD.begin(SDCARD_CS)) 
   #endif
   {
-    sdcardSPI.end(); // Closes SPI connections and release pin header.
+   // sdcardSPI.end(); // Closes SPI connections and release pin header.
     //Serial.println("Failed to mount SDCARD");
     sdcardMounted = false;
     return false;
@@ -81,7 +81,7 @@ bool setupSdCard() {
 void closeSdCard() {
   SD.end();
   #if !defined(M5STACK)
-  sdcardSPI.end(); // Closes SPI connections and release pins.
+  //sdcardSPI.end(); // Closes SPI connections and release pins.
   #endif
   //Serial.println("SD Card Unmounted...");
   sdcardMounted = false;
@@ -498,7 +498,8 @@ void loopSD(){
 ** Description:   this function performs the update 
 ***************************************************************************************/
 void performUpdate(Stream &updateSource, size_t updateSize, int command) {
-  // command = U_FAT = 300
+  // command = U_FAT_vfs = 300 
+  // command = U_FAT_sys = 400 
   // command = U_SPIFFS = 100
   // command = U_FLASH = 0
 
@@ -506,19 +507,19 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   progressHandler(0, 500);
 
   if (Update.begin(updateSize, command)) {
-    int written = 0;
-    uint8_t buf[1024];
-    int bytesRead;
-    size_t totalSize = updateSize;
+    int written = 0;    log_i("Teste");
+    uint8_t buf[1024];    log_i("Teste");
+    int bytesRead;    log_i("Teste");
+    size_t totalSize = updateSize;    log_i("Teste");
 
   #ifndef STICK_C_PLUS
     //Erase FAT partition
-    eraseFAT();
+    eraseFAT();    log_i("Teste");
   #endif
 
     prog_handler = 0; // Install flash update
-    if (command==U_SPIFFS || command==U_FAT) prog_handler = 1; // Install flash update
-
+    if (command==U_SPIFFS || command == U_FAT_vfs || command == U_FAT_sys) prog_handler = 1; // Install flash update
+    log_i("Teste");
     while (updateSource.available() > 0 && written < updateSize) {
       bytesRead = updateSource.readBytes(buf, sizeof(buf));
       written += Update.write(buf, bytesRead);
@@ -573,6 +574,12 @@ void updateFromSD(String path) {
     size_t app_size = 0;
     bool spiffs = false;
 
+    size_t fat_offset[2] = { 0, 0 };
+    size_t fat_size[2] = { 0, 0 };
+    bool fat = false;
+
+    int fat_count=0;
+
     if (!file.seek(0x8000)) goto Exit;
     for(int i=0; i<0x0A0;i+=0x20) {
       //Serial.print((0x8000+i),HEX);
@@ -583,13 +590,25 @@ void updateFromSD(String path) {
 
         if(file.size()<(app_size+0x10000)) app_size = file.size() - 0x10000;
         else if(app_size>MAX_APP) app_size = MAX_APP; 
-      }
-      if(firstThreeBytes[3] == 0x82) {
+
+
+
+      } else if(firstThreeBytes[3] == 0x82) { // SPIFFS
         spiffs_offset = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
-        spiffs_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	// Write the size of spiffs partition
-        if(file.size()<spiffs_offset) spiffs=false; // check if there is room for spiffs in file
-        else if(spiffs_size>MAX_SPIFFS) { spiffs_size = MAX_SPIFFS; spiffs = true; } // if there is spiffs in file, check its size
-        if(spiffs && file.size()<(spiffs_offset+spiffs_size)) spiffs_size = file.size() - spiffs_offset; // if there is spiffs, check if spiffs size is lesser then maximum
+        spiffs_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
+        if(file.size()<spiffs_offset) spiffs=false;                                                           // check if there is room for spiffs in file
+        else if(spiffs_size>MAX_SPIFFS) { spiffs_size = MAX_SPIFFS; spiffs = true; }                          // if there is spiffs in file, check its size
+        if(spiffs && file.size()<(spiffs_offset+spiffs_size)) spiffs_size = file.size() - spiffs_offset;      // if there is spiffs, check if spiffs size is lesser then maximum
+
+
+      } else if(firstThreeBytes[3] == 0x81 || fat_count<2) { // FAT
+        fat_offset[fat_count] = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
+        fat_size[fat_count] = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
+        if(file.size()<fat_offset[fat_count]) fat=false;                                                              // check if there is room for spiffs in file
+        else if(fat_size[fat_count]>MAX_FAT[fat_count]) { fat_size[fat_count] = MAX_FAT[fat_count]; fat = true; }     // if there is spiffs in file, check its size
+        if(fat && file.size()<(fat_offset[fat_count]+fat_size[fat_count])) fat_size[fat_count] = file.size() - fat_offset[fat_count]; // if there is spiffs, check if spiffs size is lesser then maximum
+        fat_count++;
+
       }
     }
     if (!file.seek(0x10000)) goto Exit;

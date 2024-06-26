@@ -197,7 +197,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
 ** Function name: installFirmware
 ** Description:   installs Firmware using OTA
 ***************************************************************************************/
-void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiffs_offset, uint32_t spiffs_size, bool nb) {
+void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiffs_offset, uint32_t spiffs_size, bool nb, bool fat, uint32_t fat_offset[2], uint32_t fat_size[2]) {
   uint32_t app_offset = 0x10000;
 
   //Release RAM Memory from Json Objects
@@ -212,7 +212,14 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 
   if(spiffs && spiffs_size>MAX_SPIFFS) spiffs_size=MAX_SPIFFS;
   if (app_size>MAX_APP) app_size = MAX_APP;
+  if (app_size>MAX_APP) app_size = MAX_APP;
+  
+  for(int i=0; i<2;i++) { if(fat && fat_size[i]>MAX_FAT[i]) fat_size[i]=MAX_FAT[i]; }
+  
   String fileAddr;
+
+
+
 
   tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
@@ -271,10 +278,25 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
     progressHandler(0, 500);
     httpUpdate.onProgress(progressHandler);
     
-    if(!httpUpdate.updateSpiffsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size)) {
+    if(!httpUpdate.updateVfsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size,U_SPIFFS)) {
       displayRedStripe("SPIFFS Failed -> Restarting");
       delay(2500);
     }
+  }
+
+  if(fat) {
+    eraseFAT();
+    int FAT=U_FAT_vfs;
+    if(fat_size[1]>0) FAT = U_FAT_sys;
+    for(int i=0; i<2; i++) {
+      if(fat_size[i]>0) {
+        if(!httpUpdate.updateVfsFromOffset(*client, fileAddr, fat_offset[i], fat_size[i],FAT-i*100)) {
+          displayRedStripe("FAT Failed -> Restarting");
+          delay(2500);
+        }
+      }
+    }
+
   }
 
   Sucesso:

@@ -568,14 +568,17 @@ void loopVersions() {
     const char* version = Version["version"];
     const char* published_at = Version["published_at"];
     const char* file = Version["file"];  
-    bool spiffs = Version["spiffs"].as<bool>();
-    //bool FAT = Version["f"].as<bool>();
+    bool spiffs = Version["s"].as<bool>();
+    bool fat = Version["f"].as<bool>();
+    bool fat2 = Version["f2"].as<bool>();
     bool nb = Version["nb"].as<bool>();
-    uint32_t app_size = Version["app_size"].as<uint32_t>();
-    uint32_t spiffs_size = Version["spiffs_size"].as<uint32_t>();
-    uint32_t spiffs_offset = Version["spiffs_offset"].as<uint32_t>();
-    //uint32_t FAT_size = Version["fs"].as<uint32_t>();
-    //uint32_t FAT_offset = Version["fo"].as<uint32_t>();    
+    uint32_t app_size = Version["as"].as<uint32_t>();
+    uint32_t spiffs_size = Version["ss"].as<uint32_t>();
+    uint32_t spiffs_offset = Version["so"].as<uint32_t>();
+    uint32_t FAT_size[2] = {0,0,};
+    uint32_t FAT_offset[2] = {0,0,}; 
+    if(fat) { FAT_size[0] = Version["fs"].as<uint32_t>(); FAT_offset[0] = Version["fo"].as<uint32_t>(); }
+    if(fat2) { FAT_size[1] = Version["fs2"].as<uint32_t>(); FAT_offset[1] = Version["fo2"].as<uint32_t>(); }
     if(redraw){
       
       displayCurrentVersion(String(name), String(author), String(version), String(published_at), versionIndex, versions);
@@ -613,7 +616,7 @@ void loopVersions() {
 
       // Definição da matriz "Options"
       std::vector<std::pair<std::string, std::function<void()>>> options = {
-          {"OTA Install", [=]() { installFirmware(String(file), app_size, spiffs, spiffs_offset, spiffs_size, nb); }},
+          {"OTA Install", [=]() { installFirmware(String(file), app_size, spiffs, spiffs_offset, spiffs_size, nb, fat, (uint32_t*)FAT_offset, (uint32_t*)FAT_size); }},
           {"Download->SD", [=]() { downloadFirmware(String(file), String(name)); }},
           {"Main Menu", [=]() { returnToMenu=true; }},
       };
