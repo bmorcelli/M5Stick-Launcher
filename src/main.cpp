@@ -16,9 +16,10 @@
 
 
 // Public Globals
-size_t MAX_SPIFFS = 0;
-size_t MAX_APP = 0;
-size_t MAX_FAT[2] = { 0, 0 };
+uint32_t MAX_SPIFFS = 0;
+uint32_t MAX_APP = 0;
+uint32_t MAX_FAT_vfs = 0;
+uint32_t MAX_FAT_sys = 0;
 int prog_handler;    // 0 - Flash, 1 - SPIFFS
 int currentIndex;
 int rotation;
@@ -238,11 +239,9 @@ void get_partition_sizes() {
             if (partition->subtype == ESP_PARTITION_SUBTYPE_DATA_SPIFFS) {
                 MAX_SPIFFS = partition->size;
             } else if (partition->subtype == ESP_PARTITION_SUBTYPE_DATA_FAT) {
-                if (MAX_FAT[0] == 0) {
-                    MAX_FAT[0] = partition->size;
-                } else if (MAX_FAT[1] == 0) {
-                    MAX_FAT[1] = partition->size;
-                }
+              log_i("label: %s",partition->label);
+              if(strcmp(partition->label,"vfs")==0) MAX_FAT_vfs = partition->size;
+              else if (strcmp(partition->label,"sys")==0) MAX_FAT_sys = partition->size;
             }
         }
         it = esp_partition_next(it);
@@ -253,8 +252,8 @@ void get_partition_sizes() {
     // Logar os tamanhos das partições
     ESP_LOGI("Partition Sizes", "MAX_APP: %d", MAX_APP);
     ESP_LOGI("Partition Sizes", "MAX_SPIFFS: %d", MAX_SPIFFS);
-    ESP_LOGI("Partition Sizes", "MAX_FAT0: %d", MAX_FAT[0]);
-    ESP_LOGI("Partition Sizes", "MAX_FAT1: %d", MAX_FAT[1]);
+    ESP_LOGI("Partition Sizes", "MAX_FAT_sys: %d", MAX_FAT_sys);
+    ESP_LOGI("Partition Sizes", "MAX_FAT_vfs: %d", MAX_FAT_vfs);
 }
 
 /*********************************************************************
@@ -296,7 +295,6 @@ void setup() {
 
   rotation = gsetRotation();
   askSpiffs=gsetAskSpiffs();
-  get_partition_sizes();
   tft.setRotation(rotation);
   resetTftDisplay();
 
@@ -372,6 +370,7 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
 
   // If M5 or Enter button is pressed, continue from here
   Launcher:
+  get_partition_sizes();
   tft.fillScreen(TFT_BLACK);
 }
 

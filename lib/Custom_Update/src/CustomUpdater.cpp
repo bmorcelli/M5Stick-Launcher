@@ -152,7 +152,7 @@ bool UpdateClass::begin(size_t size, int command, int ledPin, uint8_t ledOn, con
     }
     else if (command == U_FAT_vfs) {
         _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "vfs");
-        _paroffset = 0x1000;
+        _paroffset = 0x1000;  //Offset for ffat, assuming size is already corrected
         if(!_partition){
             _error = UPDATE_ERROR_NO_PARTITION;
             return false;
@@ -160,7 +160,7 @@ bool UpdateClass::begin(size_t size, int command, int ledPin, uint8_t ledOn, con
     }
     else if (command == U_FAT_sys) {
         _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "sys");
-        _paroffset = 0x1000;
+        _paroffset = 0x1000;  //Offset for ffat, assuming size is already corrected
         if(!_partition){
             _error = UPDATE_ERROR_NO_PARTITION;
             return false;

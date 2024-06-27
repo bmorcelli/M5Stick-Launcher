@@ -10,9 +10,10 @@
   #include <util/Unified/M5Unified.h>
 #endif
 
-extern size_t MAX_SPIFFS;
-extern size_t MAX_APP;
-extern size_t MAX_FAT[2];
+extern uint32_t MAX_SPIFFS;
+extern uint32_t MAX_APP;
+extern uint32_t MAX_FAT_vfs;
+extern uint32_t MAX_FAT_sys;
 
 
 extern int prog_handler;    // 0 - Flash, 1 - SPIFFS, 2 - Download

@@ -507,22 +507,21 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   progressHandler(0, 500);
 
   if (Update.begin(updateSize, command)) {
-    int written = 0;    log_i("Teste");
-    uint8_t buf[1024];    log_i("Teste");
-    int bytesRead;    log_i("Teste");
-    size_t totalSize = updateSize;    log_i("Teste");
+    int written = 0;
+    uint8_t buf[1024];
+    int bytesRead;
 
   #ifndef STICK_C_PLUS
     //Erase FAT partition
-    eraseFAT();    log_i("Teste");
+    eraseFAT();
   #endif
 
     prog_handler = 0; // Install flash update
     if (command==U_SPIFFS || command == U_FAT_vfs || command == U_FAT_sys) prog_handler = 1; // Install flash update
-    log_i("Teste");
-    while (updateSource.available() > 0 && written < updateSize) {
+    log_i("updateSize = %d",updateSize);
+    while (written < updateSize) { //updateSource.available() > 0 && 
       bytesRead = updateSource.readBytes(buf, sizeof(buf));
-      written += Update.write(buf, bytesRead);
+      written += Update.write(buf, bytesRead); 
       progressHandler(written, updateSize);
     }
     if (Update.end()) {
@@ -548,8 +547,20 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
 ***************************************************************************************/
 void updateFromSD(String path) {
   uint8_t firstThreeBytes[16];
+
+  uint32_t spiffs_offset = 0;
+  uint32_t spiffs_size = 0;
+  uint32_t app_size = 0;
+  bool spiffs = false;
+
+  uint32_t fat_offset_sys = 0;
+  uint32_t fat_size_sys = 0;
+  uint32_t fat_offset_vfs = 0;
+  uint32_t fat_size_vfs = 0;  
+  bool fat = false;
+
   File file = SD.open(path);
-  resetTftDisplay();
+  //resetTftDisplay();
   displayRedStripe("Preparing..");
 
   if (!file) goto Exit;
@@ -569,17 +580,6 @@ void updateFromSD(String path) {
   } 
   // Start Verifications to install binaries made to be flashed at 0x0
   else {
-    uint32_t spiffs_offset = 0;
-    size_t spiffs_size = 0;
-    size_t app_size = 0;
-    bool spiffs = false;
-
-    size_t fat_offset[2] = { 0, 0 };
-    size_t fat_size[2] = { 0, 0 };
-    bool fat = false;
-
-    int fat_count=0;
-
     if (!file.seek(0x8000)) goto Exit;
     for(int i=0; i<0x0A0;i+=0x20) {
       //Serial.print((0x8000+i),HEX);
@@ -591,27 +591,45 @@ void updateFromSD(String path) {
         if(file.size()<(app_size+0x10000)) app_size = file.size() - 0x10000;
         else if(app_size>MAX_APP) app_size = MAX_APP; 
 
-
-
-      } else if(firstThreeBytes[3] == 0x82) { // SPIFFS
+      }
+      if(firstThreeBytes[3] == 0x82) { // SPIFFS
         spiffs_offset = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
         spiffs_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
         if(file.size()<spiffs_offset) spiffs=false;                                                           // check if there is room for spiffs in file
         else if(spiffs_size>MAX_SPIFFS) { spiffs_size = MAX_SPIFFS; spiffs = true; }                          // if there is spiffs in file, check its size
         if(spiffs && file.size()<(spiffs_offset+spiffs_size)) spiffs_size = file.size() - spiffs_offset;      // if there is spiffs, check if spiffs size is lesser then maximum
-
-
-      } else if(firstThreeBytes[3] == 0x81 || fat_count<2) { // FAT
-        fat_offset[fat_count] = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
-        fat_size[fat_count] = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
-        if(file.size()<fat_offset[fat_count]) fat=false;                                                              // check if there is room for spiffs in file
-        else if(fat_size[fat_count]>MAX_FAT[fat_count]) { fat_size[fat_count] = MAX_FAT[fat_count]; fat = true; }     // if there is spiffs in file, check its size
-        if(fat && file.size()<(fat_offset[fat_count]+fat_size[fat_count])) fat_size[fat_count] = file.size() - fat_offset[fat_count]; // if there is spiffs, check if spiffs size is lesser then maximum
-        fat_count++;
-
+      } 
+      if(firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x73) { // FAT sys //
+        fat_offset_sys = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
+        fat_size_sys = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
+        if(file.size()<fat_offset_sys) fat=false;                                                             // check if there is room for spiffs in file
+        else  fat = true;
+        if(fat && fat_size_sys>MAX_FAT_sys) { fat_size_sys = MAX_FAT_sys;  }     // if there is spiffs in file, check its size
+        if(fat && file.size()<(fat_offset_sys+fat_size_sys)) fat_size_sys = file.size() - fat_offset_sys; // if there is spiffs, check if spiffs size is lesser then maximum
+        
+      }
+      if(firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x76) { // FAT vfs  
+        fat_offset_vfs = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
+        fat_size_vfs = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
+        if(file.size()<fat_offset_vfs) fat=false;                                                             // check if there is room for spiffs in file
+        else  fat = true;
+        if(fat && fat_size_vfs>MAX_FAT_vfs) { fat_size_vfs = MAX_FAT_vfs; }     // if there is spiffs in file, check its size
+        if(fat && file.size()<(fat_offset_vfs+fat_size_vfs)) fat_size_vfs = file.size() - fat_offset_vfs; // if there is spiffs, check if spiffs size is lesser then maximum
       }
     }
-    if (!file.seek(0x10000)) goto Exit;
+    log_i("Appsize: %d",app_size);
+    log_i("Spiffsize: %d",spiffs_size);
+    log_i("FATsize[0]: %d - max: %d",fat_size_sys, MAX_FAT_sys);
+    log_i("FATsize[1]: %d - max: %d",fat_size_vfs, MAX_FAT_vfs);
+    log_i("FAT: %d",fat);
+    log_i("------------------------");
+  
+    if(!fat) {
+      fat_size_sys = 0;
+      fat_size_vfs = 0;
+      fat_offset_sys = 0;
+      fat_offset_vfs = 0;
+    } 
 
     prog_handler = 0; // Install flash update
     if(spiffs && askSpiffs) {
@@ -622,22 +640,40 @@ void updateFromSD(String path) {
       delay(200);
       loopOptions(options);
       tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-      
-      progressHandler(0, 500);
     }
     
-
+    log_i("Appsize: %d",app_size);
+    log_i("Spiffsize: %d",spiffs_size);
+    log_i("FATsize[0]: %d - max: %d",fat_size_sys, MAX_FAT_sys);
+    log_i("FATsize[1]: %d - max: %d",fat_size_vfs, MAX_FAT_vfs);
+    
+    if (!file.seek(0x10000)) goto Exit;
     performUpdate(file, app_size, U_FLASH);
 
     if(spiffs) {
+      prog_handler = 1; // Install SPIFFS update
       if (!file.seek(spiffs_offset)) goto Exit;
       performUpdate(file, spiffs_size, U_SPIFFS);
+    }
+
+    if(fat) {
+      eraseFAT();
+      
+      if(fat_size_sys>0) {
+        if (!file.seek(fat_offset_sys)) goto Exit;
+        performUpdate(file, fat_size_sys, U_FAT_sys);
+      }
+      if(fat_size_vfs>0) {
+        if (!file.seek(fat_offset_vfs)) goto Exit;
+        performUpdate(file, fat_size_vfs, U_FAT_vfs);
+      }
+
     }
 
     ESP.restart();
 
   }
 
-  Exit:
+Exit:
   displayRedStripe("Error on updating.");
 }

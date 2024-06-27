@@ -214,7 +214,10 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   if (app_size>MAX_APP) app_size = MAX_APP;
   if (app_size>MAX_APP) app_size = MAX_APP;
   
-  for(int i=0; i<2;i++) { if(fat && fat_size[i]>MAX_FAT[i]) fat_size[i]=MAX_FAT[i]; }
+  //precisa revisar!!!
+  if(fat && fat_size[0]>MAX_FAT_vfs && fat_size[1]==0) fat_size[0]=MAX_FAT_vfs;
+  else if(fat && fat_size[0]>MAX_FAT_sys) fat_size[0]=MAX_FAT_sys;
+  if(fat && fat_size[1]>MAX_FAT_vfs) fat_size[1]=MAX_FAT_vfs;
   
   String fileAddr;
 
