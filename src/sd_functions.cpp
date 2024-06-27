@@ -525,12 +525,11 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
       progressHandler(written, updateSize);
     }
     if (Update.end()) {
-      //Serial.println("OTA done!");
-      //if (Update.isFinished()) Serial.println("Update successfully completed. Rebooting.");
-      //else Serial.println("Update not finished? Something went wrong!");
+      if (Update.isFinished()) log_i("Update successfully completed.");
+      else log_i("Update not finished? Something went wrong!");
     }
     else {
-      //Serial.println("Error Occurred. Error #: " + String(Update.getError()));
+      log_i("Error Occurred. Error #: %s", String(Update.getError()));
     }
   }
   else
@@ -661,11 +660,11 @@ void updateFromSD(String path) {
       
       if(fat_size_sys>0) {
         if (!file.seek(fat_offset_sys)) goto Exit;
-        performUpdate(file, fat_size_sys, U_FAT_sys);
+        if(!performFATUpdate(file, fat_size_sys, "sys")) log_i("FAIL updating FAT sys");
       }
       if(fat_size_vfs>0) {
         if (!file.seek(fat_offset_vfs)) goto Exit;
-        performUpdate(file, fat_size_vfs, U_FAT_vfs);
+        if(!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT sys");
       }
 
     }
@@ -677,3 +676,66 @@ void updateFromSD(String path) {
 Exit:
   displayRedStripe("Error on updating.");
 }
+
+
+/***************************************************************************************
+** Function name: performFATUpdate
+** Description:   this function performs the update 
+***************************************************************************************/
+bool IRAM_ATTR performFATUpdate(Stream &updateSource, size_t updateSize,  const char *label) {
+  uint8_t* buffer = (uint8_t*)heap_caps_malloc(4096, MALLOC_CAP_INTERNAL);
+  if (buffer == NULL) {
+      ESP_LOGE("FLASH", "Failed to allocate buffer in DRAM");
+      return false;
+  }  
+  // Preencher o buffer com 0xFF
+  memset(buffer, 0xFF, 4096);
+  log_i("Start updating: %s", label);
+
+  const esp_partition_t* partition;
+  esp_err_t error;
+  size_t paroffset=0;
+  int written=0;
+  int bytesRead=0;
+  partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, label);
+  if(!partition){
+      error = UPDATE_ERROR_NO_PARTITION;
+      return false;
+  }
+  paroffset = partition->address;
+  log_i("Erasing updating: %s", label);
+  error = spi_flash_erase_range(partition->address, partition->size);
+  if(error != ESP_OK) {
+      log_i("Erase error %d", error);
+      return false;
+  }
+  progressHandler(0,500);
+
+  log_i("Updating updating: %s", label);
+  while (updateSource.available() && written < updateSize) { //updateSource.available() > 0 && 
+    memset(buffer, 0xFF, 4096);
+    bytesRead = updateSource.readBytes(buffer, sizeof(buffer));
+    //memcpy(buffer, buff, bytesRead);
+    written += bytesRead;
+    error = spi_flash_write(paroffset,buffer,sizeof(buffer)); 
+    paroffset+=bytesRead;
+    progressHandler(written, updateSize);
+    if (error != ESP_OK) {
+        log_i("[FLASH] Failed to write to flash (0x%x)", error);
+        heap_caps_free(buffer);
+        return false;
+    }    
+  }
+  if(written==updateSize)  {
+    log_i("Success updating %s", label);
+  }
+  else {
+    log_i("FAIL updating %s", label);
+    return false;
+  }
+
+    heap_caps_free(buffer);
+    return true;
+
+}
+
