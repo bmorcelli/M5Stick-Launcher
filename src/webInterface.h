@@ -299,6 +299,7 @@ color: #ad007c65;
 <h1 align="center">-= M5 Launcher =-</h1>
 <p>Firmware version: %FIRMWARE%</p>
 <p>Free Storage: <span id="freeSD">%FREESD%</span> | Used: <span id="usedSD">%USEDSD%</span> | Total: <span id="totalSD">%TOTALSD%</span></p>
+<p><a href="https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html" target="_blank" rel="noopener noreferrer">Online Firmware list from M5Burner (Need Internet)</a></p>
 <p>
 <form id="save" enctype="multipart/form-data" method="post"><input type="hidden" id="actualFolder" name="actualFolder" value="/"></form>
 <button onclick="rebootButton()">Reboot</button>
@@ -552,28 +553,32 @@ var lines = responseText.split('\n');
 var tableContent = "<table><tr><th align='left'>Name</th><th style=\"text-align=center;\">Size</th><th></th></tr>\n";
 	tableContent+="<tr><th align='left'><a onclick=\"listFilesButton('"+ PreFolder + "')\" href='javascript:void(0);'>... </a></th><th align='left'></th><th></th></tr>\n"
 
+var folder = "";
+
 lines.forEach(function(line) {
 if (line) {
 var type = line.substring(0, 2);
 var path = line.substring(3,line.lastIndexOf(':'));
-var filename = line.substring(line.lastIndexOf('/') + 1, line.lastIndexOf(':'));
+var filename = line.substring(3, line.lastIndexOf(':'));
 var size = line.substring(line.lastIndexOf(':')+1);
-if (type === "Fo") {
-			tableContent += "<tr align='left'><td><a onclick=\"listFilesButton('"+ path + "')\" href='javascript:void(0);'>\n" + filename + "</a></td>";
+if (type === "pa") {
+      if (path !== "") folder = path + "/"; 
+} else if (type === "Fo") {
+			tableContent += "<tr align='left'><td><a onclick=\"listFilesButton('"+ folder + path + "')\" href='javascript:void(0);'>\n" + filename + "</a></td>";
 			tableContent += "<td></td>\n";
-			tableContent += "<td><i style=\"color: #e0d204;\" class=\"gg-folder\" onclick=\"listFilesButton('" + path + "')\"></i>&nbsp&nbsp";
-			tableContent += "<i style=\"color: #e0d204;\" class=\"gg-rename\"onclick=\"renameFile(\'" + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
-			tableContent += "<i style=\"color: #e0d204;\" class=\"gg-trash\"onclick=\"downloadDeleteButton(\'" + path + "\', \'delete\')\"></i></td></tr>\n\n";
+			tableContent += "<td><i style=\"color: #e0d204;\" class=\"gg-folder\" onclick=\"listFilesButton('" + folder + path + "')\"></i>&nbsp&nbsp";
+			tableContent += "<i style=\"color: #e0d204;\" class=\"gg-rename\"onclick=\"renameFile(\'" + folder + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
+			tableContent += "<i style=\"color: #e0d204;\" class=\"gg-trash\"onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'delete\')\"></i></td></tr>\n\n";
 } else if (type === "Fi") {
 			tableContent += "<tr align='left'><td>" + filename;
 			if (filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() === "bin") {
-				tableContent+= "&nbsp<i class=\"rocket\" onclick=\"startUpdate(\'" + path + "\')\"></i>";
+				tableContent+= "&nbsp<i class=\"rocket\" onclick=\"startUpdate(\'" + folder + path + "\')\"></i>";
 			}
 			tableContent += "</td>\n";
 			tableContent += "<td style=\"font-size: 10px; text-align=center;\">" + size + "</td>\n";
-			tableContent += "<td><i class=\"gg-arrow-down-r\" onclick=\"downloadDeleteButton(\'" + path + "\', \'download\')\"></i>&nbsp&nbsp\n";
-			tableContent += "<i class=\"gg-rename\"onclick=\"renameFile(\'" + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
-			tableContent += "<i class=\"gg-trash\"onclick=\"downloadDeleteButton(\'" + path + "\', \'delete\')\"></i></td></tr>\n\n";			
+			tableContent += "<td><i class=\"gg-arrow-down-r\" onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'download\')\"></i>&nbsp&nbsp\n";
+			tableContent += "<i class=\"gg-rename\"onclick=\"renameFile(\'" + folder + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
+			tableContent += "<i class=\"gg-trash\"onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'delete\')\"></i></td></tr>\n\n";			
 }
 }
 });

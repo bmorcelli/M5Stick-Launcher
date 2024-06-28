@@ -88,7 +88,7 @@ String humanReadableSize(uint64_t bytes) {
 // list all of the files, if ishtml=true, return html rather than simple text
 String listFiles(String folder) {
   //log_i("Listfiles Start");
-  String returnText = "";
+  String returnText = "pa:" + folder + ":0\n";
   Serial.println("Listing files stored on SD");
 
   File root = SD.open(folder);
@@ -101,7 +101,7 @@ String listFiles(String folder) {
 
   if (folder=="/") folder = "";
   while (foundfile) {
-    if(foundfile.isDirectory()) returnText+="Fo:" + String(foundfile.path()) + ":0\n";
+    if(foundfile.isDirectory()) returnText+="Fo:" + String(foundfile.name()) + ":0\n";
     foundfile = root.openNextFile();
   }
   root.close();
@@ -111,7 +111,7 @@ String listFiles(String folder) {
   root = SD.open(folder);
   foundfile = root.openNextFile();
   while (foundfile) {
-    if(!(foundfile.isDirectory())) returnText+="Fi:" + String(foundfile.path()) + ":" + humanReadableSize(foundfile.size()) + "\n";
+    if(!(foundfile.isDirectory())) returnText+="Fi:" + String(foundfile.name()) + ":" + humanReadableSize(foundfile.size()) + "\n";
     foundfile = root.openNextFile();
   }
   root.close();

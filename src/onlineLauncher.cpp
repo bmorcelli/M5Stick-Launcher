@@ -79,13 +79,13 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 ***************************************************************************************/
 bool GetJsonFromM5() {
   #if defined(CARDPUTER) 
-  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/cardputer.json";
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/cardputer.json";
   #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2)
-  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/stickc.json";
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/stickc.json";
   #elif defined(CORE2)
-  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core2.json";  
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core2.json";  
   #elif defined(CORE)
-  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/core.json";  
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core.json";  
   #endif
 
   if (WiFi.status() == WL_CONNECTED) {
@@ -221,9 +221,6 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   
   String fileAddr;
 
-
-
-
   tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
 
@@ -282,25 +279,33 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
     httpUpdate.onProgress(progressHandler);
     
     if(!httpUpdate.updateVfsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size,U_SPIFFS)) {
-      displayRedStripe("SPIFFS Failed -> Restarting");
+      displayRedStripe("SPIFFS Failed");
       delay(2500);
     }
   }
 
+#if !defined(STICK_C_PLUS)
   if(fat) {
     eraseFAT();
     int FAT=U_FAT_vfs;
     if(fat_size[1]>0) FAT = U_FAT_sys;
     for(int i=0; i<2; i++) {
       if(fat_size[i]>0) {
-        if(!httpUpdate.updateVfsFromOffset(*client, fileAddr, fat_offset[i], fat_size[i],FAT-i*100)) {
-          displayRedStripe("FAT Failed -> Restarting");
-          delay(2500);
+        if((FAT-i*100)==400) {
+          if(!installFAT_OTA(client, fileAddr,fat_offset[i], fat_size[i], "sys")) {
+            displayRedStripe("FAT Failed");
+            delay(2500);
+          }
+        } else {
+          if(!installFAT_OTA(client, fileAddr,fat_offset[i], fat_size[i], "vfs")) {
+            displayRedStripe("FAT Failed");
+            delay(2500);
+          }
         }
       }
     }
-
   }
+  #endif
 
   Sucesso:
   esp_restart();
@@ -310,3 +315,38 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   delay(5000);
 }
 
+
+/***************************************************************************************
+** Function name: installFAT_OTA
+** Description:   install FAT partition OverTheAir
+***************************************************************************************/
+bool installFAT_OTA( WiFiClientSecure *client, String fileAddr, uint32_t offset, uint32_t size, const char *label) {
+  prog_handler = 1; // review
+
+  tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  displayRedStripe("Connecting FAT");
+
+  if(client) {
+    HTTPClient http;
+    int httpResponseCode=-1;
+    http.begin(*client, fileAddr);
+    http.addHeader("Range", "bytes=" + String(offset) + "-" + String(offset+size-1));
+    http.useHTTP10(true);
+    
+    while(httpResponseCode<0) { 
+      httpResponseCode = http.GET();
+      delay(500);
+    }
+    if (httpResponseCode > 0) {
+      int size = http.getSize();
+      displayRedStripe("Installing FAT");
+      WiFiClient* stream = http.getStreamPtr();
+      prog_handler = 1; //Download handler
+      performFATUpdate(*stream, size, label);
+    }
+    http.end();
+    delay(1000);
+    return true;
+  } else { displayRedStripe("Couldn't Connect"); delay(2000); return false; }
+
+}

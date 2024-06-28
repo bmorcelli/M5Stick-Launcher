@@ -655,6 +655,7 @@ void updateFromSD(String path) {
       performUpdate(file, spiffs_size, U_SPIFFS);
     }
 
+  #if !defined(STICK_C_PLUS)
     if(fat) {
       eraseFAT();
       
@@ -666,9 +667,8 @@ void updateFromSD(String path) {
         if (!file.seek(fat_offset_vfs)) goto Exit;
         if(!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT sys");
       }
-
     }
-
+  #endif
     ESP.restart();
 
   }
@@ -733,9 +733,6 @@ bool performFATUpdate(Stream &updateSource, size_t updateSize,  const char *labe
     log_i("FAIL updating %s", label);
     return false;
   }
-
     heap_caps_free(buffer);
     return true;
-
 }
-

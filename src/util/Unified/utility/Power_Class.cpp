@@ -847,13 +847,13 @@ namespace m5
     if (adc_chars == nullptr)
     {
       if (adc_unit == 2) {
-        adc2_config_channel_atten((adc2_channel_t)adc_ch, ADC_ATTEN_DB_11);
+        adc2_config_channel_atten((adc2_channel_t)adc_ch, ADC_ATTEN_DB_12);
       } else {
         adc1_config_width(ADC_WIDTH_BIT_12);
-        adc1_config_channel_atten((adc1_channel_t)adc_ch, ADC_ATTEN_DB_11);
+        adc1_config_channel_atten((adc1_channel_t)adc_ch, ADC_ATTEN_DB_12);
       }
       adc_chars = (esp_adc_cal_characteristics_t*)calloc(1, sizeof(esp_adc_cal_characteristics_t));
-      esp_adc_cal_characterize((adc_unit_t)adc_unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, BASE_VOLATAGE, adc_chars);
+      esp_adc_cal_characterize((adc_unit_t)adc_unit, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, BASE_VOLATAGE, adc_chars);
     }
     int raw;
     if (adc_unit == 2) {
