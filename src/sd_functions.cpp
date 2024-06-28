@@ -10,6 +10,7 @@ String fileToCopy;
 // Protected global variables
 String fileList[MAXFILES][3];
 
+#ifndef STICK_C_PLUS
 /***************************************************************************************
 ** Function name: eraseFAT
 ** Description:   erase FAT partition to micropython compatibilities
@@ -29,22 +30,39 @@ bool eraseFAT() {
   if (err != ESP_OK) {
       //log_e("Failed to erase partition: %s", esp_err_to_name(err));
       return false;
-  } else {
-      //log_i("Partition erased successfully");
-      return true;
+  } 
+
+  // Find FAT partition with its name
+  partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "sys");
+  if (!partition) {
+      //log_e("Failed to find partition");
+      goto Exit;
   }
 
-}
+  // erase all FAT partition
+  err = esp_partition_erase_range(partition, 0, partition->size);
+  if (err != ESP_OK) {
+      return false;
+  }
+  Exit:
+  return true;
 
+}
+#endif
 /***************************************************************************************
 ** Function name: setupSdCard
 ** Description:   Start SD Card
 ***************************************************************************************/
 bool setupSdCard() {
+  #if !defined(M5STACK) // Core2 uses the same SPI bus as TFT
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
   delay(10);
-  if (!SD.begin(SDCARD_CS, sdcardSPI)) { 
-    sdcardSPI.end(); // Closes SPI connections and release pin header.
+  if (!SD.begin(SDCARD_CS, sdcardSPI))  
+  #else
+  if (!SD.begin(SDCARD_CS)) 
+  #endif
+  {
+   // sdcardSPI.end(); // Closes SPI connections and release pin header.
     //Serial.println("Failed to mount SDCARD");
     sdcardMounted = false;
     return false;
@@ -62,7 +80,9 @@ bool setupSdCard() {
 ***************************************************************************************/
 void closeSdCard() {
   SD.end();
-  sdcardSPI.end(); // Closes SPI connections and release pins.
+  #if !defined(M5STACK)
+  //sdcardSPI.end(); // Closes SPI connections and release pins.
+  #endif
   //Serial.println("SD Card Unmounted...");
   sdcardMounted = false;
 }
@@ -351,7 +371,8 @@ void readFs(String folder, String result[][3]) {
 **  Function: loopSD                          
 **  Where you choose what to do wuth your SD Files   
 **********************************************************************/
-void loopSD(){
+String loopSD(bool filePicker) {
+  String result = "";
   bool reload=false;
   bool redraw = true;
   int index = 0;
@@ -360,8 +381,6 @@ void loopSD(){
   String PreFolder = "/";
   tft.fillScreen(BGCOLOR);
   tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
 
   readFs(Folder, fileList);
 
@@ -399,14 +418,9 @@ void loopSD(){
     /* Select to install */
     if(checkSelPress()) { 
       delay(200);
-      
-      #if defined(CARDPUTER)
-      Keyboard.update();
-      if(Keyboard.isKeyPressed(KEY_ENTER)) 
-      #else
-      if(digitalRead(SEL_BTN)==LOW) 
-      #endif
+      if(checkSelPress()) 
       {
+        while(checkSelPress()) yield();
         // Definição da matriz "Options" 
         if(fileList[index][2]=="folder") {
           options = {
@@ -417,8 +431,6 @@ void loopSD(){
           };
           delay(200);
           loopOptions(options);
-          sprite.deleteSprite();
-          sprite.createSprite(WIDTH-20,HEIGHT-20);   
           tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);  
           reload = true;     
           redraw = true;
@@ -432,9 +444,6 @@ void loopSD(){
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           delay(200);
           loopOptions(options);
-          sprite.deleteSprite();
-          sprite.createSprite(WIDTH-20,HEIGHT-20);
-          tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
           reload = true;  
           redraw = true;
         }
@@ -454,10 +463,12 @@ void loopSD(){
           options.push_back({"Delete", [=]() { deleteFromSd(fileList[index][1]); }});
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           delay(200);
-          loopOptions(options);
-          sprite.deleteSprite();
-          sprite.createSprite(WIDTH-20,HEIGHT-20);
-          tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+
+          if(!filePicker) loopOptions(options);
+          else {
+            result = fileList[index][1];
+            break;
+          }
           reload = true;  
           redraw = true;
         } else {
@@ -468,6 +479,9 @@ void loopSD(){
         }
         redraw = true;
       }
+      tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+      tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+      redraw = true;
     }
 
     #ifdef CARDPUTER
@@ -475,50 +489,60 @@ void loopSD(){
       if(Keyboard.isKeyPressed('`')) break;
     #endif
   }
+  //clear fileList memory
+  for(int i=0; i<MAXFILES; i++) {
+    fileList[i][0] = "";
+    fileList[i][1] = "";
+    fileList[i][2] = "";
+  }
   closeSdCard();
   setupSdCard();  
+  tft.fillScreen(BGCOLOR);
+  return result;
 }
 /***************************************************************************************
 ** Function name: performUpdate
 ** Description:   this function performs the update 
 ***************************************************************************************/
 void performUpdate(Stream &updateSource, size_t updateSize, int command) {
+  // command = U_FAT_vfs = 300 
+  // command = U_FAT_sys = 400 
   // command = U_SPIFFS = 100
   // command = U_FLASH = 0
-  sprite.deleteSprite();
-  menu_op.deleteSprite();
-  Serial.begin(115200);
-  //Erase FAT partition
-  eraseFAT();
 
+  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  progressHandler(0, 500);
 
   if (Update.begin(updateSize, command)) {
-    Update.onProgress(progressHandler); 
     int written = 0;
     uint8_t buf[1024];
     int bytesRead;
-    size_t totalSize = updateSize;
-    
-    prog_handler = 0; // Install flash update
-    if (command==U_SPIFFS) prog_handler = 1; // Install flash update
 
-    while (updateSource.available() > 0 && written < updateSize) {
+  #ifndef STICK_C_PLUS
+    //Erase FAT partition
+    eraseFAT();
+  #endif
+
+    prog_handler = 0; // Install flash update
+    if (command==U_SPIFFS || command == U_FAT_vfs || command == U_FAT_sys) prog_handler = 1; // Install flash update
+    log_i("updateSize = %d",updateSize);
+    while (written < updateSize) { //updateSource.available() > 0 && 
       bytesRead = updateSource.readBytes(buf, sizeof(buf));
-      written += Update.write(buf, bytesRead);
+      written += Update.write(buf, bytesRead); 
+      progressHandler(written, updateSize);
     }
     if (Update.end()) {
-      //Serial.println("OTA done!");
-      //if (Update.isFinished()) Serial.println("Update successfully completed. Rebooting.");
-      //else Serial.println("Update not finished? Something went wrong!");
+      if (Update.isFinished()) log_i("Update successfully completed.");
+      else log_i("Update not finished? Something went wrong!");
     }
     else {
-      //Serial.println("Error Occurred. Error #: " + String(Update.getError()));
+      log_i("Error Occurred. Error #: %s", String(Update.getError()));
     }
   }
   else
   {
     uint8_t error = Update.getError();
-    displayRedStripe("Update error: " + String(error));
+    displayRedStripe("E:" + String(error) + "-Wrong Partition Scheme");
     delay(2000);
   }
 }
@@ -529,11 +553,21 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
 ***************************************************************************************/
 void updateFromSD(String path) {
   uint8_t firstThreeBytes[16];
+
+  uint32_t spiffs_offset = 0;
+  uint32_t spiffs_size = 0;
+  uint32_t app_size = 0;
+  bool spiffs = false;
+
+  uint32_t fat_offset_sys = 0;
+  uint32_t fat_size_sys = 0;
+  uint32_t fat_offset_vfs = 0;
+  uint32_t fat_size_vfs = 0;  
+  bool fat = false;
+
   File file = SD.open(path);
-  resetTftDisplay();
-  tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,ALCOLOR);
-  tft.setTextColor(ALCOLOR);
-  tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);
+  //resetTftDisplay();
+  displayRedStripe("Preparing..");
 
   if (!file) goto Exit;
   if (!file.seek(0x8000)) goto Exit; 
@@ -552,11 +586,6 @@ void updateFromSD(String path) {
   } 
   // Start Verifications to install binaries made to be flashed at 0x0
   else {
-    uint32_t spiffs_offset = 0;
-    size_t spiffs_size = 0;
-    size_t app_size = 0;
-    bool spiffs = false;
-
     if (!file.seek(0x8000)) goto Exit;
     for(int i=0; i<0x0A0;i+=0x20) {
       //Serial.print((0x8000+i),HEX);
@@ -567,27 +596,152 @@ void updateFromSD(String path) {
 
         if(file.size()<(app_size+0x10000)) app_size = file.size() - 0x10000;
         else if(app_size>MAX_APP) app_size = MAX_APP; 
+
       }
-      if(firstThreeBytes[3] == 0x82) {
+      if(firstThreeBytes[3] == 0x82) { // SPIFFS
         spiffs_offset = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
-        spiffs_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	// Write the size of spiffs partition
-        if(file.size()<spiffs_offset) spiffs=false; // check if there is room for spiffs in file
-        else if(spiffs_size>MAX_SPIFFS) { spiffs_size = MAX_SPIFFS; spiffs = true; } // if there is spiffs in file, check its size
-        if(spiffs && file.size()<(spiffs_offset+spiffs_size)) spiffs_size = file.size() - spiffs_offset; // if there is spiffs, check if spiffs size is lesser then maximum
+        spiffs_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
+        if(file.size()<spiffs_offset) spiffs=false;                                                           // check if there is room for spiffs in file
+        else if(spiffs_size>MAX_SPIFFS) { spiffs_size = MAX_SPIFFS; spiffs = true; }                          // if there is spiffs in file, check its size
+        if(spiffs && file.size()<(spiffs_offset+spiffs_size)) spiffs_size = file.size() - spiffs_offset;      // if there is spiffs, check if spiffs size is lesser then maximum
+      } 
+      if(firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x73) { // FAT sys //
+        fat_offset_sys = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
+        fat_size_sys = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
+        if(file.size()<fat_offset_sys) fat=false;                                                             // check if there is room for spiffs in file
+        else  fat = true;
+        if(fat && fat_size_sys>MAX_FAT_sys) { fat_size_sys = MAX_FAT_sys;  }     // if there is spiffs in file, check its size
+        if(fat && file.size()<(fat_offset_sys+fat_size_sys)) fat_size_sys = file.size() - fat_offset_sys; // if there is spiffs, check if spiffs size is lesser then maximum
+        
+      }
+      if(firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x76) { // FAT vfs  
+        fat_offset_vfs = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
+        fat_size_vfs = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
+        if(file.size()<fat_offset_vfs) fat=false;                                                             // check if there is room for spiffs in file
+        else  fat = true;
+        if(fat && fat_size_vfs>MAX_FAT_vfs) { fat_size_vfs = MAX_FAT_vfs; }     // if there is spiffs in file, check its size
+        if(fat && file.size()<(fat_offset_vfs+fat_size_vfs)) fat_size_vfs = file.size() - fat_offset_vfs; // if there is spiffs, check if spiffs size is lesser then maximum
       }
     }
+    log_i("Appsize: %d",app_size);
+    log_i("Spiffsize: %d",spiffs_size);
+    log_i("FATsize[0]: %d - max: %d",fat_size_sys, MAX_FAT_sys);
+    log_i("FATsize[1]: %d - max: %d",fat_size_vfs, MAX_FAT_vfs);
+    log_i("FAT: %d",fat);
+    log_i("------------------------");
+  
+    if(!fat) {
+      fat_size_sys = 0;
+      fat_size_vfs = 0;
+      fat_offset_sys = 0;
+      fat_offset_vfs = 0;
+    } 
+
+    prog_handler = 0; // Install flash update
+    if(spiffs && askSpiffs) {
+      options = {
+        {"SPIFFS No", [&](){ spiffs = false; }},
+        {"SPIFFS Yes", [&](){ spiffs = true; }},
+      };
+      delay(200);
+      loopOptions(options);
+      tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+    }
+    
+    log_i("Appsize: %d",app_size);
+    log_i("Spiffsize: %d",spiffs_size);
+    log_i("FATsize[0]: %d - max: %d",fat_size_sys, MAX_FAT_sys);
+    log_i("FATsize[1]: %d - max: %d",fat_size_vfs, MAX_FAT_vfs);
+    
     if (!file.seek(0x10000)) goto Exit;
     performUpdate(file, app_size, U_FLASH);
 
+    prog_handler = 1; // Install SPIFFS update
     if(spiffs) {
       if (!file.seek(spiffs_offset)) goto Exit;
       performUpdate(file, spiffs_size, U_SPIFFS);
     }
 
+  #if !defined(STICK_C_PLUS)
+    if(fat) {
+      eraseFAT();
+      
+      if(fat_size_sys>0) {
+        if (!file.seek(fat_offset_sys)) goto Exit;
+        if(!performFATUpdate(file, fat_size_sys, "sys")) log_i("FAIL updating FAT sys");
+      }
+      if(fat_size_vfs>0) {
+        if (!file.seek(fat_offset_vfs)) goto Exit;
+        if(!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT sys");
+      }
+    }
+  #endif
     ESP.restart();
 
   }
 
-  Exit:
+Exit:
   displayRedStripe("Error on updating.");
+}
+
+
+/***************************************************************************************
+** Function name: performFATUpdate
+** Description:   this function performs the update 
+***************************************************************************************/
+bool performFATUpdate(Stream &updateSource, size_t updateSize,  const char *label) {
+  uint8_t* buffer = (uint8_t*)heap_caps_malloc(4096, MALLOC_CAP_INTERNAL);
+  if (buffer == NULL) {
+      ESP_LOGE("FLASH", "Failed to allocate buffer in DRAM");
+      return false;
+  }  
+  // Preencher o buffer com 0xFF
+  memset(buff, 0xFF, 4096);
+  log_i("Start updating: %s", label);
+
+  const esp_partition_t* partition;
+  esp_err_t error;
+  size_t paroffset=0;
+  int written=0;
+  int bytesRead=0;
+  partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, label);
+  if(!partition){
+      error = UPDATE_ERROR_NO_PARTITION;
+      return false;
+  }
+  paroffset = partition->address;
+  log_i("Erasing updating: %s", label);
+  error = spi_flash_erase_range(partition->address, partition->size);
+  if(error != ESP_OK) {
+      log_i("Erase error %d", error);
+      return false;
+  }
+  progressHandler(0,500);
+  displayRedStripe("Updating FAT");
+  log_i("Updating updating: %s", label);
+  while (updateSource.available() && written < updateSize) { //updateSource.available() > 0 && 
+    //memset(buff, 0xFF, 4096);
+    bytesRead = updateSource.readBytes(buff, sizeof(buff));
+    //memcpy(buffer, buff, bytesRead);
+    written += bytesRead;
+    error = spi_flash_write(paroffset,buff,sizeof(buff)); 
+    delay(1);
+    paroffset+=bytesRead;
+    progressHandler(written, updateSize);
+    delay(1);
+    if (error != ESP_OK) {
+        log_i("[FLASH] Failed to write to flash (0x%x)", error);
+        heap_caps_free(buffer);
+        return false;
+    }    
+  }
+  if(written==updateSize)  {
+    log_i("Success updating %s", label);
+  }
+  else {
+    log_i("FAIL updating %s", label);
+    return false;
+  }
+    heap_caps_free(buffer);
+    return true;
 }

@@ -43,7 +43,7 @@ void webUIMyNet() {
   if (WiFi.status() != WL_CONNECTED) {
     int nets;
     WiFi.mode(WIFI_MODE_STA);
-    displayScanning();
+    displayRedStripe("Scanning...");
     nets=WiFi.scanNetworks();
     options = { };
     for(int i=0; i<nets; i++){
@@ -56,7 +56,6 @@ void webUIMyNet() {
     //If it is already connected, just start the network
     startWebUi("",0,false); 
   }
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
   // On fail installing will run the following line
 }
 /**********************************************************************
@@ -72,7 +71,6 @@ void loopOptionsWebUi() {
   delay(200);
 
   loopOptions(options);
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
   // On fail installing will run the following line
 }
 
@@ -88,14 +86,11 @@ String humanReadableSize(uint64_t bytes) {
 }
 
 // list all of the files, if ishtml=true, return html rather than simple text
-String listFiles(bool ishtml, String folder) {
+String listFiles(String folder) {
   //log_i("Listfiles Start");
-  String returnText = "";
+  String returnText = "pa:" + folder + ":0\n";
   Serial.println("Listing files stored on SD");
 
-  if (ishtml) {
-    returnText += "<table><tr><th align='left'>Name</th><th style=\"text-align=center;\">Size</th><th></th></tr>\n";
-  }
   File root = SD.open(folder);
   File foundfile = root.openNextFile();
   if (folder=="//") folder = "/";
@@ -103,21 +98,10 @@ String listFiles(bool ishtml, String folder) {
   String PreFolder = folder;
   PreFolder = PreFolder.substring(0, PreFolder.lastIndexOf("/"));
   if(PreFolder=="") PreFolder= "/";
-  returnText += "<tr><th align='left'><a onclick=\"listFilesButton('"+ PreFolder + "')\" href='javascript:void(0);'>... </a></th><th align='left'></th><th></th></tr>\n";
 
   if (folder=="/") folder = "";
   while (foundfile) {
-    if(foundfile.isDirectory()) {
-      if (ishtml) {
-        returnText += "<tr align='left'><td><a onclick=\"listFilesButton('"+ String(foundfile.path()) + "')\" href='javascript:void(0);'>\n" + String(foundfile.name()) + "</a></td>";
-        returnText += "<td></td>\n";
-        returnText += "<td><i style=\"color: #e0d204;\" class=\"gg-folder\" onclick=\"listFilesButton('" + String(foundfile.path()) + "')\"></i>&nbsp&nbsp";
-        returnText += "<i style=\"color: #e0d204;\" class=\"gg-rename\"  onclick=\"renameFile(\'" + String(foundfile.path()) + "\', \'" + String(foundfile.name()) + "\')\"></i>&nbsp&nbsp\n";
-        returnText += "<i style=\"color: #e0d204;\" class=\"gg-trash\"  onclick=\"downloadDeleteButton(\'" + String(foundfile.path()) + "\', \'delete\')\"></i></td></tr>\n\n";
-      } else {
-        returnText += "Folder: " + String(foundfile.name()) + " Size: " + humanReadableSize(foundfile.size()) + "\n";
-      }
-    }
+    if(foundfile.isDirectory()) returnText+="Fo:" + String(foundfile.name()) + ":0\n";
     foundfile = root.openNextFile();
   }
   root.close();
@@ -127,27 +111,12 @@ String listFiles(bool ishtml, String folder) {
   root = SD.open(folder);
   foundfile = root.openNextFile();
   while (foundfile) {
-    if(!(foundfile.isDirectory())) {
-      if (ishtml) {
-        returnText += "<tr align='left'><td>" + String(foundfile.name());
-        if (String(foundfile.name()).substring(String(foundfile.name()).lastIndexOf('.') + 1).equalsIgnoreCase("bin")) returnText+= "&nbsp<i class=\"rocket\" onclick=\"startUpdate(\'" + String(foundfile.path()) + "\')\"></i>";
-        returnText += "</td>\n";
-        returnText += "<td style=\"font-size: 10px; text-align=center;\">" + humanReadableSize(foundfile.size()) + "</td>\n";
-        returnText += "<td><i class=\"gg-arrow-down-r\" onclick=\"downloadDeleteButton(\'"+ String(foundfile.path()) + "\', \'download\')\"></i>&nbsp&nbsp\n";
-        returnText += "<i class=\"gg-rename\"  onclick=\"renameFile(\'" + String(foundfile.path()) + "\', \'" + String(foundfile.name()) + "\')\"></i>&nbsp&nbsp\n";
-        returnText += "<i class=\"gg-trash\"  onclick=\"downloadDeleteButton(\'" + String(foundfile.path()) + "\', \'delete\')\"></i></td></tr>\n\n";
-      } else {
-        returnText += "File: " + String(foundfile.name()) + " Size: " + humanReadableSize(foundfile.size()) + "\n";
-      }
-    }
+    if(!(foundfile.isDirectory())) returnText+="Fi:" + String(foundfile.name()) + ":" + humanReadableSize(foundfile.size()) + "\n";
     foundfile = root.openNextFile();
   }
   root.close();
   foundfile.close();
 
-  if (ishtml) {
-    returnText += "</table>";
-  }
   //log_i("ListFiles End");
   return returnText;
 }
@@ -188,9 +157,11 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
         if(Update.begin(file_size,command)) {
           if(command == 0) prog_handler = 0;
           else prog_handler = 1;
+        #ifndef STICK_C_PLUS
           //Erase FAT partition
           eraseFAT();
-
+        #endif
+          progressHandler(0, 500);
           Update.onProgress(progressHandler);
         } else { displayRedStripe("FAIL 160: " + String(Update.getError())); delay(3000); }
       }
@@ -330,7 +301,7 @@ void configureWebServer() {
       } else {
         String folder = "/";
       }
-      request->send(200, "text/plain", listFiles(true, folder));
+      request->send(200, "text/plain", listFiles(folder));
 
     } else {
       return request->requestAuthentication();
@@ -463,31 +434,29 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   disableCore1WDT(); // disable WDT
   disableLoopWDT();  // disable WDT
 
-  tft.fillScreen(BGCOLOR);
   tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,ALCOLOR,BGCOLOR);
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH-14, HEIGHT-14);
-  setSpriteDisplay(0,0,ALCOLOR,FONT_P);
-  sprite.drawCentreString("-= M5Launcher WebUI =-",sprite.width()/2,0,1);
+  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  setTftDisplay(7,7,ALCOLOR,FONT_P,BGCOLOR);
+  tft.drawCentreString("-= M5Launcher WebUI =-",WIDTH/2,0,8);
   String txt;
   if(!mode_ap) txt = WiFi.localIP().toString();
   else txt = WiFi.softAPIP().toString();
   
 #ifndef STICK_C
-  sprite.drawCentreString("http://m5launcher.local", sprite.width()/2,15,1);
-  setSpriteDisplay(0,40,TFT_WHITE,FONT_P);
+  tft.drawCentreString("http://m5launcher.local", WIDTH/2,22,1);
+  setTftDisplay(7,47,TFT_WHITE,FONT_P,BGCOLOR);
 #else
-  sprite.drawCentreString("http://m5launcher.local", sprite.width()/2,10,1);
-  setSpriteDisplay(0,19,TFT_WHITE,FONT_P);
+  tft.drawCentreString("http://m5launcher.local", WIDTH/2,17,1);
+  setTftDisplay(7,26,TFT_WHITE,FONT_P,BGCOLOR);
 #endif
-  sprite.setTextSize(FONT_M);
-  sprite.print("IP: ");   sprite.println(txt);
-  sprite.println("Usr: " + String(default_httpuser) + "\nPwd: " + String(default_httppassword));
+  tft.setTextSize(FONT_M);
+  tft.print("IP: ");   tftprintln(txt,10,1);
+  tftprintln("Usr: " + String(default_httpuser),10,1);
+  tftprintln("Pwd: " + String(default_httppassword),10,1);
 
-  setSpriteDisplay(0,sprite.height()-32,ALCOLOR,FONT_P);
+  setTftDisplay(7,HEIGHT-39,ALCOLOR,FONT_P);
 
-  sprite.drawCentreString("press " + String(BTN_ALIAS) + " to stop", sprite.width()/2,sprite.height()-8,1);
-  sprite.pushSprite(7,7);
+  tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", WIDTH/2,HEIGHT-15,1);
 
   while (!checkSelPress())
   {
@@ -514,10 +483,6 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   WiFi.mode(WIFI_OFF);
   stopOta = true; // used to verify if webUI was opened before to stop OTA and request restart
   
-
-  //log_i("Enabling Watchdogs");
-  enableCore0WDT(); // enable WDT
-  enableCore1WDT(); // enable WDT
-  enableLoopWDT();
+  tft.fillScreen(BGCOLOR);
 }
 

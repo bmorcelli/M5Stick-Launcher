@@ -1,10 +1,10 @@
 #include <Arduino.h>
 
 #if defined(CARDPUTER)
-  #include <Keyboard.h>
+  #include <util/Cardputer/Keyboard.h>
   extern Keyboard_Class Keyboard;
 #elif defined (STICK_C_PLUS) || defined (STICK_C) 
-  #include <AXP192.h>
+  #include <util/StickCP/AXP192.h>
   extern AXP192 axp192;
 #endif
 

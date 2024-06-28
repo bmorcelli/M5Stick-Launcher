@@ -1,0 +1,19 @@
+{
+    "name": "M5Core2",
+    "builds": [
+      {
+        "chipFamily": "ESP32",
+        "improv": false,
+        "parts": [
+          { "path": "Launcher_2.0_core2.bin", "offset": 0 }
+        ]
+      },
+      {
+        "chipFamily": "ESP8266",
+        "parts": [
+          { "path": "esp8266.bin", "offset": 0 }
+        ]
+      }
+    ]
+  }
+  

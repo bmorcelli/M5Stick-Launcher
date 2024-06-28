@@ -6,6 +6,17 @@
 #include <functional>
 #include <vector>
 
+#if defined (M5STACK)
+  #include <util/Unified/M5Unified.h>
+#endif
+
+
+extern uint32_t MAX_APP;
+extern uint32_t MAX_SPIFFS;
+extern uint32_t MAX_FAT_vfs;
+extern uint32_t MAX_FAT_sys;
+
+
 extern int prog_handler;    // 0 - Flash, 1 - SPIFFS, 2 - Download
 
 extern bool sdcardMounted;
@@ -34,6 +45,9 @@ extern const int bufSize;
 
 //Used to handle the update in webUI
 extern bool update;
+
+//Used to choose SPIFFS or not
+extern bool askSpiffs;
 
 //Don't let open OTA after use WebUI due t oRAM handling
 extern bool stopOta;

@@ -35,8 +35,6 @@ const char* root_ca3 =
 ** Description:   Connects to wifiNetwork
 ***************************************************************************************/
 void wifiConnect(String ssid, int encryptation, bool isAP) {
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH-12,HEIGHT-12);
 
   if(!isAP) {
 
@@ -54,15 +52,13 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 
     WiFi.begin(ssid, pwd);
 
-    resetSpriteDisplay(0, 0, FGCOLOR,FONT_P);
-    sprite.fillRect(0,0,sprite.width(),sprite.height(),BGCOLOR);
+    resetTftDisplay(10, 10, FGCOLOR,FONT_P);
 
-    sprite.print("Connecting to: " + ssid + ".");
+    tftprint("Connecting to: " + ssid + ".",10);
+    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
-      sprite.print(".");
-      sprite.pushSprite(6,6);
-      tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+      tftprint(".",10);
     }
 
   } else { //Running in Access point mode
@@ -74,6 +70,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
   } 
 
   delay(200);
+
 }
 
 /***************************************************************************************
@@ -81,26 +78,26 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 ** Description:   Gets JSON from github server
 ***************************************************************************************/
 bool GetJsonFromM5() {
-  sprite.deleteSprite();
-  sprite.createSprite(WIDTH,HEIGHT);
   #if defined(CARDPUTER) 
-  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/test/cardputer.json";
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/cardputer.json";
   #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2)
-  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/stickc.json";
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/stickc.json";
+  #elif defined(CORE2)
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core2.json";  
+  #elif defined(CORE)
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core.json";  
   #endif
-  closeSdCard();
 
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     int httpResponseCode=-1;
-    resetSpriteDisplay(sprite.width()/2 - 6*String("Getting info from").length(),32);
-    sprite.fillRect(0,0,sprite.width(),sprite.height(),BGCOLOR);
-    sprite.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
-    sprite.drawCentreString("Getting info from", WIDTH/2, HEIGHT/3,1);
-    sprite.drawCentreString("M5Burner repo", WIDTH/2, HEIGHT/3+FONT_M*9,1);
-    sprite.pushSprite(0,0);
+    resetTftDisplay(WIDTH/2 - 6*String("Getting info from").length(),32);
+    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+    tft.drawCentreString("Getting info from", WIDTH/2, HEIGHT/3,1);
+    tft.drawCentreString("M5Burner repo", WIDTH/2, HEIGHT/3+FONT_M*9,1);
 
-    sprite.setCursor(8,  HEIGHT/3+FONT_M*9*2);
+    tft.setCursor(18,  HEIGHT/3+FONT_M*9*2);
     while(httpResponseCode<0) { 
       http.begin(serverUrl);
       http.useHTTP10(true);
@@ -108,15 +105,11 @@ bool GetJsonFromM5() {
       if (httpResponseCode > 0) {
         DeserializationError error;
         deserializeJson(doc, http.getStream());
-        sprite.deleteSprite();
-        sprite.createSprite(WIDTH-20,HEIGHT-20);
         delay(100);
-        //displayCurrentItem(doc, currentIndex); //Show first item
         return true;
         break;
       } else {
-        sprite.print(".");
-        sprite.pushSprite(0,0);
+        tftprint(".",10);
         http.end();
         delay(1000);
       }
@@ -138,9 +131,6 @@ void downloadFirmware(String file_str, String fileName, String folder) {
     delay(2000);
     return;
   }
-
-  sprite.deleteSprite();//Delete Sprite, it consumes a lot of RAM
-  menu_op.deleteSprite();
 
   tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
@@ -171,6 +161,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
           prog_handler = 2; //Download handler
 
           // Ler dados enquanto disponível
+          progressHandler(downloaded, size);
           while (http.connected() && (len > 0 || len == -1)) {
             // Ler dados em partes
             int size_av = stream->available();
@@ -206,15 +197,28 @@ void downloadFirmware(String file_str, String fileName, String folder) {
 ** Function name: installFirmware
 ** Description:   installs Firmware using OTA
 ***************************************************************************************/
-void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiffs_offset, uint32_t spiffs_size, bool nb) {
+void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiffs_offset, uint32_t spiffs_size, bool nb, bool fat, uint32_t fat_offset[2], uint32_t fat_size[2]) {
   uint32_t app_offset = 0x10000;
 
   //Release RAM Memory from Json Objects
-  sprite.deleteSprite();
-  menu_op.deleteSprite();
+  if(spiffs && askSpiffs) {
+    options = {
+      {"SPIFFS No", [&](){ spiffs = false; }},
+      {"SPIFFS Yes", [&](){ spiffs = true; }},
+    };
+    delay(200);
+    loopOptions(options);
+  }
 
   if(spiffs && spiffs_size>MAX_SPIFFS) spiffs_size=MAX_SPIFFS;
   if (app_size>MAX_APP) app_size = MAX_APP;
+  if (app_size>MAX_APP) app_size = MAX_APP;
+  
+  //precisa revisar!!!
+  if(fat && fat_size[0]>MAX_FAT_vfs && fat_size[1]==0) fat_size[0]=MAX_FAT_vfs;
+  else if(fat && fat_size[0]>MAX_FAT_sys) fat_size[0]=MAX_FAT_sys;
+  if(fat && fat_size[1]>MAX_FAT_vfs) fat_size[1]=MAX_FAT_vfs;
+  
   String fileAddr;
 
   tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
@@ -228,12 +232,16 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   httpUpdate.rebootOnUpdate(false);
   /* Install App */
   prog_handler = 0;
+  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  progressHandler(0, 500);
   httpUpdate.onProgress(progressHandler);
   httpUpdate.setLedPin(LED, LED_ON);
 
+#ifndef STICK_C_PLUS
   //Erase FAT partition
   eraseFAT();
-  
+#endif
+
 #ifndef STICK_C
   tft.drawRect(18, HEIGHT - 47, 204, 17, FGCOLOR);        
   if (spiffs) tft.drawRect(18, HEIGHT - 28, 204, 17, ALCOLOR);
@@ -267,20 +275,78 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
     displayRedStripe("Connecting SPIFFs");
     
     // Install Spiffs
+    progressHandler(0, 500);
     httpUpdate.onProgress(progressHandler);
     
-    if(!httpUpdate.updateSpiffsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size)) {
-      displayRedStripe("SPIFFS Failed -> Restarting");
+    if(!httpUpdate.updateVfsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size,U_SPIFFS)) {
+      displayRedStripe("SPIFFS Failed");
       delay(2500);
     }
   }
+
+#if !defined(STICK_C_PLUS)
+  if(fat) {
+    eraseFAT();
+    int FAT=U_FAT_vfs;
+    if(fat_size[1]>0) FAT = U_FAT_sys;
+    for(int i=0; i<2; i++) {
+      if(fat_size[i]>0) {
+        if((FAT-i*100)==400) {
+          if(!installFAT_OTA(client, fileAddr,fat_offset[i], fat_size[i], "sys")) {
+            displayRedStripe("FAT Failed");
+            delay(2500);
+          }
+        } else {
+          if(!installFAT_OTA(client, fileAddr,fat_offset[i], fat_size[i], "vfs")) {
+            displayRedStripe("FAT Failed");
+            delay(2500);
+          }
+        }
+      }
+    }
+  }
+  #endif
 
   Sucesso:
   esp_restart();
 
   // Só chega aqui se der errado
   SAIR:
-  sprite.createSprite(WIDTH-20,HEIGHT-20);
   delay(5000);
 }
 
+
+/***************************************************************************************
+** Function name: installFAT_OTA
+** Description:   install FAT partition OverTheAir
+***************************************************************************************/
+bool installFAT_OTA( WiFiClientSecure *client, String fileAddr, uint32_t offset, uint32_t size, const char *label) {
+  prog_handler = 1; // review
+
+  tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  displayRedStripe("Connecting FAT");
+
+  if(client) {
+    HTTPClient http;
+    int httpResponseCode=-1;
+    http.begin(*client, fileAddr);
+    http.addHeader("Range", "bytes=" + String(offset) + "-" + String(offset+size-1));
+    http.useHTTP10(true);
+    
+    while(httpResponseCode<0) { 
+      httpResponseCode = http.GET();
+      delay(500);
+    }
+    if (httpResponseCode > 0) {
+      int size = http.getSize();
+      displayRedStripe("Installing FAT");
+      WiFiClient* stream = http.getStreamPtr();
+      prog_handler = 1; //Download handler
+      performFATUpdate(*stream, size, label);
+    }
+    http.end();
+    delay(1000);
+    return true;
+  } else { displayRedStripe("Couldn't Connect"); delay(2000); return false; }
+
+}

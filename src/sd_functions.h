@@ -2,12 +2,12 @@
 #include <SD.h>
 #include <SPI.h>
 #include <FFat.h>
-#include <Update.h>
+#include <CustomUpdate.h>
 
 extern SPIClass sdcardSPI;
-
+#ifndef STICK_C_PLUS
 bool eraseFAT();
-
+#endif
 bool setupSdCard();
 
 void closeSdCard();
@@ -28,8 +28,10 @@ void readFs(String folder, String result[][3]);
 
 void sortList(String fileList[][3], int fileListCount);
 
-void loopSD();
+String loopSD(bool filePicker = false);
 
 void performUpdate(Stream &updateSource, size_t updateSize, int command);
 
 void updateFromSD(String path);
+
+bool performFATUpdate(Stream &updateSource, size_t updateSize,  const char *label = "vfs");
