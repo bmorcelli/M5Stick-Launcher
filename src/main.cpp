@@ -273,7 +273,7 @@ void setup() {
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
 
-  tft.init();
+
   // Setup GPIOs and stuff
   #if defined(STICK_C_PLUS2)
     pinMode(UP_BTN, INPUT);
@@ -294,9 +294,11 @@ void setup() {
   #endif
 
   rotation = gsetRotation();
-  askSpiffs=gsetAskSpiffs();
   tft.setRotation(rotation);
+  tft.init();
   resetTftDisplay();
+  initDisplay(true);  
+  askSpiffs=gsetAskSpiffs();
 
   #if defined(BACKLIGHT)
   pinMode(BACKLIGHT, OUTPUT);
@@ -324,7 +326,7 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
   getBrightness();  
   onlyBins=gsetOnlyBins();
   tft.setAttribute(PSRAM_ENABLE,true);
-  initDisplay(true);
+
   //Start Bootscreen timer
   int i = millis();
   while(millis()<i+5000) { // increased from 2500 to 5000
@@ -350,9 +352,9 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
     Keyboard.update();
     if (Keyboard.isPressed() && !(Keyboard.isKeyPressed(KEY_ENTER)))
   #elif defined(STICK_C_PLUS2)
-    if(digitalRead(UP_BTN)==LOW || digitalRead(DW_BTN)==LOW) 
+    if((digitalRead(UP_BTN)==LOW && (millis()-i>2000)) || digitalRead(DW_BTN)==LOW) 
   #elif defined(STICK_C_PLUS)
-    if((axp192.GetBtnPress() || digitalRead(DW_BTN)==LOW) && (millis()-i>2000))
+    if((axp192.GetBtnPress() && (millis()-i>2000)) || digitalRead(DW_BTN)==LOW)
   #elif defined(M5STACK)
     if(checkNextPress() || checkPrevPress())    
   #endif 
@@ -411,7 +413,7 @@ void loop() {
     if(checkSelPress()) { 
       if(index == 0) {  
         if(setupSdCard()) { 
-          loopSD(); 
+          loopSD(false); 
           tft.fillScreen(BGCOLOR);
           redraw=true;
         }
@@ -481,6 +483,11 @@ void loop() {
       #ifndef STICK_C_PLUS
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
       #endif
+        if(MAX_SPIFFS>0) options.push_back({"Bkp SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
+        if(MAX_FAT_vfs>0) options.push_back({"Bkp FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
+        if(MAX_SPIFFS>0) options.push_back({ "Restore SPIFFS",  [=]() { restorePartition("spiffs"); }});
+        if(MAX_FAT_vfs>0) options.push_back({"Restore FAT FS",  [=]() { restorePartition("vfs"); }});
+
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         
         delay(200);

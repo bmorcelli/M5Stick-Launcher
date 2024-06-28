@@ -10,8 +10,9 @@
   #include <util/Unified/M5Unified.h>
 #endif
 
-extern uint32_t MAX_SPIFFS;
+
 extern uint32_t MAX_APP;
+extern uint32_t MAX_SPIFFS;
 extern uint32_t MAX_FAT_vfs;
 extern uint32_t MAX_FAT_sys;
 

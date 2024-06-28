@@ -3,6 +3,7 @@
 #include "display.h"
 #include "mykeyboard.h"
 #include "esp_heap_caps.h"
+#include "sd_functions.h"
 
 // Define o tamanho da partição
 #define PARTITION_SIZE 4096
@@ -216,62 +217,102 @@ void partList() {
     int i=0;
     while (it != NULL) {
       partition = esp_partition_get(it);
-      Serial.print("Nome: ");
-      Serial.println(partition->label);
-      Serial.print("Tipo: ");
-      Serial.print(partition->type, HEX);
-      Serial.print(" (");
-      switch (partition->type) {
-        case ESP_PARTITION_TYPE_APP:
-          Serial.print("Aplicação");
-          break;
-        case ESP_PARTITION_TYPE_DATA:
-          Serial.print("Dados");
-          break;
-        default:
-          Serial.print("Desconhecido");
-          break;
-      }
 
       switch (partition->subtype) {
-        case ESP_PARTITION_SUBTYPE_APP_FACTORY:
-          Serial.print("Fábrica");
-          break;
         case ESP_PARTITION_SUBTYPE_APP_OTA_0:
         case ESP_PARTITION_SUBTYPE_APP_OTA_1:
-          Serial.print("OTA");
+          Serial.println("OTA");
           txt+="-OTA-";
           break;
 
         case ESP_PARTITION_SUBTYPE_DATA_FAT:
-          Serial.print("FAT");
+          Serial.println("FAT");
           txt+="FAT-";
           break;
         case ESP_PARTITION_SUBTYPE_DATA_SPIFFS:
-          Serial.print("SPIFFS");
+          Serial.println("SPIFFS");
           txt+="SPIFFs-";
           break;
         default:
-          Serial.print("Desconhecido");
+          Serial.println("Desconhecido");
           break;
-      }
-      Serial.println(")");
-      Serial.print("Endereço: 0x");
-      Serial.println(partition->address, HEX);
-      Serial.print("Tamanho: 0x");
-      Serial.println(partition->size, HEX);
-      Serial.println();
-
-      
+      }    
       it = esp_partition_next(it);
     }
     esp_partition_iterator_release(it);
     displayRedStripe(txt);
     while(!checkSelPress()) yield();
     while(checkSelPress()) yield();    
-  } else {
-    Serial.println("Nenhuma partição encontrada.");
-  }
-  
+  }   
+}
 
+
+void dumpPartition(const char* partitionLabel, const char* outputPath) {
+  tft.fillScreen(BGCOLOR);
+  const esp_partition_t* partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, partitionLabel);
+  if (partition == NULL) {
+    Serial.printf("Partição %s não encontrada\n", partitionLabel);
+    return;
+  }
+
+  setupSdCard();
+  if (!SD.exists("/bkp")) SD.mkdir("/bkp");
+
+  File outputFile = SD.open(outputPath, FILE_WRITE);
+  if (!outputFile) {
+    Serial.printf("Falha ao abrir o arquivo %s no cartão SD\n", outputPath);
+    return;
+  }
+
+  Serial.printf("Iniciando dump da partição %s para o arquivo %s\n", partitionLabel, outputPath);
+
+  const size_t bufferSize = 4096;  // Ajuste conforme necessário
+  uint8_t* buffer = (uint8_t*)malloc(bufferSize);
+  if (!buffer) {
+    Serial.println("Falha ao alocar memória");
+    outputFile.close();
+    return;
+  }
+  progressHandler(0,500);
+  displayRedStripe("Backing up");
+  for (size_t offset = 0; offset < partition->size; offset += bufferSize) {
+    size_t bytesToRead = (offset + bufferSize > partition->size) ? (partition->size - offset) : bufferSize;
+    esp_err_t result = esp_partition_read(partition, offset, buffer, bytesToRead);
+    if (result != ESP_OK) {
+      Serial.printf("Erro ao ler a partição %s no offset %d (código de erro: %d)\n", partitionLabel, offset, result);
+      free(buffer);
+      outputFile.close();
+      return;
+    }
+    outputFile.write(buffer, bytesToRead);
+    progressHandler(offset+bufferSize,partition->size);
+  }
+
+  free(buffer);
+  outputFile.close();
+  displayRedStripe("Complete");
+  delay(2000);
+
+  Serial.printf("Dump da partição %s para o arquivo %s concluído\n", partitionLabel, outputPath);
+}
+
+void restorePartition(const char* partitionLabel) {
+  tft.fillScreen(BGCOLOR);
+  String filepath = loopSD(true);
+  if(filepath=="") return;
+  else {
+    File source = SD.open(filepath, "r");
+    if(strcmp(partitionLabel,"spiffs")==0) {
+      prog_handler=1;
+      Update.onProgress(progressHandler);
+      Update.begin(source.size(),U_SPIFFS);
+      Update.writeStream(source);
+    }
+
+    if(strcmp(partitionLabel,"vfs")==0) {
+      performFATUpdate(source,source.size(), "vfs");
+    }
+  }
+  displayRedStripe("Restored");
+  delay(2000);
 }

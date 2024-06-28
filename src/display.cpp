@@ -1,6 +1,4 @@
 
-#define LAUNCHER_VERSION "2.0.1"
-
 #include "display.h"
 #include "globals.h"
 #include "mykeyboard.h"
@@ -85,8 +83,8 @@ void initDisplay(bool doAll) {
       tft.setTextSize(FONT_P);
       show = random(0,40);
       if(show==0 || doAll) {
-        if (cor==0) { tft.setTextColor(0x33c5,BGCOLOR); txt=String(cor); }
-        else if (cor==1) { tft.setTextColor(0x35e5,BGCOLOR); txt=String(cor); }
+        if (cor==0) { tft.setTextColor(0x30c5,BGCOLOR); txt=String(cor); }
+        else if (cor==1) { tft.setTextColor(0x32e5,BGCOLOR); txt=String(cor); }
         else { txt=" "; }
         
         if(_x>=(WIDTH-10)) {_x=10; _y+=8; }
@@ -96,19 +94,19 @@ void initDisplay(bool doAll) {
         _x+=6;
         
         tft.print(txt);
-        tft.setTextSize(FONT_G);
-        tft.setTextColor(TFT_GREEN);
-        #ifndef STICK_C
-        tft.drawCentreString("M5Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
-        #else
-        tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
-        #endif
       } else { 
         _x+=6;
         if(_x>=(WIDTH-10)) { _x=10; _y+=8; }
         tft.setCursor(_x,_y); 
         }
     }
+    tft.setTextSize(FONT_G);
+    tft.setTextColor(TFT_GREEN);
+    #ifndef STICK_C
+    tft.drawCentreString("M5Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
+    #else
+    tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
+    #endif
     tft.setTextSize(FONT_G);
     tft.setTextColor(TFT_GREEN);
 

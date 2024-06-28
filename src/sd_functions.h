@@ -28,7 +28,7 @@ void readFs(String folder, String result[][3]);
 
 void sortList(String fileList[][3], int fileListCount);
 
-void loopSD();
+String loopSD(bool filePicker = false);
 
 void performUpdate(Stream &updateSource, size_t updateSize, int command);
 

@@ -47,7 +47,7 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 Sourcecode will be released in the future..
 
 ## Changelog
-* 2.1.1 (Future):
+* 2.?.? (Future):
      * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
      * [ ] change default folder for download (config.conf)
 * 2.1.0:
@@ -60,6 +60,7 @@ Sourcecode will be released in the future..
      * [x] Update FAT vfs partition to make compatible with UIFlow2 https://github.com/bmorcelli/M5Stick-Launcher/issues/29
      * [x] Partition changer, to allow running DOOM and UIFlow on Cardputer and StickC
      * [x] Fixed (increased number of files) https://github.com/bmorcelli/M5Stick-Launcher/issues/33
+     * [x] Backup and Restore FAT and SPIFFS Filesystems. If you use UIFlow, you can save all sketches into your device and make a backup to restore after reinstall UIFlow or MicroHydra or CircuitPython
 * 2.0.1:
      * Fixed UIFlow Instalation https://github.com/bmorcelli/M5Stick-Launcher/issues/20
      * Fixed Folder creation on WebUI https://github.com/bmorcelli/M5Stick-Launcher/issues/18

@@ -371,7 +371,8 @@ void readFs(String folder, String result[][3]) {
 **  Function: loopSD                          
 **  Where you choose what to do wuth your SD Files   
 **********************************************************************/
-void loopSD(){
+String loopSD(bool filePicker) {
+  String result = "";
   bool reload=false;
   bool redraw = true;
   int index = 0;
@@ -462,7 +463,12 @@ void loopSD(){
           options.push_back({"Delete", [=]() { deleteFromSd(fileList[index][1]); }});
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           delay(200);
-          loopOptions(options);
+
+          if(!filePicker) loopOptions(options);
+          else {
+            result = fileList[index][1];
+            break;
+          }
           reload = true;  
           redraw = true;
         } else {
@@ -492,6 +498,7 @@ void loopSD(){
   closeSdCard();
   setupSdCard();  
   tft.fillScreen(BGCOLOR);
+  return result;
 }
 /***************************************************************************************
 ** Function name: performUpdate
@@ -718,8 +725,10 @@ bool performFATUpdate(Stream &updateSource, size_t updateSize,  const char *labe
     //memcpy(buffer, buff, bytesRead);
     written += bytesRead;
     error = spi_flash_write(paroffset,buff,sizeof(buff)); 
+    delay(1);
     paroffset+=bytesRead;
     progressHandler(written, updateSize);
+    delay(1);
     if (error != ESP_OK) {
         log_i("[FLASH] Failed to write to flash (0x%x)", error);
         heap_caps_free(buffer);
