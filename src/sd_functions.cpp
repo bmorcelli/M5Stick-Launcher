@@ -649,8 +649,8 @@ void updateFromSD(String path) {
     if (!file.seek(0x10000)) goto Exit;
     performUpdate(file, app_size, U_FLASH);
 
+    prog_handler = 1; // Install SPIFFS update
     if(spiffs) {
-      prog_handler = 1; // Install SPIFFS update
       if (!file.seek(spiffs_offset)) goto Exit;
       performUpdate(file, spiffs_size, U_SPIFFS);
     }
@@ -682,14 +682,14 @@ Exit:
 ** Function name: performFATUpdate
 ** Description:   this function performs the update 
 ***************************************************************************************/
-bool IRAM_ATTR performFATUpdate(Stream &updateSource, size_t updateSize,  const char *label) {
+bool performFATUpdate(Stream &updateSource, size_t updateSize,  const char *label) {
   uint8_t* buffer = (uint8_t*)heap_caps_malloc(4096, MALLOC_CAP_INTERNAL);
   if (buffer == NULL) {
       ESP_LOGE("FLASH", "Failed to allocate buffer in DRAM");
       return false;
   }  
   // Preencher o buffer com 0xFF
-  memset(buffer, 0xFF, 4096);
+  memset(buff, 0xFF, 4096);
   log_i("Start updating: %s", label);
 
   const esp_partition_t* partition;
@@ -710,14 +710,14 @@ bool IRAM_ATTR performFATUpdate(Stream &updateSource, size_t updateSize,  const 
       return false;
   }
   progressHandler(0,500);
-
+  displayRedStripe("Updating FAT");
   log_i("Updating updating: %s", label);
   while (updateSource.available() && written < updateSize) { //updateSource.available() > 0 && 
-    memset(buffer, 0xFF, 4096);
-    bytesRead = updateSource.readBytes(buffer, sizeof(buffer));
+    //memset(buff, 0xFF, 4096);
+    bytesRead = updateSource.readBytes(buff, sizeof(buff));
     //memcpy(buffer, buff, bytesRead);
     written += bytesRead;
-    error = spi_flash_write(paroffset,buffer,sizeof(buffer)); 
+    error = spi_flash_write(paroffset,buff,sizeof(buff)); 
     paroffset+=bytesRead;
     progressHandler(written, updateSize);
     if (error != ESP_OK) {
