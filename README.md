@@ -24,11 +24,13 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 - change rotation (StickCs)
 - Start WebUI
 - set to see all files on SD Card (see only .bins is default)
+- (new) change Partition Scheme (allows installing big apps or UiFlow, for example)
 
 ## tips
 * Having an SD card is good for better experience, but not really needed. [SDCard Hat for M5StickCs](https://www.thingiverse.com/thing:6459069) 
 * You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
 * Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Obtaining-binaries-to-launch)
+* Now you can download binaries from [HERE!](https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html)
 
 ## How to Install
 * Use the Flasher: [M5Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/flash0.html).
@@ -45,17 +47,19 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 Sourcecode will be released in the future..
 
 ## Changelog
-* 2.1.0 (Future):
+* 2.1.1 (Future):
      * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
      * [ ] change default folder for download (config.conf)
-     * [ ] Update FAT vfs partition to make compatible with UIFlow2 (update.h and HTTPUpdate.h libraries fork and rework)
-* 2.0.2:
-     * [x] Core2 compatibility
+* 2.1.0:
+     * [x] Core Fire (all 16Mb Core devices) and Core2 compatibility
      * [x] Turn SPIFFs update optional (turne off by default) (config.conf)
-     * [x] De-Sprite-fy the screens for Core devices (No PSRam, unable to handle huge Sprites)
+     * [x] De-Sprite-fied the screens for Core devices (No PSRam, unable to handle huge Sprites) https://github.com/bmorcelli/M5Stick-Launcher/issues/34
      * [x] Make keyboard work with touchscreen capture in Core devices
-     * [x] Dedicated btn for WebUI on main screen
-     * [ ] Multiple files upload on WebUI
+     * [x] Dedicated btn for WebUI on main screen https://github.com/bmorcelli/M5Stick-Launcher/issues/22
+     * [x] Multiple files upload on WebUI https://github.com/bmorcelli/M5Stick-Launcher/issues/28
+     * [x] Update FAT vfs partition to make compatible with UIFlow2 https://github.com/bmorcelli/M5Stick-Launcher/issues/29
+     * [x] Partition changer, to allow running DOOM and UIFlow on Cardputer and StickC
+     * [x] Fixed (increased number of files) https://github.com/bmorcelli/M5Stick-Launcher/issues/33
 * 2.0.1:
      * Fixed UIFlow Instalation https://github.com/bmorcelli/M5Stick-Launcher/issues/20
      * Fixed Folder creation on WebUI https://github.com/bmorcelli/M5Stick-Launcher/issues/18

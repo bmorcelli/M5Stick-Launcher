@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M5Stack Firmware</title>
+    <style>
+		body {
+		  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		  margin: 0;
+		  padding: 5px;
+		  color: #00dd00;
+		  background-color: #202124;
+		}
+		.container {
+		  max-width: 800px;
+		  margin: 5px auto;
+		  padding: 0 5px;
+		}
+
+		h3 {
+		  margin: 0;
+		  padding: 10px 0;
+		  border-bottom: 1px solid #00cc00;
+		}
+		
+		.download-button {
+		  background-color: #303134;
+		  color: #00dd00;
+		  border: 2px solid;
+		  padding: 4px 8px;
+		  border-radius: 4px;
+		  border-color: #00dd00;
+		  cursor: pointer;
+		  margin: 5px;
+		}
+	 
+		.download-button:hover {
+		  background-color: #292a2c;
+		}
+
+		a {
+		  color: #e0d204;
+		  text-decoration: none;
+		}
+	 
+		a:hover {
+		  text-decoration: underline;
+		}
+		
+        .firmware-card {
+            display: flex;
+            flex-wrap: wrap;
+            border: 1px solid #00cc00;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            align-items: center;
+            word-break: break-word;
+            position: relative;
+        }
+        .firmware-card img {
+            width: 250px;
+            height: auto;
+            margin-right: 16px;
+        }
+        .firmware-details {
+            flex: 1;
+            position: relative;
+        }
+        .firmware-details h2 {
+            margin: 0;
+        }
+        .description {
+            overflow: hidden;
+            display: -webkit-box;
+			text-align: justify;
+            -webkit-line-clamp: 10; /* Limit to 10 lines */
+            -webkit-box-orient: vertical;
+            max-height: 15em; /* Adjust according to line height */
+            position: relative;
+        }
+        .description.expanded {
+            -webkit-line-clamp: unset; /* Remove line clamp */
+            max-height: none; /* Remove max height */
+        }
+        .overlay {
+            display: none;
+            position: absolute;
+            bottom: 3em;
+            left: 0;
+            right: 0;
+			border: 0 0 0 0;
+            height: 3em; /* Adjust according to line height */
+            background: rgba(000, 180, 000, 0.7);
+            text-align: center;
+            color: white;
+			text-decoration: bold;
+            cursor: pointer;
+            line-height: 3em; /* Vertically center the text */
+            transition: background 0.3s;
+            z-index: 1; /* Ensure overlay is on top */
+        }
+        .overlay:hover {
+            background: rgba(000, 100, 000, 0.9);
+			text-decoration: underline;
+        }
+        .version-select {
+            margin: 8px 0;
+            width: 10ch; /* Approximate width for 10 characters */
+        }
+        .version-select option {
+            max-width: 10ch; /* Limit the display width */
+        }
+		.version-div {
+			text-align: right;
+		}	
+        @media (max-width: 768px) {
+            .firmware-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .firmware-card img {
+                width: 100%;
+                height: auto;
+                margin: 16px 0;
+            }
+            .version-select {
+                width: 10ch; /* Maintain the width for mobile */
+            }		
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>-= M5 Launcher =-</h1>
+        <h1 align="center">Firmwares available on M5Burner</h1>
+        <label for="category-filter">Filter by Category:</label>
+        <select id="category-filter">
+            <option value="all">All</option>
+        </select>
+        <div id="firmware-list"></div>
+    </div>
+
+    <script>
+        async function fetchFirmwareData() {
+            const response = await fetch('https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/script/all_device_firmware.json');
+            const data = await response.json();
+            return data;
+        }
+
+        function createFirmwareCard(firmware) {
+            const card = document.createElement('div');
+            card.classList.add('firmware-card');
+            
+            const image = document.createElement('img');
+            image.loading = "lazy"; // Load images lazily
+            image.src = `https://m5burner-cdn.m5stack.com/cover/${firmware.cover}`;
+            card.appendChild(image);
+            
+            const details = document.createElement('div');
+            details.classList.add('firmware-details');
+            
+            const name = document.createElement('h2');
+            name.textContent = `${firmware.name} (${firmware.author})`;
+            details.appendChild(name);
+            
+            const description = document.createElement('p');
+            description.classList.add('description');
+            description.textContent = firmware.description;
+            details.appendChild(description);
+
+            const overlay = document.createElement('div');
+            overlay.classList.add('overlay');
+            overlay.textContent = 'Read more';
+            details.appendChild(overlay);
+
+            card.appendChild(details);
+			
+			const versionDiv = document.createElement('div');
+			versionDiv.classList.add('version-div');
+
+            const versionSelect = document.createElement('select');
+            versionSelect.classList.add('version-select');
+            firmware.versions.forEach(version => {
+                const option = document.createElement('option');
+                option.value = version.file;
+                option.textContent = version.version;
+                versionSelect.appendChild(option);
+            });
+            versionDiv.appendChild(versionSelect);
+
+            // Check if description is longer than allowed height
+            setTimeout(() => {
+                if (description.scrollHeight > description.clientHeight) {
+                    overlay.style.display = 'inline-block';
+
+                    overlay.addEventListener('click', () => {
+                        description.classList.toggle('expanded');
+                        overlay.textContent = description.classList.contains('expanded') ? 'Contract' : 'Read more';
+						overlay.style.height = description.classList.contains('expanded') ? '1em' : '3em';
+						overlay.style.lineHeight = description.classList.contains('expanded') ? '1em' : '3em';
+						versionSelect.style.marginTop = description.classList.contains('expanded') ? '2em' : '1em';
+                    });
+                }
+            }, 100);
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = `https://m5burner-cdn.m5stack.com/firmware/${firmware.versions[0].file}`;
+            downloadLink.target = "_blank";
+            downloadLink.textContent = "Download Firmware";
+            downloadLink.classList.add('download-button');
+            versionDiv.appendChild(downloadLink);
+            
+            versionSelect.addEventListener('change', () => {
+                downloadLink.href = `https://m5burner-cdn.m5stack.com/firmware/${versionSelect.value}`;
+            });
+			
+			details.appendChild(versionDiv);
+			
+
+            return card;
+        }
+
+        function populateCategoryFilter(categories) {
+            const filter = document.getElementById('category-filter');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                filter.appendChild(option);
+            });
+        }
+
+        function filterFirmwareByCategory(firmwareData, category) {
+            if (category === 'all') {
+                return firmwareData;
+            }
+            return firmwareData.filter(firmware => firmware.category === category);
+        }
+
+        function displayFirmwareList(firmwareData) {
+            const list = document.getElementById('firmware-list');
+            list.innerHTML = '';
+            firmwareData.forEach(firmware => {
+                const card = createFirmwareCard(firmware);
+                list.appendChild(card);
+            });
+        }
+
+        async function init() {
+            const firmwareData = await fetchFirmwareData();
+            const categories = [...new Set(firmwareData.map(firmware => firmware.category))];
+            populateCategoryFilter(categories);
+            
+            document.getElementById('category-filter').addEventListener('change', (event) => {
+                const filteredData = filterFirmwareByCategory(firmwareData, event.target.value);
+                displayFirmwareList(filteredData);
+            });
+
+            displayFirmwareList(firmwareData);
+        }
+
+        init();
+    </script>
+</body>
+</html>
