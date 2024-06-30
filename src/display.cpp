@@ -279,7 +279,10 @@ void progressHandler(int progress, size_t total) {
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);    
 
-    if (prog_handler == 1) tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
+    if (prog_handler == 1) { 
+      tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
+      tft.fillRect(20, HEIGHT - 26, WIDTH-40, 13, BGCOLOR);
+      }
     else tft.drawRect(18, HEIGHT - 47, WIDTH-36, 17, FGCOLOR);
     
     String txt;

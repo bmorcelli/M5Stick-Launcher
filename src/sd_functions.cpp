@@ -553,12 +553,10 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
 ***************************************************************************************/
 void updateFromSD(String path) {
   uint8_t firstThreeBytes[16];
-
   uint32_t spiffs_offset = 0;
   uint32_t spiffs_size = 0;
   uint32_t app_size = 0;
   bool spiffs = false;
-
   uint32_t fat_offset_sys = 0;
   uint32_t fat_size_sys = 0;
   uint32_t fat_offset_vfs = 0;
@@ -566,122 +564,114 @@ void updateFromSD(String path) {
   bool fat = false;
 
   File file = SD.open(path);
-  //resetTftDisplay();
   displayRedStripe("Preparing..");
 
   if (!file) goto Exit;
   if (!file.seek(0x8000)) goto Exit; 
   file.read(firstThreeBytes, 16);
-  // Read 3 bytes of the file at position 0x8000 (in order to see if it is partitions information)
-  if (firstThreeBytes[0] != 0xAA || firstThreeBytes[1] != 0x50 || firstThreeBytes[2] != 0x01) {
-    // Install binaries made to be flashed at 0x10000
-    if (!file.seek(0x0)) goto Exit;
-    //file.read(firstThreeBytes, 16);
-    // File is a firmware binary made to flash at 0x10000 address
-    performUpdate(file, file.size(), U_FLASH);
 
+  if (firstThreeBytes[0] != 0xAA || firstThreeBytes[1] != 0x50 || firstThreeBytes[2] != 0x01) {
+    if (!file.seek(0x0)) goto Exit;
+    performUpdate(file, file.size(), U_FLASH);
     file.close();
     tft.fillScreen(BGCOLOR);
-    ESP.restart(); 
-  } 
-  // Start Verifications to install binaries made to be flashed at 0x0
-  else {
+    ESP.restart();
+  } else {
     if (!file.seek(0x8000)) goto Exit;
-    for(int i=0; i<0x0A0;i+=0x20) {
-      //Serial.print((0x8000+i),HEX);
-      if (!file.seek(0x8000+i)) goto Exit;
+    for (int i = 0; i < 0x0A0; i += 0x20) {
+      if (!file.seek(0x8000 + i)) goto Exit;
       file.read(firstThreeBytes, 16);
-      if((firstThreeBytes[0x03]==0x00 || firstThreeBytes[0x03]==0x10 || firstThreeBytes[0x03]==0x20) && firstThreeBytes[0x06]==0x01) {
-        app_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00; // Sets max size of partition.
 
-        if(file.size()<(app_size+0x10000)) app_size = file.size() - 0x10000;
-        else if(app_size>MAX_APP) app_size = MAX_APP; 
+      if ((firstThreeBytes[0x03] == 0x00 || firstThreeBytes[0x03] == 0x10 || firstThreeBytes[0x03] == 0x20) && firstThreeBytes[0x06] == 0x01) {
+        app_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;
+        if (file.size() < (app_size + 0x10000)) app_size = file.size() - 0x10000;
+        else if (app_size > MAX_APP) app_size = MAX_APP;
+      }
+      
+      if (firstThreeBytes[3] == 0x82) {
+        spiffs_offset = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];
+        spiffs_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;
+        if (file.size() < spiffs_offset) spiffs = false;
+        else if (spiffs_size > MAX_SPIFFS) { spiffs_size = MAX_SPIFFS; spiffs = true; }
+        if (spiffs && file.size() < (spiffs_offset + spiffs_size)) spiffs_size = file.size() - spiffs_offset;
+      }
 
+      if (firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x73) {
+        fat_offset_sys = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];
+        fat_size_sys = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;
+        if (file.size() < fat_offset_sys) fat = false;
+        else fat = true;
+        if (fat && fat_size_sys > MAX_FAT_sys) fat_size_sys = MAX_FAT_sys;
+        if (fat && file.size() < (fat_offset_sys + fat_size_sys)) fat_size_sys = file.size() - fat_offset_sys;
       }
-      if(firstThreeBytes[3] == 0x82) { // SPIFFS
-        spiffs_offset = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
-        spiffs_size = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
-        if(file.size()<spiffs_offset) spiffs=false;                                                           // check if there is room for spiffs in file
-        else if(spiffs_size>MAX_SPIFFS) { spiffs_size = MAX_SPIFFS; spiffs = true; }                          // if there is spiffs in file, check its size
-        if(spiffs && file.size()<(spiffs_offset+spiffs_size)) spiffs_size = file.size() - spiffs_offset;      // if there is spiffs, check if spiffs size is lesser then maximum
-      } 
-      if(firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x73) { // FAT sys //
-        fat_offset_sys = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
-        fat_size_sys = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
-        if(file.size()<fat_offset_sys) fat=false;                                                             // check if there is room for spiffs in file
-        else  fat = true;
-        if(fat && fat_size_sys>MAX_FAT_sys) { fat_size_sys = MAX_FAT_sys;  }     // if there is spiffs in file, check its size
-        if(fat && file.size()<(fat_offset_sys+fat_size_sys)) fat_size_sys = file.size() - fat_offset_sys; // if there is spiffs, check if spiffs size is lesser then maximum
-        
-      }
-      if(firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x76) { // FAT vfs  
-        fat_offset_vfs = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];	// Write the offset of spiffs partition
-        fat_size_vfs = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;	                  // Write the size of spiffs partition
-        if(file.size()<fat_offset_vfs) fat=false;                                                             // check if there is room for spiffs in file
-        else  fat = true;
-        if(fat && fat_size_vfs>MAX_FAT_vfs) { fat_size_vfs = MAX_FAT_vfs; }     // if there is spiffs in file, check its size
-        if(fat && file.size()<(fat_offset_vfs+fat_size_vfs)) fat_size_vfs = file.size() - fat_offset_vfs; // if there is spiffs, check if spiffs size is lesser then maximum
+
+      if (firstThreeBytes[3] == 0x81 && firstThreeBytes[0x0C] == 0x76) {
+        fat_offset_vfs = (firstThreeBytes[0x06] << 16) | (firstThreeBytes[0x07] << 8) | firstThreeBytes[0x08];
+        fat_size_vfs = (firstThreeBytes[0x0A] << 16) | (firstThreeBytes[0x0B] << 8) | 0x00;
+        if (file.size() < fat_offset_vfs) fat = false;
+        else fat = true;
+        if (fat && fat_size_vfs > MAX_FAT_vfs) fat_size_vfs = MAX_FAT_vfs;
+        if (fat && file.size() < (fat_offset_vfs + fat_size_vfs)) fat_size_vfs = file.size() - fat_offset_vfs;
       }
     }
-    log_i("Appsize: %d",app_size);
-    log_i("Spiffsize: %d",spiffs_size);
-    log_i("FATsize[0]: %d - max: %d",fat_size_sys, MAX_FAT_sys);
-    log_i("FATsize[1]: %d - max: %d",fat_size_vfs, MAX_FAT_vfs);
-    log_i("FAT: %d",fat);
+
+    log_i("Appsize: %d", app_size);
+    log_i("Spiffsize: %d", spiffs_size);
+    log_i("FATsize[0]: %d - max: %d at offset: %d", fat_size_sys, MAX_FAT_sys, fat_offset_sys);
+    log_i("FATsize[1]: %d - max: %d at offset: %d", fat_size_vfs, MAX_FAT_vfs, fat_offset_vfs);
+    log_i("FAT: %d", fat);
     log_i("------------------------");
-  
-    if(!fat) {
+
+    if (!fat) {
       fat_size_sys = 0;
       fat_size_vfs = 0;
       fat_offset_sys = 0;
       fat_offset_vfs = 0;
-    } 
+    }
 
     prog_handler = 0; // Install flash update
-    if(spiffs && askSpiffs) {
+    if (spiffs && askSpiffs) {
       options = {
         {"SPIFFS No", [&](){ spiffs = false; }},
         {"SPIFFS Yes", [&](){ spiffs = true; }},
       };
       delay(200);
       loopOptions(options);
-      tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+      tft.fillSmoothRoundRect(6, 6, WIDTH - 12, HEIGHT - 12, 5, BGCOLOR);
     }
-    
-    log_i("Appsize: %d",app_size);
-    log_i("Spiffsize: %d",spiffs_size);
-    log_i("FATsize[0]: %d - max: %d",fat_size_sys, MAX_FAT_sys);
-    log_i("FATsize[1]: %d - max: %d",fat_size_vfs, MAX_FAT_vfs);
-    
+
+    log_i("Appsize: %d", app_size);
+    log_i("Spiffsize: %d", spiffs_size);
+    log_i("FATsize[0]: %d - max: %d at offset: %d", fat_size_sys, MAX_FAT_sys, fat_offset_sys);
+    log_i("FATsize[1]: %d - max: %d at offset: %d", fat_size_vfs, MAX_FAT_vfs, fat_offset_vfs);
+
     if (!file.seek(0x10000)) goto Exit;
     performUpdate(file, app_size, U_FLASH);
 
     prog_handler = 1; // Install SPIFFS update
-    if(spiffs) {
+    if (spiffs) {
       if (!file.seek(spiffs_offset)) goto Exit;
       performUpdate(file, spiffs_size, U_SPIFFS);
     }
 
-  #if !defined(STICK_C_PLUS)
-    if(fat) {
-      eraseFAT();
-      
-      if(fat_size_sys>0) {
+    if (fat) {
+      if (fat_size_sys > 0 && fat_size_vfs > 0) {
         if (!file.seek(fat_offset_sys)) goto Exit;
-        if(!performFATUpdate(file, fat_size_sys, "sys")) log_i("FAIL updating FAT sys");
-      }
-      if(fat_size_vfs>0) {
+        if (!performFATUpdate(file, fat_size_sys + fat_size_vfs, "sys")) log_i("FAIL updating FAT sys");
+        else displayRedStripe("sys FAT complete");
+      } else if (fat_size_sys == 0 && fat_size_vfs > 0) {
         if (!file.seek(fat_offset_vfs)) goto Exit;
-        if(!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT sys");
+        if (!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT vfs");
+        else displayRedStripe("vfs FAT complete");
       }
+     
+
     }
-  #endif
     ESP.restart();
-
   }
-
 Exit:
   displayRedStripe("Error on updating.");
+  delay(2000);
 }
 
 
@@ -689,59 +679,58 @@ Exit:
 ** Function name: performFATUpdate
 ** Description:   this function performs the update 
 ***************************************************************************************/
-bool performFATUpdate(Stream &updateSource, size_t updateSize,  const char *label) {
-  uint8_t* buffer = (uint8_t*)heap_caps_malloc(4096, MALLOC_CAP_INTERNAL);
-  if (buffer == NULL) {
-      ESP_LOGE("FLASH", "Failed to allocate buffer in DRAM");
-      return false;
-  }  
-  // Preencher o buffer com 0xFF
-  memset(buff, 0xFF, 4096);
-  log_i("Start updating: %s", label);
+uint8_t DRAM_ATTR buffer[1024];
 
+bool performFATUpdate(Stream &updateSource, size_t updateSize, const char *label) {
+  // Preencher o buffer com 0xFF
+  memset(buffer, 0xFF, sizeof(buffer));
   const esp_partition_t* partition;
   esp_err_t error;
-  size_t paroffset=0;
-  int written=0;
-  int bytesRead=0;
+  size_t paroffset = 0;
+  int written = 0;
+  int bytesRead = 0;
+  
   partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, label);
-  if(!partition){
-      error = UPDATE_ERROR_NO_PARTITION;
-      return false;
+  if (!partition) {
+    error = UPDATE_ERROR_NO_PARTITION;
+    return false;
   }
+  
+  log_i("Start updating: %s", partition->label);
   paroffset = partition->address;
-  log_i("Erasing updating: %s", label);
-  error = spi_flash_erase_range(partition->address, partition->size);
-  if(error != ESP_OK) {
-      log_i("Erase error %d", error);
-      return false;
+  log_i("Erasing updating: %s from: %d with size: %d", label, paroffset, partition->size);
+  
+  error = spi_flash_erase_range(partition->address, updateSize);
+  if (error != ESP_OK) {
+    log_i("Erase error %d", error);
+    return false;
   }
-  progressHandler(0,500);
+  
+  progressHandler(0, 500);
   displayRedStripe("Updating FAT");
   log_i("Updating updating: %s", label);
-  while (updateSource.available() && written < updateSize) { //updateSource.available() > 0 && 
-    //memset(buff, 0xFF, 4096);
-    bytesRead = updateSource.readBytes(buff, sizeof(buff));
-    //memcpy(buffer, buff, bytesRead);
-    written += bytesRead;
-    error = spi_flash_write(paroffset,buff,sizeof(buff)); 
-    delay(1);
-    paroffset+=bytesRead;
-    progressHandler(written, updateSize);
-    delay(1);
+  
+  while (written < updateSize) { //updateSource.available() && 
+    bytesRead = updateSource.readBytes(buffer, sizeof(buffer));
+    if (bytesRead == 0) break; // Evitar loop infinito se não houver bytes para ler
+    
+    error = spi_flash_write(paroffset, buffer, bytesRead);
     if (error != ESP_OK) {
-        log_i("[FLASH] Failed to write to flash (0x%x)", error);
-        heap_caps_free(buffer);
-        return false;
-    }    
+      log_i("[FLASH] Failed to write to flash (0x%x)", error);
+      return false;
+    }
+    
+    paroffset += bytesRead;
+    written += bytesRead;
+    progressHandler(written, updateSize);
   }
-  if(written==updateSize)  {
+  
+  if (written == updateSize) {
     log_i("Success updating %s", label);
-  }
-  else {
+  } else {
     log_i("FAIL updating %s", label);
     return false;
   }
-    heap_caps_free(buffer);
-    return true;
+  
+  return true;
 }
