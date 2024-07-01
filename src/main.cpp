@@ -262,6 +262,8 @@ void get_partition_sizes() {
 *********************************************************************/
 void setup() {
   Serial.begin(115200);
+  tft.init();
+  tft.fillScreen(TFT_DARKGREEN);
 
   // declare variables
   size_t currentIndex=0;  
@@ -273,7 +275,6 @@ void setup() {
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
 
-  tft.init();
   // Setup GPIOs and stuff
   #if defined(STICK_C_PLUS2)
     pinMode(UP_BTN, INPUT);

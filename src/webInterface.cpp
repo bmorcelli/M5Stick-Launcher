@@ -450,7 +450,7 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   setTftDisplay(7,26,TFT_WHITE,FONT_P,BGCOLOR);
 #endif
   tft.setTextSize(FONT_M);
-  tft.print("IP: ");   tftprintln(txt,10,1);
+  tft.print("IP ");   tftprintln(txt,10,1);
   tftprintln("Usr: " + String(default_httpuser),10,1);
   tftprintln("Pwd: " + String(default_httppassword),10,1);
 

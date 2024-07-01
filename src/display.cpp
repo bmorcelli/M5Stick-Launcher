@@ -349,13 +349,13 @@ void drawOptions(int index,const std::vector<std::pair<std::string, std::functio
     tft.setTextColor(fgcolor,bgcolor);
     tft.setTextSize(FONT_M);
     tft.setCursor(WIDTH*0.15+5,HEIGHT/2-menuSize*(FONT_M*8+4)/2);
-
+    
     int i=0;
     int init = 0;
     int cont = 1;
+    tft.fillRoundRect(WIDTH*0.15,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,bgcolor);
     menuSize = options.size();
     if(index>=MAX_MENU_SIZE) init=index-MAX_MENU_SIZE+1;
-    tft.fillRoundRect(WIDTH*0.15,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,bgcolor);
     for(i=0;i<menuSize;i++) {
       if(i>=init) {
         String text="";
