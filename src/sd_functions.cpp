@@ -299,7 +299,6 @@ void readFs(String folder, String result[][3]) {
       result[allFilesCount][1]="";
       result[allFilesCount][2]="";
       allFilesCount++;
-      if (allFilesCount<MAXFILES && result[allFilesCount][2]!="") break;
     }
     allFilesCount=0;
 

@@ -49,14 +49,12 @@ uint8_t buff[4096] = {0};
 
 //Functions in this file;
 
-void loopSD();
 void setBrightnessMenu();
 void setBrightness(int bright, bool save = true);
 void getBrightness(); 
 bool gsetOnlyBins(bool set = false, bool value = true);
 bool gsetAskSpiffs(bool set = false, bool value = true);
 int gsetRotation(bool set = false);
-void backToMenu();
 
 
 /*********************************************************************
@@ -262,8 +260,6 @@ void get_partition_sizes() {
 *********************************************************************/
 void setup() {
   Serial.begin(115200);
-  tft.init();
-  tft.fillScreen(TFT_DARKGREEN);
 
   // declare variables
   size_t currentIndex=0;  
@@ -274,6 +270,7 @@ void setup() {
   //Define variables to identify if there is an app installed after Launcher 
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
+  tft.init();
 
   // Setup GPIOs and stuff
   #if defined(STICK_C_PLUS2)
@@ -306,7 +303,7 @@ void setup() {
   #endif
 
   EEPROM.begin(EEPROMSIZE); // open eeprom
-if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(3) > 1 || EEPROM.read(4) > 19 || EEPROM.read(5) > 19) {
+if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100) {
 #if defined(CARDPUTER) || defined(M5STACK)
   EEPROM.write(0, 1);    // Right rotation for cardputer
 #else
@@ -314,9 +311,6 @@ if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.
 #endif
   EEPROM.write(1, 15);   // 15 second auto dim time
   EEPROM.write(2, 100);  // 100% brightness
-  EEPROM.write(3, 0);    // TVBG NA Region
-  EEPROM.write(4, 11);   // FGColor Green
-  EEPROM.write(5, 1);    // BGcolor Black
   EEPROM.commit();       // Store data to EEPROM
 }
 if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  { 
@@ -474,10 +468,10 @@ void loop() {
         if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); }});
         else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true); }});
 
-      #ifndef CARDPUTER
+      #if !defined(CARDPUTER)
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
       #endif
-      #if !defined(CORE) || !defined(CORE2)
+      #if defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(CARDPUTER)
         options.push_back({"Part Change",  [=]() { partitioner(); }});
         options.push_back({"Part List",  [=]() { partList(); }});
       #endif
@@ -485,10 +479,10 @@ void loop() {
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
       #endif
         if(MAX_SPIFFS>0) options.push_back({"Save SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
-        //if(MAX_FAT_sys>0) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});        
+        //if(MAX_FAT_sys>0) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
         if(MAX_FAT_vfs>0) options.push_back({"Save FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
         if(MAX_SPIFFS>0) options.push_back({ "Rest SPIFFS",  [=]() { restorePartition("spiffs"); }});
-        //if(MAX_FAT_sys>0) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});
+        //if(MAX_FAT_sys>0) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
         if(MAX_FAT_vfs>0) options.push_back({"Rest FAT Vfs",  [=]() { restorePartition("vfs"); }});
         
 

@@ -1,5 +1,13 @@
+# Default, , , , 
 # Name,   Type, SubType, Offset,   Size, Flags
 nvs,      data, nvs,     0x9000,   0x6000,
 test,     app,  test,    0x10000,  0x170000,
 app0,     app,  ota_0,   0x180000, 0x260000,
 spiffs,   data, spiffs,  0x3E0000, 0x20000,
+#
+# Orca, , , , ,
+# Name,   Type, SubType, Offset,   Size, Flags
+#nvs,      data, nvs,     0x9000,   0x6000,
+#test,     app,  test,    0x10000,  0x170000,
+#app0,     app,  ota_0,   0x180000, 0x200000,
+#spiffs,   data, spiffs,  0x380000, 0x80000,
