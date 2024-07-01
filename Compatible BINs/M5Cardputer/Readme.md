@@ -14,6 +14,7 @@
   * MicroHydra: https://github.com/echo-lalia/Cardputer-MicroHydra
   * Nemo: https://github.com/n0xa/m5stick-nemo
   * Palnagochi: https://github.com/viniciusbo/m5-palnagotchi
+  * Saturn: https://github.com/henriquesebastiao/saturn
   * UserDemo: https://github.com/m5stack/M5Cardputer
   * Volos TV-Remote: https://github.com/VolosR/M5CardRemote
   
