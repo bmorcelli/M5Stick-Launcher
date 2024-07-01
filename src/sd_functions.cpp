@@ -293,13 +293,13 @@ void sortList(String fileList[][3], int fileListCount) {
 ** Description:   sort files for name
 ***************************************************************************************/
 void readFs(String folder, String result[][3]) {
-
     int allFilesCount = 0;
     while(allFilesCount<MAXFILES) {
       result[allFilesCount][0]="";
       result[allFilesCount][1]="";
       result[allFilesCount][2]="";
       allFilesCount++;
+      if (allFilesCount<MAXFILES && result[allFilesCount][0]!="") break;
     }
     allFilesCount=0;
 
@@ -312,11 +312,13 @@ void readFs(String folder, String result[][3]) {
 
     File root = SD.open(folder);
     if (!root || !root.isDirectory()) {
-        //Serial.println("Não foi possível abrir o diretório");
+        displayRedStripe("Fail open root");
+        delay(2000);
         return; // Retornar imediatamente se não for possível abrir o diretório
     }
 
-    File file2 = root.openNextFile();
+    File file2;
+    file2 = root.openNextFile();
     while (file2 && allFilesCount < (MAXFILES-1)) {
         String fileName = file2.name();
         if (!file2.isDirectory()) {
@@ -564,7 +566,6 @@ void updateFromSD(String path) {
   bool fat = false;
 
   File file = SD.open(path);
-  displayRedStripe("Preparing..");
 
   if (!file) goto Exit;
   if (!file.seek(0x8000)) goto Exit; 
@@ -669,12 +670,12 @@ void updateFromSD(String path) {
      
 
     }
-    //ESP.restart();
     displayRedStripe("Complete");
-    delay(2000);
+    delay(1000);
+    ESP.restart();
   }
 Exit:
-  displayRedStripe("Error on updating.");
+  displayRedStripe("Update Error.");
   delay(2000);
 }
 

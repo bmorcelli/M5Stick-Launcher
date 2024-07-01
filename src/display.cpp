@@ -133,8 +133,8 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   tft.print("Firmware: ");
   
   setTftDisplay(10, 22, TFT_WHITE, FONT_M,BGCOLOR);
-  String name2 = String(name).substring(0,56);
-  tftprintln(name2,10);
+  String name2 = String(name);
+  tftprintln(name2,10,3);
   
   setTftDisplay(10, 22+4*FONT_M*8, FGCOLOR);
   tft.print("by: ");
@@ -187,8 +187,8 @@ void displayCurrentVersion(String name, String author, String version, String pu
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
 
     setTftDisplay(10, 10, TFT_WHITE,FONT_M,BGCOLOR);
-    String name2 = String(name).substring(0,36);
-    tftprintln(name2,10);
+    String name2 = String(name);
+    tftprintln(name2,10,2);
     #ifndef STICK_C
     setTftDisplay(10,50,ALCOLOR,FONT_M);
     #endif
@@ -340,7 +340,9 @@ void progressHandler(int progress, size_t total) {
 ***************************************************************************************/
 void drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
     int menuSize = options.size();
-    if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
+    if(options.size()>MAX_MENU_SIZE) { 
+      menuSize = MAX_MENU_SIZE; 
+      } 
 
     tft.fillRoundRect(WIDTH*0.15,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,bgcolor);
     
@@ -353,6 +355,7 @@ void drawOptions(int index,const std::vector<std::pair<std::string, std::functio
     int cont = 1;
     menuSize = options.size();
     if(index>=MAX_MENU_SIZE) init=index-MAX_MENU_SIZE+1;
+    tft.fillRoundRect(WIDTH*0.15,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,bgcolor);
     for(i=0;i<menuSize;i++) {
       if(i>=init) {
         String text="";
@@ -716,8 +719,8 @@ void tftprintln(String txt, int margin, int numlines) {
   while(size>0 && numlines>0) {
     if(tft.getCursorX()<margin) tft.setCursor(margin,tft.getCursorY());
     nchars = (WIDTH-tft.getCursorX()-margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
-    tft.println(txt.substring(start,nchars));
-    start = nchars-1;
+    tft.println(txt.substring(0,nchars));
+    txt=txt.substring(nchars);
     size -= nchars;
     numlines--;
   }
@@ -737,8 +740,8 @@ void tftprint(String txt, int margin, int numlines) {
     if(!prim) { tft.println(); }
     if(tft.getCursorX()<margin) tft.setCursor(margin,tft.getCursorY());
     nchars = (WIDTH-tft.getCursorX()-margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
-    tft.print(txt.substring(start,nchars));
-    start = nchars-1;
+    tft.print(txt.substring(0,nchars));
+    txt = txt.substring(nchars);
     size -= nchars;
     numlines--;
     prim = false;
