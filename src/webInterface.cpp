@@ -159,7 +159,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
           else prog_handler = 1;
         #ifndef STICK_C_PLUS
           //Erase FAT partition
-          eraseFAT();
+          //eraseFAT();
         #endif
           progressHandler(0, 500);
           Update.onProgress(progressHandler);

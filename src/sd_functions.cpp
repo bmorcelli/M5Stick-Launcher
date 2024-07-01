@@ -26,7 +26,7 @@ bool eraseFAT() {
   }
 
   // erase all FAT partition
-  err = esp_partition_erase_range(partition, 0, partition->size);
+  err = spi_flash_erase_range(partition->address, partition->size);
   if (err != ESP_OK) {
       //log_e("Failed to erase partition: %s", esp_err_to_name(err));
       return false;
@@ -40,7 +40,7 @@ bool eraseFAT() {
   }
 
   // erase all FAT partition
-  err = esp_partition_erase_range(partition, 0, partition->size);
+  err = spi_flash_erase_range(partition->address, partition->size);
   if (err != ESP_OK) {
       return false;
   }
@@ -520,7 +520,7 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
 
   #ifndef STICK_C_PLUS
     //Erase FAT partition
-    eraseFAT();
+    //eraseFAT();
   #endif
 
     prog_handler = 0; // Install flash update
@@ -655,11 +655,13 @@ void updateFromSD(String path) {
     }
 
     if (fat) {
-      if (fat_size_sys > 0 && fat_size_vfs > 0) {
+      if (fat_size_sys > 0) {
         if (!file.seek(fat_offset_sys)) goto Exit;
-        if (!performFATUpdate(file, fat_size_sys + fat_size_vfs, "sys")) log_i("FAIL updating FAT sys");
+        if (!performFATUpdate(file, fat_size_sys, "sys")) log_i("FAIL updating FAT sys");
         else displayRedStripe("sys FAT complete");
-      } else if (fat_size_sys == 0 && fat_size_vfs > 0) {
+      } 
+      
+      if (fat_size_vfs > 0) {
         if (!file.seek(fat_offset_vfs)) goto Exit;
         if (!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT vfs");
         else displayRedStripe("vfs FAT complete");
@@ -667,7 +669,9 @@ void updateFromSD(String path) {
      
 
     }
-    ESP.restart();
+    //ESP.restart();
+    displayRedStripe("Complete");
+    delay(2000);
   }
 Exit:
   displayRedStripe("Error on updating.");
@@ -679,17 +683,23 @@ Exit:
 ** Function name: performFATUpdate
 ** Description:   this function performs the update 
 ***************************************************************************************/
-uint8_t DRAM_ATTR buffer[1024];
+uint8_t buffer2[1024];
 
 bool performFATUpdate(Stream &updateSource, size_t updateSize, const char *label) {
   // Preencher o buffer com 0xFF
-  memset(buffer, 0xFF, sizeof(buffer));
+  memset(buffer2, 0x00, sizeof(buffer2));
   const esp_partition_t* partition;
   esp_err_t error;
   size_t paroffset = 0;
   int written = 0;
   int bytesRead = 0;
-  
+  error = esp_flash_set_chip_write_protect(NULL, false);
+
+  if (error != ESP_OK) {
+    log_i("Protection error: %d", error);
+    //return false;
+  }
+
   partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, label);
   if (!partition) {
     error = UPDATE_ERROR_NO_PARTITION;
@@ -698,7 +708,7 @@ bool performFATUpdate(Stream &updateSource, size_t updateSize, const char *label
   
   log_i("Start updating: %s", partition->label);
   paroffset = partition->address;
-  log_i("Erasing updating: %s from: %d with size: %d", label, paroffset, partition->size);
+  log_i("Erasing updating: %s from: %d with size: %d", label, paroffset, updateSize);
   
   error = spi_flash_erase_range(partition->address, updateSize);
   if (error != ESP_OK) {
@@ -711,15 +721,13 @@ bool performFATUpdate(Stream &updateSource, size_t updateSize, const char *label
   log_i("Updating updating: %s", label);
   
   while (written < updateSize) { //updateSource.available() && 
-    bytesRead = updateSource.readBytes(buffer, sizeof(buffer));
-    if (bytesRead == 0) break; // Evitar loop infinito se não houver bytes para ler
-    
-    error = spi_flash_write(paroffset, buffer, bytesRead);
+    bytesRead = updateSource.readBytes(buffer2, sizeof(buffer2));
+    error = spi_flash_write(paroffset, buffer2, bytesRead);
     if (error != ESP_OK) {
       log_i("[FLASH] Failed to write to flash (0x%x)", error);
       return false;
     }
-    
+    if (bytesRead == 0) break; // Evitar loop infinito se não houver bytes para ler    
     paroffset += bytesRead;
     written += bytesRead;
     progressHandler(written, updateSize);

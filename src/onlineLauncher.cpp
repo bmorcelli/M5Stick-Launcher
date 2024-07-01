@@ -239,7 +239,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 
 #ifndef STICK_C_PLUS
   //Erase FAT partition
-  eraseFAT();
+  //eraseFAT();
 #endif
 
 #ifndef STICK_C
@@ -286,7 +286,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 
 #if !defined(STICK_C_PLUS)
   if(fat) {
-    eraseFAT();
+    //eraseFAT();
     int FAT=U_FAT_vfs;
     if(fat_size[1]>0) FAT = U_FAT_sys;
     for(int i=0; i<2; i++) {

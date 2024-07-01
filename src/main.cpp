@@ -273,7 +273,7 @@ void setup() {
   esp_app_desc_t ota_desc;
   esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
 
-
+  tft.init();
   // Setup GPIOs and stuff
   #if defined(STICK_C_PLUS2)
     pinMode(UP_BTN, INPUT);
@@ -295,7 +295,7 @@ void setup() {
 
   rotation = gsetRotation();
   tft.setRotation(rotation);
-  tft.init();
+  
   resetTftDisplay();
   initDisplay(true);  
   askSpiffs=gsetAskSpiffs();
@@ -484,9 +484,11 @@ void loop() {
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
       #endif
         if(MAX_SPIFFS>0) options.push_back({"Bkp SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
+        if(MAX_FAT_sys>0) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});        
         if(MAX_FAT_vfs>0) options.push_back({"Bkp FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
-        if(MAX_SPIFFS>0) options.push_back({ "Restore SPIFFS",  [=]() { restorePartition("spiffs"); }});
-        if(MAX_FAT_vfs>0) options.push_back({"Restore FAT FS",  [=]() { restorePartition("vfs"); }});
+        if(MAX_SPIFFS>0) options.push_back({ "Rest SPIFFS",  [=]() { restorePartition("spiffs"); }});
+        if(MAX_FAT_vfs>0) options.push_back({"Rest FAT Vfs",  [=]() { restorePartition("vfs"); }});
+        if(MAX_FAT_vfs>0) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});
 
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         
