@@ -47,10 +47,11 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 Sourcecode will be released in the future..
 
 ## Changelog
-* 2.?.? (Future):
+* 2.2.0 (Future):
      * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
      * [ ] change default folder for download (config.conf)
-     * [ ] Allow M5Launcher to be updated through OTA
+     * [x] Allow M5Launcher to be updated through OTA
+     * [x] Reduced flickering on SD files navigation
 * 2.1.2:
      * [x] Fixed OTA error message
      * [x] Increased Options Menu width and reduced menu flickering

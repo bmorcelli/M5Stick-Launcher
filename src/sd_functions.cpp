@@ -397,6 +397,7 @@ String loopSD(bool filePicker) {
         maxFiles=0;
         for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
         reload=false;
+        tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
       }
       listFiles(index, fileList);
 

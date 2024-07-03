@@ -293,6 +293,7 @@ void setup() {
 
   rotation = gsetRotation();
   tft.setRotation(rotation);
+  partitionCrawler(); // Performs the verification when Launcher is installed through OTA
   
   resetTftDisplay();
   initDisplay(true);  

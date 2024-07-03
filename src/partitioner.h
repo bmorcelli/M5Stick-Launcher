@@ -1,4 +1,5 @@
 #include <esp_partition.h>
+#include <esp_ota_ops.h>
 #include <esp_flash.h>
 
 
@@ -10,3 +11,5 @@ void partList();
 void dumpPartition(const char* partitionLabel, const char* outputPath);
 
 void restorePartition(const char* partitionLabel);
+
+void partitionCrawler();

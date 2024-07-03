@@ -62,28 +62,22 @@ void coreFooter2(uint16_t color) {
 ***************************************************************************************/
 void initDisplay(bool doAll) {
     tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
-    srand(time(0));
     tft.setTextSize(FONT_P);
     tft.setCursor(10,10);
-    int cor = rand() % 3;
-
-    if (cor==0) tft.setTextColor(0x35e5,BGCOLOR);
-    else if (cor==1) tft.setTextColor(0x33c5,BGCOLOR);
-    else tft.setTextColor(0x0ce0,BGCOLOR);
-    tftprint(String(random(0,9)),10);
+    int cor = 0;
     String txt;
     int show = random(0,40);
     int _x=tft.getCursorX();
     int _y=tft.getCursorY();
     
     while(tft.getCursorY()<(HEIGHT-12)) {
-      cor = random(0,3);
+      cor = random(0,11);
       tft.setTextSize(FONT_P);
       show = random(0,40);
       if(show==0 || doAll) {
-        if (cor==0) { tft.setTextColor(0x30c5,BGCOLOR); txt=String(cor); }
-        else if (cor==1) { tft.setTextColor(0x32e5,BGCOLOR); txt=String(cor); }
-        else { txt=" "; }
+        if (cor==10) { txt=" "; }
+        else if (cor & 1) { tft.setTextColor(0x30c5,BGCOLOR); txt=String(cor); }
+        else { tft.setTextColor(0x32e5,BGCOLOR); txt=String(cor); }
         
         if(_x>=(WIDTH-10)) {_x=10; _y+=8; }
         else if(_x<10) { _x = 10; }
@@ -273,6 +267,7 @@ void progressHandler(int progress, size_t total) {
 #ifndef STICK_C
   int barWidth = map(progress, 0, total, 0, WIDTH-40);
   if(progress == 0) {
+    tft.setTextSize(FONT_M);
     tft.setTextColor(ALCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);    
@@ -464,7 +459,6 @@ void drawBatteryStatus() {
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
 void listFiles(int index, String fileList[][3]) {
-    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     tft.setCursor(10,10);
     tft.setTextSize(FONT_M);
     int arraySize = 0;
@@ -475,16 +469,18 @@ void listFiles(int index, String fileList[][3]) {
         start=index-MAX_ITEMS+1;
         if(start<0) start=0;
     }
-    
+    int nchars = (WIDTH-20)/(6*tft.textsize);
+    String txt="";
     while(i<arraySize) {
         if(i>=start && fileList[i][2]!="") {
-            if(fileList[i][2]=="folder") tft.setTextColor(FGCOLOR-0x1111);
-            else if(fileList[i][2]=="operator") tft.setTextColor(ALCOLOR);
-            else tft.setTextColor(FGCOLOR);
+            if(fileList[i][2]=="folder") tft.setTextColor(FGCOLOR-0x1111, BGCOLOR);
+            else if(fileList[i][2]=="operator") tft.setTextColor(ALCOLOR, BGCOLOR);
+            else tft.setTextColor(FGCOLOR,BGCOLOR);
             tft.setCursor(10,tft.getCursorY());
-            if (index==i) tft.print(">");
-            else tft.print(" ");
-            tftprintln(fileList[i][0],10,1);
+            if (index==i) txt=">";
+            else txt=" ";
+            txt+=fileList[i][0] + "                       ";
+            tft.println(txt.substring(0,nchars));
         }
         i++;
         if (i==(start+MAX_ITEMS) || fileList[i][2]=="") break;
@@ -494,6 +490,7 @@ void listFiles(int index, String fileList[][3]) {
     coreFooter();
     #endif    
 }
+
 
 
 /*********************************************************************
