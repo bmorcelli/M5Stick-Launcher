@@ -50,7 +50,7 @@ Sourcecode will be released in the future..
 * 2.?.? (Future):
      * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
      * [ ] change default folder for download (config.conf)
-     * [ ] Adjust size of Options menu to allow some more letters
+     * [ ] Allow M5Launcher to be updated through OTA
 * 2.1.2:
      * [x] Fixed OTA error message
      * [x] Increased Options Menu width and reduced menu flickering

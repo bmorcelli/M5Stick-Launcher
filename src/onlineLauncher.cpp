@@ -86,6 +86,8 @@ bool GetJsonFromM5() {
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core2.json";  
   #elif defined(CORE)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core.json";  
+  #elif defined(CORE3)
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/cores3.json";
   #endif
 
   if (WiFi.status() == WL_CONNECTED) {

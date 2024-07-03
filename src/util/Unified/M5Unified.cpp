@@ -1184,6 +1184,8 @@ for (int i = 0; i < 0x50; ++i)
       switch (_board)
       {
       case board_t::board_M5StackCore2:
+      case board_t::board_M5Tough:
+      case board_t::board_M5StackCoreS3:
       case board_t::board_M5StackCoreS3SE:
         {
           use_rawstate_bits = 0b00111;
@@ -1191,7 +1193,7 @@ for (int i = 0; i < 0x50; ++i)
           while (--i >= 0)
           {
             auto raw = Touch.getTouchPointRaw(i);
-            if (raw.y > 240)
+            if (raw.y > 190) //240 - 50 para a margem inferior onde estão os botoes
             {
               auto det = Touch.getDetail(i);
               if (det.state & touch_state_t::touch)

@@ -279,7 +279,7 @@ void setup() {
     axp192.begin();
   #endif
   #if defined(M5STACK)
-    M5.begin(); // inicia os periféricos do CORE2 exceto o TFT.
+    M5.begin(); // inicia os periféricos do CORE, CORE2 e COREs3 exceto o TFT.
   #endif
   #ifndef CARDPUTER
   pinMode(SEL_BTN, INPUT);
