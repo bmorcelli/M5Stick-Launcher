@@ -150,22 +150,6 @@ bool UpdateClass::begin(size_t size, int command, int ledPin, uint8_t ledOn, con
             }
         }
     }
-    else if (command == U_FAT_vfs) {
-        _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "vfs");
-        _paroffset = 0x1000;  //Offset for ffat, assuming size is already corrected
-        if(!_partition){
-            _error = UPDATE_ERROR_NO_PARTITION;
-            return false;
-        }
-    }
-    else if (command == U_FAT_sys) {
-        _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "sys");
-        _paroffset = 0x1000;  //Offset for ffat, assuming size is already corrected
-        if(!_partition){
-            _error = UPDATE_ERROR_NO_PARTITION;
-            return false;
-        }
-    }    
     else {
         _error = UPDATE_ERROR_BAD_ARGUMENT;
         log_e("bad command %u", command);
@@ -262,9 +246,9 @@ bool UpdateClass::_verifyHeader(uint8_t data) {
             return false;
         }
         return true;
-    } else if(_command == U_SPIFFS || _command == U_FAT_vfs || _command == U_FAT_sys) {
+    } else if(_command == U_SPIFFS) {
         return true;
-    } 
+    }
     return false;
 }
 
@@ -275,16 +259,17 @@ bool UpdateClass::_verifyEnd() {
             return false;
         }
 
-        if(esp_ota_set_boot_partition(_partition)){
-            _abort(UPDATE_ERROR_ACTIVATE);
-            return false;
-        }
+// Launcher doesn't have otadata partition anymore, so this information can't be saved at all
+        //if(esp_ota_set_boot_partition(_partition)){
+        //    _abort(UPDATE_ERROR_ACTIVATE);
+        //    return false;
+        //}
         _reset();
         return true;
-    } else if(_command == U_SPIFFS || _command == U_FAT_vfs || _command == U_FAT_sys) {
+    } else if(_command == U_SPIFFS) {
         _reset();
         return true;
-    } 
+    }
     return false;
 }
 

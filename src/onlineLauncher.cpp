@@ -278,7 +278,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
     progressHandler(0, 500);
     httpUpdate.onProgress(progressHandler);
     
-    if(!httpUpdate.updateVfsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size,U_SPIFFS)) {
+    if(!httpUpdate.updateSpiffsFromOffset(*client, fileAddr, spiffs_offset, spiffs_size)) {
       displayRedStripe("SPIFFS Failed");
       delay(2500);
     }
@@ -287,7 +287,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 #if !defined(STICK_C_PLUS)
   if(fat) {
     //eraseFAT();
-    int FAT=U_FAT_vfs;
+    int FAT = U_FAT_vfs;
     if(fat_size[1]>0) FAT = U_FAT_sys;
     for(int i=0; i<2; i++) {
       if(fat_size[i]>0) {

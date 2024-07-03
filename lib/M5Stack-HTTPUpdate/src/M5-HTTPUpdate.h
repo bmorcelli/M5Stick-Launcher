@@ -102,7 +102,7 @@ public:
     // Functions to download from offset to end of partition
     t_httpUpdate_return updateFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
     
-    t_httpUpdate_return updateVfsFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, int command = U_SPIFFS, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
+    t_httpUpdate_return updateSpiffsFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, const String& currentVersion = "", HTTPUpdateRequestCB requestCB = NULL);
 
 
     // Notification callbacks
@@ -115,7 +115,7 @@ public:
     String getLastErrorString(void);
 
 protected:
-    t_httpUpdate_return handleUpdate(HTTPClient& http, const String& currentVersion, int command = 0, HTTPUpdateRequestCB requestCB = NULL, uint32_t size = 0);
+    t_httpUpdate_return handleUpdate(HTTPClient& http, const String& currentVersion, bool spiffs = false, HTTPUpdateRequestCB requestCB = NULL, uint32_t size = 0);
     bool runUpdate(Stream& in, uint32_t size, String md5, int command = U_FLASH);
 
     // Set the error and potentially use a CB to notify the application

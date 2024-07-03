@@ -259,53 +259,60 @@ void dumpPartition(const char* partitionLabel, const char* outputPath) {
 
   Serial.printf("Iniciando dump da partição %s para o arquivo %s\n", partitionLabel, outputPath);
 
-  const size_t bufferSize = 4096;  // Ajuste conforme necessário
-  uint8_t* buffer = (uint8_t*)malloc(bufferSize);
-  if (!buffer) {
-    Serial.println("Falha ao alocar memória");
-    outputFile.close();
-    return;
-  }
+  const size_t bufferSize = 1024;  // Ajuste conforme necessário
+  uint8_t buffer[1024];
+  size_t bytesToRead = 0;
+  esp_err_t result;
   progressHandler(0,500);
   displayRedStripe("Backing up");
   for (size_t offset = 0; offset < partition->size; offset += bufferSize) {
-    size_t bytesToRead = (offset + bufferSize > partition->size) ? (partition->size - offset) : bufferSize;
-    esp_err_t result = esp_partition_read(partition, offset, buffer, bytesToRead);
+    bytesToRead = (offset + bufferSize > partition->size) ? (partition->size - offset) : bufferSize;
+    result = esp_partition_read(partition, offset, buffer, bytesToRead);
     if (result != ESP_OK) {
       Serial.printf("Erro ao ler a partição %s no offset %d (código de erro: %d)\n", partitionLabel, offset, result);
-      free(buffer);
       outputFile.close();
       return;
     }
     outputFile.write(buffer, bytesToRead);
-    progressHandler(offset+bufferSize,partition->size);
+    progressHandler(int(offset+bufferSize),partition->size);
   }
-
-  free(buffer);
   outputFile.close();
-  displayRedStripe("Complete");
+  displayRedStripe("    Complete!    ");
   delay(2000);
 
   Serial.printf("Dump da partição %s para o arquivo %s concluído\n", partitionLabel, outputPath);
 }
 
 void restorePartition(const char* partitionLabel) {
-  tft.fillScreen(BGCOLOR);
   String filepath = loopSD(true);
+  tft.fillScreen(BGCOLOR);
   if(filepath=="") return;
   else {
     File source = SD.open(filepath, "r");
     if(strcmp(partitionLabel,"spiffs")==0) {
       prog_handler=1;
-      Update.onProgress(progressHandler);
       Update.begin(source.size(),U_SPIFFS);
-      Update.writeStream(source);
+      uint8_t buffer[1024];
+      int bytesRead = 0;
+      int written = 0;
+      size_t total = source.size();
+      progressHandler(0,500);
+      while (source.available()) {
+        bytesRead = source.read(buffer, sizeof(buffer));
+        Update.write(buffer,bytesRead);
+        written+=bytesRead;
+        progressHandler(written, total);
+      }
     }
 
     if(strcmp(partitionLabel,"vfs")==0) {
       performFATUpdate(source,source.size(), "vfs");
     }
+    if(strcmp(partitionLabel,"sys")==0) {
+      performFATUpdate(source,source.size(), "sys");
+    }
   }
-  displayRedStripe("Restored");
+  delay(100);
+  displayRedStripe("    Restored!    ");
   delay(2000);
 }

@@ -51,6 +51,9 @@ Sourcecode will be released in the future..
      * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
      * [ ] change default folder for download (config.conf)
      * [ ] Adjust size of Options menu to allow some more letters
+* 2.1.2:
+     * [x] Fixed OTA error message
+     * [x] Increased Options Menu width and reduced menu flickering
 * 2.1.1:
      * [x] Fixed UIFlow Compatibility
      * [x] Fixed SD card issues

@@ -43,7 +43,7 @@ HTTPUpdateResult HTTPUpdate::updateFromOffset(WiFiClient& client, const String& 
     http.addHeader("Range", "bytes=" + String(offset) + "-" + String(offset+size-1));
     return handleUpdate(http, currentVersion, false, requestCB);
 }
-HTTPUpdateResult HTTPUpdate::updateVfsFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, int command, const String& currentVersion, HTTPUpdateRequestCB requestCB)
+HTTPUpdateResult HTTPUpdate::updateSpiffsFromOffset(WiFiClient& client, const String& url, uint32_t offset, uint32_t size, const String& currentVersion, HTTPUpdateRequestCB requestCB)
 {
     HTTPClient http;
     if(!http.begin(client, url))
@@ -51,7 +51,7 @@ HTTPUpdateResult HTTPUpdate::updateVfsFromOffset(WiFiClient& client, const Strin
         return HTTP_UPDATE_FAILED;
     }
     if(offset>0) http.addHeader("Range", "bytes=" + String(offset) + "-" + String(offset+size-1));
-    return handleUpdate(http, currentVersion, command, requestCB, size);
+    return handleUpdate(http, currentVersion, true, requestCB, size);
 }
 
 
@@ -86,7 +86,7 @@ HTTPUpdateResult HTTPUpdate::update(WiFiClient& client, const String& url, const
 
 HTTPUpdateResult HTTPUpdate::updateSpiffs(HTTPClient& httpClient, const String& currentVersion, HTTPUpdateRequestCB requestCB)
 {
-    return handleUpdate(httpClient, currentVersion, U_SPIFFS, requestCB);
+    return handleUpdate(httpClient, currentVersion, true, requestCB);
 }
 
 HTTPUpdateResult HTTPUpdate::updateSpiffs(WiFiClient& client, const String& url, const String& currentVersion, HTTPUpdateRequestCB requestCB)
@@ -96,9 +96,8 @@ HTTPUpdateResult HTTPUpdate::updateSpiffs(WiFiClient& client, const String& url,
     {
         return HTTP_UPDATE_FAILED;
     }
-    return handleUpdate(http, currentVersion, U_SPIFFS, requestCB);
+    return handleUpdate(http, currentVersion, true, requestCB);
 }
-
 
 HTTPUpdateResult HTTPUpdate::update(HTTPClient& httpClient,
         const String& currentVersion, HTTPUpdateRequestCB requestCB)
@@ -142,8 +141,7 @@ String HTTPUpdate::getLastErrorString(void)
         StreamString error;
         Update.printError(error);
         error.trim(); // remove line ending
-        
-        return "E:" + error + "-Unsupported";
+        return String("Update error: ") + error;
     }
 
     // error from http client
@@ -208,7 +206,7 @@ String getSketchSHA256() {
  * @param currentVersion const char *
  * @return HTTPUpdateResult
  */
-HTTPUpdateResult HTTPUpdate::handleUpdate(HTTPClient& http, const String& currentVersion, int command, HTTPUpdateRequestCB requestCB, uint32_t size)
+HTTPUpdateResult HTTPUpdate::handleUpdate(HTTPClient& http, const String& currentVersion, bool spiffs, HTTPUpdateRequestCB requestCB, uint32_t size)
 {
 
     HTTPUpdateResult ret = HTTP_UPDATE_FAILED;
@@ -293,7 +291,7 @@ HTTPUpdateResult HTTPUpdate::handleUpdate(HTTPClient& http, const String& curren
     case HTTP_CODE_OK:  ///< OK (Start Update)
         if(len > 0) {
             bool startUpdate = true;
-            if(command == U_SPIFFS) {
+            if(spiffs) {
                 const esp_partition_t* _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, NULL);
                 if(!_partition){
                     _lastError = HTTP_UE_NO_PARTITION;
@@ -304,26 +302,6 @@ HTTPUpdateResult HTTPUpdate::handleUpdate(HTTPClient& http, const String& curren
                     log_e("spiffsSize to low (%d) needed: %d\n", _partition->size, len);
                     startUpdate = false;
                 }
-            } else if (command == U_FAT_vfs) {
-                const esp_partition_t* _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "vfs");
-                if(!_partition){
-                    _lastError = HTTP_UE_NO_PARTITION;
-                    return HTTP_UPDATE_FAILED;
-                }
-                if(len > _partition->size) {
-                    log_e("spiffsSize to low (%d) needed: %d\n", _partition->size, len);
-                    startUpdate = false;
-                }
-            } else if (command == U_FAT_sys) {
-                const esp_partition_t* _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "sys");
-                if(!_partition){
-                    _lastError = HTTP_UE_NO_PARTITION;
-                    return HTTP_UPDATE_FAILED;
-                }
-                if(len > _partition->size) {
-                    log_e("spiffsSize to low (%d) needed: %d\n", _partition->size, len);
-                    startUpdate = false;
-                }        
             } else {
                 int sketchFreeSpace = ESP.getFreeSketchSpace();
                 if(!sketchFreeSpace){
@@ -353,7 +331,7 @@ HTTPUpdateResult HTTPUpdate::handleUpdate(HTTPClient& http, const String& curren
 // To do?                WiFiClient::stopAllExcept(tcp);
 
                 delay(100);
-/*
+
                 int command;
 
                 if(spiffs) {
@@ -363,8 +341,8 @@ HTTPUpdateResult HTTPUpdate::handleUpdate(HTTPClient& http, const String& curren
                     command = U_FLASH;
                     //log_d("runUpdate flash...\n");
                 }
-*/
-                if(command==0) {
+
+                if(!spiffs) {
 /* To do
                     uint8_t buf[4];
                     if(tcp->peekBytes(&buf[0], 4) != 4) {
@@ -405,7 +383,7 @@ HTTPUpdateResult HTTPUpdate::handleUpdate(HTTPClient& http, const String& curren
                         _cbEnd();
                     }
 
-                    if(_rebootOnUpdate && command==0) {
+                    if(_rebootOnUpdate && !spiffs) {
                         ESP.restart();
                     }
 

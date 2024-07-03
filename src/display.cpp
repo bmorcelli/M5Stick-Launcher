@@ -42,6 +42,7 @@ void coreFooter(uint16_t color) {
   tft.drawCentreString("SEL",WIDTH/2,HEIGHT+15,1);
   tft.drawCentreString("NEXT",5*WIDTH/6,HEIGHT+15,1);
 }
+
 /***************************************************************************************
 ** Function name: coreFooter2
 ** Description:   Draw Core2 footer
@@ -54,9 +55,6 @@ void coreFooter2(uint16_t color) {
   tft.drawCentreString("LAUNCHER",WIDTH/2,HEIGHT+15,1);
   tft.drawCentreString("Skip",5*WIDTH/6,HEIGHT+15,1);
 }
-
-
-
 
 /***************************************************************************************
 ** Function name: BootScreen
@@ -278,7 +276,7 @@ void progressHandler(int progress, size_t total) {
     tft.setTextColor(ALCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);    
-
+    tft.drawRoundRect(5, 5, WIDTH - 10, HEIGHT - 10, 5, FGCOLOR);
     if (prog_handler == 1) { 
       tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
       tft.fillRect(20, HEIGHT - 26, WIDTH-40, 13, BGCOLOR);
@@ -344,16 +342,16 @@ void drawOptions(int index,const std::vector<std::pair<std::string, std::functio
       menuSize = MAX_MENU_SIZE; 
       } 
 
-    tft.fillRoundRect(WIDTH*0.15,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,bgcolor);
+    if(index==0) tft.fillRoundRect(WIDTH*0.10,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.8,(FONT_M*8+4)*menuSize+10,5,bgcolor);
     
     tft.setTextColor(fgcolor,bgcolor);
     tft.setTextSize(FONT_M);
-    tft.setCursor(WIDTH*0.15+5,HEIGHT/2-menuSize*(FONT_M*8+4)/2);
+    tft.setCursor(WIDTH*0.10+5,HEIGHT/2-menuSize*(FONT_M*8+4)/2);
     
     int i=0;
     int init = 0;
     int cont = 1;
-    tft.fillRoundRect(WIDTH*0.15,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,bgcolor);
+    if(index==0) tft.fillRoundRect(WIDTH*0.10,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.8,(FONT_M*8+4)*menuSize+10,5,bgcolor);
     menuSize = options.size();
     if(index>=MAX_MENU_SIZE) init=index-MAX_MENU_SIZE+1;
     for(i=0;i<menuSize;i++) {
@@ -361,16 +359,16 @@ void drawOptions(int index,const std::vector<std::pair<std::string, std::functio
         String text="";
         if(i==index) text+=">";
         else text +=" ";
-        text += String(options[i].first.c_str());
-        tft.setCursor(WIDTH*0.15+5,tft.getCursorY()+4);
-        tft.println(text.substring(0,(WIDTH*0.7 - 10)/(LW*FONT_M) - 1));  
+        text += String(options[i].first.c_str()) + "              ";
+        tft.setCursor(WIDTH*0.10+5,tft.getCursorY()+4);
+        tft.println(text.substring(0,(WIDTH*0.8 - 10)/(LW*FONT_M) - 1));  
         cont++;
       }
       if(cont>MAX_MENU_SIZE) goto Exit;
     }
     Exit:
     if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
-    tft.drawRoundRect(WIDTH*0.15,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.7,(FONT_M*8+4)*menuSize+10,5,fgcolor);
+    tft.drawRoundRect(WIDTH*0.10,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.8,(FONT_M*8+4)*menuSize+10,5,fgcolor);
 }
 
 /***************************************************************************************
@@ -619,7 +617,7 @@ void loopVersions() {
     if(checkSelPress()) { 
 
       // Definição da matriz "Options"
-      std::vector<std::pair<std::string, std::function<void()>>> options = {
+      options = {
           {"OTA Install", [=]() { installFirmware(String(file), app_size, spiffs, spiffs_offset, spiffs_size, nb, fat, (uint32_t*)FAT_offset, (uint32_t*)FAT_size); }},
           {"Download->SD", [=]() { downloadFirmware(String(file), String(name)); }},
           {"Main Menu", [=]() { returnToMenu=true; }},
