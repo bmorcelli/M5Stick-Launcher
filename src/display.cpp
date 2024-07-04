@@ -76,8 +76,8 @@ void initDisplay(bool doAll) {
       show = random(0,40);
       if(show==0 || doAll) {
         if (cor==10) { txt=" "; }
-        else if (cor & 1) { tft.setTextColor(0x30c5,BGCOLOR); txt=String(cor); }
-        else { tft.setTextColor(0x32e5,BGCOLOR); txt=String(cor); }
+        else if (cor & 1) { tft.setTextColor(odd_color,BGCOLOR); txt=String(cor); }
+        else { tft.setTextColor(even_color,BGCOLOR); txt=String(cor); }
         
         if(_x>=(WIDTH-10)) {_x=10; _y+=8; }
         else if(_x<10) { _x = 10; }
@@ -470,7 +470,7 @@ void listFiles(int index, String fileList[][3]) {
         if(start<0) start=0;
     }
     int nchars = (WIDTH-20)/(6*tft.textsize);
-    String txt="";
+    String txt=">";
     while(i<arraySize) {
         if(i>=start && fileList[i][2]!="") {
             if(fileList[i][2]=="folder") tft.setTextColor(FGCOLOR-0x1111, BGCOLOR);
@@ -616,7 +616,7 @@ void loopVersions() {
       // Definição da matriz "Options"
       options = {
           {"OTA Install", [=]() { installFirmware(String(file), app_size, spiffs, spiffs_offset, spiffs_size, nb, fat, (uint32_t*)FAT_offset, (uint32_t*)FAT_size); }},
-          {"Download->SD", [=]() { downloadFirmware(String(file), String(name)); }},
+          {"Download->SD", [=]() { downloadFirmware(String(file), String(name), dwn_path); }},
           {"Main Menu", [=]() { returnToMenu=true; }},
       };
       delay(200);
