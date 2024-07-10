@@ -121,7 +121,7 @@ bool checkPrevPress() {
 bool checkSelPress(bool dimmOff){
   if(!dimmOff && (dimmerTemp+dimmerSet*1000) < millis() && !dimmer) {
     dimmer = true;
-    setBrightness(10,false);
+    setBrightness(5,false);
     setCpuFrequencyMhz(80);
   }  
   #if defined (CARDPUTER)

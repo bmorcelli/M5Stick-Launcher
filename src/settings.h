@@ -45,3 +45,4 @@ void getConfigs();
 void saveConfigs();
 void setdimmerSet();
 void setUiColor();
+void chargeMode();

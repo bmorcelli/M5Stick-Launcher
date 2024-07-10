@@ -59,7 +59,7 @@ extern int rotation;
 
 extern bool returnToMenu;
 
-extern uint8_t buff[4096];
+extern uint8_t buff[1024];
 
 extern const int bufSize;
 

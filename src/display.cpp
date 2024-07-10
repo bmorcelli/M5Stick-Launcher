@@ -461,9 +461,9 @@ void drawBatteryStatus() {
 void listFiles(int index, String fileList[][3]) {
     tft.setCursor(10,10);
     tft.setTextSize(FONT_M);
+    int i=0;
     int arraySize = 0;
     while(fileList[arraySize][2]!="" && arraySize < MAXFILES) arraySize++;
-    int i=0;
     int start=0;
     if(index>=MAX_ITEMS) {
         start=index-MAX_ITEMS+1;
@@ -473,10 +473,11 @@ void listFiles(int index, String fileList[][3]) {
     String txt=">";
     while(i<arraySize) {
         if(i>=start && fileList[i][2]!="") {
+            tft.setCursor(10,tft.getCursorY());
             if(fileList[i][2]=="folder") tft.setTextColor(FGCOLOR-0x1111, BGCOLOR);
             else if(fileList[i][2]=="operator") tft.setTextColor(ALCOLOR, BGCOLOR);
-            else tft.setTextColor(FGCOLOR,BGCOLOR);
-            tft.setCursor(10,tft.getCursorY());
+            else { tft.setTextColor(FGCOLOR,BGCOLOR); }
+
             if (index==i) txt=">";
             else txt=" ";
             txt+=fileList[i][0] + "                       ";
@@ -616,7 +617,7 @@ void loopVersions() {
       // Definição da matriz "Options"
       options = {
           {"OTA Install", [=]() { installFirmware(String(file), app_size, spiffs, spiffs_offset, spiffs_size, nb, fat, (uint32_t*)FAT_offset, (uint32_t*)FAT_size); }},
-          {"Download->SD", [=]() { downloadFirmware(String(file), String(name), dwn_path); }},
+          {"Download->SD", [=]() { downloadFirmware(String(file), String(name) + "." + String(version).substring(0,10), dwn_path); }},
           {"Main Menu", [=]() { returnToMenu=true; }},
       };
       delay(200);

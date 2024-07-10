@@ -15,4 +15,4 @@ def after_upload(source, target, env):
     os.system(command)
 
 env.AddPreAction("upload", before_upload)
-env.AddPostAction("upload", after_upload)
+#env.AddPostAction("upload", after_upload)

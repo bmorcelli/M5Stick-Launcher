@@ -181,8 +181,10 @@ void partitioner() {
         {"Doom", [&](){ partition = 1; }},
         {"UiFlow2", [&](){ partition = 2; }},
       #elif defined(STICK_C_PLUS)
-        {"Doom", [&](){ partition = 1; }},
-      #endif
+        {"Orca", [&](){ partition = 1; }},
+      #elif defined(CORE) || defined(CORE2) || defined(CORE3)
+        {"UiFlow1", [&](){ partition = 1; }},
+      #endif      
     };
     delay(200);
     loopOptions(options);
@@ -205,6 +207,8 @@ void partitioner() {
                 break;
       #elif defined(CORE) || defined(CORE2) || defined(CORE3)
         case 1: data = uiFlow1;
+                displayRedStripe("Experimental");
+                delay(2000);
                 data_size = sizeof(uiFlow1);
                 break;                
       #endif
@@ -262,7 +266,7 @@ void partList() {
     }
     esp_partition_iterator_release(it);
     displayRedStripe(txt);
-    delay(200);
+    delay(300);
     while(!checkSelPress()) yield();
     while(checkSelPress()) yield();    
   }   

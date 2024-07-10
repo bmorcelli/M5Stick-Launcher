@@ -176,6 +176,7 @@ void setUiColor() {
   };
   delay(200);
   loopOptions(options);
+  displayRedStripe("Saving...");
   EEPROM.begin(EEPROMSIZE);
 
   EEPROM.write(EEPROMSIZE-3, int((FGCOLOR >> 8) & 0x00FF));
@@ -223,6 +224,26 @@ void setdimmerSet() {
   delay(200);
 }
 
+/*********************************************************************
+**  Function: chargeMode
+**  Enter in Charging mode
+**********************************************************************/
+void chargeMode() {
+  setCpuFrequencyMhz(80);
+  setBrightness(5,false);
+  delay(500);
+  tft.fillScreen(BGCOLOR);
+  unsigned long tmp=0;
+  while(!checkSelPress(true)) {
+    if(millis()-tmp>5000) {
+      displayRedStripe(String(getBattery()) + " %");
+      tmp=millis();
+    }
+  }
+  setCpuFrequencyMhz(240);
+  setBrightness(bright,false);
+  delay(200);
+}
 
 /*********************************************************************
 **  Function: getConfigs                             
@@ -231,32 +252,37 @@ void setdimmerSet() {
 void getConfigs() {
   if(setupSdCard()) {
     File file = SD.open("/config.conf");
-      if(file) {
+      if(file && file.size()>10) {
         // Deserialize the JSON document
         DeserializationError error = deserializeJson(settings, file);
         if (error) { 
           log_i("Failed to read file, using default configuration");
           goto Default;
         }
-        JsonObject setting = settings[0];
+        //JsonObject setting = settings[0];
+        int count=0;
+        if(settings.containsKey("onlyBins"))  { onlyBins  = gsetOnlyBins(settings["onlyBins"].as<bool>()); } else count++;
+        if(settings.containsKey("askSpiffs")) { askSpiffs = gsetAskSpiffs(settings["askSpiffs"].as<bool>()); } else count++;
+        if(settings.containsKey("bright"))    { bright    = settings["bright"].as<int>(); } else count++;
+        if(settings.containsKey("dimmerSet")) { dimmerSet = settings["dimmerSet"].as<int>(); } else count++;
+        if(settings.containsKey("rot"))       { rotation  = settings["rot"].as<int>(); } else count++;
+        if(settings.containsKey("FGCOLOR"))   { FGCOLOR   = settings["FGCOLOR"].as<uint16_t>(); } else count++;
+        if(settings.containsKey("BGCOLOR"))   { BGCOLOR   = settings["BGCOLOR"].as<uint16_t>(); } else count++;
+        if(settings.containsKey("ALCOLOR"))   { ALCOLOR   = settings["ALCOLOR"].as<uint16_t>(); } else count++;
+        if(settings.containsKey("odd"))       { odd_color = settings["odd"].as<uint16_t>(); } else count++;
+        if(settings.containsKey("even"))      { even_color= settings["even"].as<uint16_t>(); } else count++;
+        if(settings.containsKey("wui_usr"))   { wui_usr   = settings["wui_usr"].as<String>(); } else count++;
+        if(settings.containsKey("wui_pwd"))   { wui_pwd   = settings["wui_pwd"].as<String>(); } else count++;
+        if(settings.containsKey("dwn_path"))  { dwn_path  = settings["dwn_path"].as<String>(); } else count++;
+        if(!settings.containsKey("wifi")) count++;
 
-        onlyBins = gsetOnlyBins(setting["onlyBins"].as<bool>());
-        askSpiffs = gsetAskSpiffs(setting["askSpiffs"].as<bool>());
-        bright = setting["bright"].as<int>();
+        if(count>0) saveConfigs();
         log_i("Brightness: %d", bright);
         setBrightness(bright);
-        dimmerSet = setting["dimmerSet"].as<int>();
-        rotation = setting["rot"].as<int>();
-        FGCOLOR = setting["FGCOLOR"].as<uint16_t>();
-        BGCOLOR = setting["BGCOLOR"].as<uint16_t>();
-        ALCOLOR = setting["ALCOLOR"].as<uint16_t>();
-        odd_color = setting["odd"].as<uint16_t>();
-        even_color = setting["even"].as<uint16_t>();
-        wui_usr = setting["wui_usr"].as<String>();
-        wui_pwd = setting["wui_pwd"].as<String>();
-        dwn_path = setting["dwn_path"].as<String>();
         if(dimmerSet<10) dimmerSet=10;
         file.close();
+
+        
         
         EEPROM.begin(EEPROMSIZE); // open eeprom
         EEPROM.write(0, rotation);
@@ -284,6 +310,8 @@ void getConfigs() {
         log_i("Using config.conf setup file");
     } else {
 Default:
+        file.close();
+        saveConfigs();
         
         log_i("Using settings stored on EEPROM");
     }
@@ -298,20 +326,29 @@ void saveConfigs() {
   if(setupSdCard()) {
     SD.remove("/config.conf");
 
-    JsonObject setting = settings[0];
-    setting["onlyBins"] = onlyBins;
-    setting["askSpiffs"] = askSpiffs;
-    setting["bright"] = bright;
-    setting["dimmerSet"] = dimmerSet;    
-    setting["rot"] = rotation;
-    setting["FGCOLOR"] = FGCOLOR;
-    setting["BGCOLOR"] = BGCOLOR;
-    setting["ALCOLOR"] = ALCOLOR;
-    setting["odd"] = odd_color;
-    setting["even"] = even_color;
-    setting["wui_usr"] = wui_usr;
-    setting["wui_pwd"] = wui_pwd;
-    setting["dwn_path"] = dwn_path;
+    //JsonObject setting = settings[0].add<JsonObject>();
+    //if(!settings[0].containsKey("onlyBins")) 
+    settings["onlyBins"] = onlyBins;
+    settings["askSpiffs"] = askSpiffs;
+    settings["bright"] = bright;
+    settings["dimmerSet"] = dimmerSet;    
+    settings["rot"] = rotation;
+    settings["FGCOLOR"] = FGCOLOR;
+    settings["BGCOLOR"] = BGCOLOR;
+    settings["ALCOLOR"] = ALCOLOR;
+    settings["odd"] = odd_color;
+    settings["even"] = even_color;
+    settings["wui_usr"] = wui_usr;
+    settings["wui_pwd"] = wui_pwd;
+    settings["dwn_path"] = dwn_path;
+    if(!settings.containsKey("wifi")) {
+      JsonArray WifiList = settings["wifi"].to<JsonArray>();
+      if(WifiList.size()<1) {
+        JsonObject WifiObj = WifiList.add<JsonObject>();
+        WifiObj["ssid"] = "myNetSSID";
+        WifiObj["pwd"] = "myNetPassword";
+      } 
+    }
     // Open file for writing
     File file = SD.open("/config.conf", FILE_WRITE);
     if (!file) {
@@ -319,8 +356,8 @@ void saveConfigs() {
       return;
     }
     // Serialize JSON to file
-    if (serializeJsonPretty(settings, file) == 0) {
-      Serial.println(F("Failed to write to file"));
+    if (serializeJsonPretty(settings, file) < 5) {
+      log_i("Failed to write to file");
     }
 
     // Close the file

@@ -47,8 +47,8 @@ String dwn_path = "/downloads/";
 JsonDocument doc;
 JsonDocument settings;
 std::vector<std::pair<std::string, std::function<void()>>> options;
-const int bufSize = 4096;
-uint8_t buff[4096] = {0};
+const int bufSize = 1024;
+uint8_t buff[1024] = {0};
 
 
 #include "display.h"
@@ -111,8 +111,8 @@ void setup() {
   Serial.begin(115200);
 
   EEPROM.begin(EEPROMSIZE); // open eeprom
-  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-1) > 1) {
-    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(9),EEPROM.read(EEPROMSIZE-1) );
+  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-2) > 1) {
+    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(9),EEPROM.read(EEPROMSIZE-2) );
   #if defined(CARDPUTER) || defined(M5STACK)
     EEPROM.write(0, 1);    // Right rotation for cardputer
   #else
@@ -218,7 +218,7 @@ void setup() {
     if(checkSelPress())        
   #endif
      {
-        tft.fillScreen(TFT_BLACK);
+        tft.fillScreen(BGCOLOR);
         goto Launcher;
       }
 
@@ -247,7 +247,7 @@ void setup() {
   // If M5 or Enter button is pressed, continue from here
   Launcher:
   get_partition_sizes();
-  tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(BGCOLOR);
 }
 
 /**********************************************************************
@@ -337,6 +337,8 @@ void loop() {
 
       if(index == 3) {  
         options = {
+          
+          {"Charge Mode", [=](){ chargeMode(); }},
           {"Brightness", [=]() { setBrightnessMenu(); }},
           {"Dim time", [=]()   { setdimmerSet();}},
           {"UI Color", [=]()   { setUiColor();}},
@@ -352,13 +354,14 @@ void loop() {
       #if !defined(CARDPUTER)
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
       #endif
-      #if defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(CARDPUTER)
+
         options.push_back({"Part Change",  [=]() { partitioner(); }});
         options.push_back({"Part List",  [=]() { partList(); }});
-      #endif
+
       #ifndef STICK_C_PLUS
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
       #endif
+
         if(MAX_SPIFFS>0) options.push_back({"Save SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
         //if(MAX_FAT_sys>0) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
         if(MAX_FAT_vfs>0) options.push_back({"Save FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
@@ -370,6 +373,7 @@ void loop() {
         
         delay(200);
         loopOptions(options);
+        tft.fillScreen(BGCOLOR);
         tft.fillScreen(BGCOLOR);
         redraw=true;
       }

@@ -48,10 +48,11 @@ Sourcecode will be released in the future..
 
 ## Changelog
 * 2.2.0 (Future):
-     * [ ] Save more SSIDs and pwd, connect automatically if is a known network (config.conf)
-     * [ ] change default folder for download (config.conf)
-     * [x] Allow M5Launcher to be updated through OTA
+     * [x] Save more SSIDs and pwd, connect automatically if is a known network (config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/30
+     * [x] change default folder for download (config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/15
+     * [x] Allow M5Launcher to be updated OverTheAir
      * [x] Reduced flickering on SD files navigation
+     * [x] Fixed Download progressbar https://github.com/bmorcelli/M5Stick-Launcher/issues/41
 * 2.1.2:
      * [x] Fixed OTA error message
      * [x] Increased Options Menu width and reduced menu flickering
