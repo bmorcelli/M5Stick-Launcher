@@ -656,12 +656,13 @@ void updateFromSD(String path) {
     }
 
     if (fat) {
+      displayRedStripe("Formating FAT");
       if (fat_size_sys > 0) {
         if (!file.seek(fat_offset_sys)) goto Exit;
         if (!performFATUpdate(file, fat_size_sys, "sys")) log_i("FAIL updating FAT sys");
         else displayRedStripe("sys FAT complete");
       } 
-      
+      displayRedStripe("Formating FAT");
       if (fat_size_vfs > 0) {
         if (!file.seek(fat_offset_vfs)) goto Exit;
         if (!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT vfs");

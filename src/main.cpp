@@ -24,6 +24,10 @@ uint16_t ALCOLOR = TFT_RED;
 uint16_t BGCOLOR = TFT_BLACK;
 uint16_t odd_color = 0x30c5;
 uint16_t even_color = 0x32e5;
+unsigned long dimmerTemp=millis();
+int dimmerSet=20;
+int bright=100;
+bool dimmer=false;
 int prog_handler;    // 0 - Flash, 1 - SPIFFS
 int currentIndex;
 int rotation;
@@ -106,6 +110,54 @@ void get_partition_sizes() {
 void setup() {
   Serial.begin(115200);
 
+  EEPROM.begin(EEPROMSIZE); // open eeprom
+  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-1) > 1) {
+    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(9),EEPROM.read(EEPROMSIZE-1) );
+  #if defined(CARDPUTER) || defined(M5STACK)
+    EEPROM.write(0, 1);    // Right rotation for cardputer
+  #else
+    EEPROM.write(0, 3);    // Left rotation
+  #endif
+    EEPROM.write(1, 20);  // 20s Dimm time
+    EEPROM.write(2, 100);  // 100% brightness
+    EEPROM.write(9, 1);    // OnlyBins
+    EEPROM.writeString(10,"");
+    EEPROM.write(EEPROMSIZE-2, 1);  // AskSpiffs
+
+    //FGCOLOR
+    EEPROM.write(EEPROMSIZE-3, 0x07); 
+    EEPROM.write(EEPROMSIZE-4, 0xE0);
+    //BGCOLOR
+    EEPROM.write(EEPROMSIZE-5, 0);
+    EEPROM.write(EEPROMSIZE-6, 0);
+    //ALCOLOR
+    EEPROM.write(EEPROMSIZE-7, 0xF8);
+    EEPROM.write(EEPROMSIZE-8, 0x00);
+    //odd
+    EEPROM.write(EEPROMSIZE-9, 0x30);
+    EEPROM.write(EEPROMSIZE-10, 0xC5);
+    //even
+    EEPROM.write(EEPROMSIZE-11, 0x32);
+    EEPROM.write(EEPROMSIZE-12, 0xe5);
+    EEPROM.commit();       // Store data to EEPROM
+  }
+  if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  { 
+    EEPROM.write(0, 3);    // Left rotation
+    EEPROM.commit();       // Store data to EEPROM
+  }
+  rotation = EEPROM.read(0);
+  dimmerSet = EEPROM.read(1);
+  bright = EEPROM.read(2);
+  onlyBins = EEPROM.read(9);
+  askSpiffs = EEPROM.read(EEPROMSIZE-2);
+  FGCOLOR =    (EEPROM.read(EEPROMSIZE-3)  << 8) | EEPROM.read(EEPROMSIZE-4);
+  BGCOLOR =    (EEPROM.read(EEPROMSIZE-5)  << 8) | EEPROM.read(EEPROMSIZE-6);
+  ALCOLOR =    (EEPROM.read(EEPROMSIZE-7)  << 8) | EEPROM.read(EEPROMSIZE-8);
+  odd_color =  (EEPROM.read(EEPROMSIZE-9)  << 8) | EEPROM.read(EEPROMSIZE-10);
+  even_color = (EEPROM.read(EEPROMSIZE-11) << 8) | EEPROM.read(EEPROMSIZE-12);
+  EEPROM.end();  
+  setBrightness(bright,false);
+
   // declare variables
   size_t currentIndex=0;  
   prog_handler=0;
@@ -137,7 +189,7 @@ void setup() {
   pinMode(10, INPUT);
   #endif
 
-  rotation = gsetRotation();
+
   tft.setRotation(rotation);
   partitionCrawler(); // Performs the verification when Launcher is installed through OTA
   
@@ -286,6 +338,8 @@ void loop() {
       if(index == 3) {  
         options = {
           {"Brightness", [=]() { setBrightnessMenu(); }},
+          {"Dim time", [=]()   { setdimmerSet();}},
+          {"UI Color", [=]()   { setUiColor();}},
         };
         if(sdcardMounted) {
           if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false); saveConfigs();}});
@@ -311,7 +365,6 @@ void loop() {
         if(MAX_SPIFFS>0) options.push_back({ "Rest SPIFFS",  [=]() { restorePartition("spiffs"); }});
         //if(MAX_FAT_sys>0) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
         if(MAX_FAT_vfs>0) options.push_back({"Rest FAT Vfs",  [=]() { restorePartition("vfs"); }});
-        
 
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         

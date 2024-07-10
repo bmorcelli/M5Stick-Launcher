@@ -43,3 +43,5 @@ bool gsetAskSpiffs(bool set = false, bool value = true);
 int gsetRotation(bool set = false);
 void getConfigs();
 void saveConfigs();
+void setdimmerSet();
+void setUiColor();

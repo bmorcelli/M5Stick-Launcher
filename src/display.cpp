@@ -93,14 +93,14 @@ void initDisplay(bool doAll) {
         }
     }
     tft.setTextSize(FONT_G);
-    tft.setTextColor(TFT_GREEN);
+    tft.setTextColor(FGCOLOR);
     #ifndef STICK_C
     tft.drawCentreString("M5Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
     #else
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
     #endif
     tft.setTextSize(FONT_G);
-    tft.setTextColor(TFT_GREEN);
+    tft.setTextColor(FGCOLOR);
 
     delay(50);
     
@@ -124,13 +124,13 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   setTftDisplay(10, 10, FGCOLOR,FONT_P);
   tft.print("Firmware: ");
   
-  setTftDisplay(10, 22, TFT_WHITE, FONT_M,BGCOLOR);
+  setTftDisplay(10, 22, ~BGCOLOR, FONT_M,BGCOLOR);
   String name2 = String(name);
   tftprintln(name2,10,3);
   
   setTftDisplay(10, 22+4*FONT_M*8, FGCOLOR);
   tft.print("by: ");
-  tft.setTextColor(TFT_WHITE);
+  tft.setTextColor(~BGCOLOR);
   String author2 = String(author).substring(0,14);
   tftprintln(author2,10);
 
@@ -178,33 +178,33 @@ void displayCurrentVersion(String name, String author, String version, String pu
     tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,ALCOLOR,BGCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
 
-    setTftDisplay(10, 10, TFT_WHITE,FONT_M,BGCOLOR);
+    setTftDisplay(10, 10, ~BGCOLOR,FONT_M,BGCOLOR);
     String name2 = String(name);
     tftprintln(name2,10,2);
     #ifndef STICK_C
     setTftDisplay(10,50,ALCOLOR,FONT_M);
     #endif
     tft.print("by: ");
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(~BGCOLOR);
     tft.println(String(author).substring(0,14));
     
     tft.setTextColor(ALCOLOR);
     tft.setCursor(10,tft.getCursorY());
     tft.print("v: ");
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(~BGCOLOR);
     tft.println(String(version).substring(0,15));
     
     tft.setTextColor(ALCOLOR);
     tft.setCursor(10,tft.getCursorY());
     tft.print("from: ");
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(~BGCOLOR);
     tft.println(String(published_at));
 
     if(versions.size()>1) {
         tft.setTextColor(ALCOLOR);
         tft.drawChar('<', 10, HEIGHT-(10+FONT_M*9));
         tft.drawChar('>', WIDTH-(10+FONT_M*6), HEIGHT-(10+FONT_M*9));
-        tft.setTextColor(TFT_WHITE);
+        tft.setTextColor(~BGCOLOR);
     }
 
     setTftDisplay(-1, -1,ALCOLOR,FONT_M,BGCOLOR);
@@ -502,7 +502,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   int index = 0;
   while(1){
     if (redraw) { 
-      drawOptions(index,options, TFT_RED, BGCOLOR);
+      drawOptions(index,options, ALCOLOR, BGCOLOR);
       if(bright){
         #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
         int bl = MINBRIGHT + round(((255 - MINBRIGHT) * (4 - index) * 0.25)); // 4 is the number of options

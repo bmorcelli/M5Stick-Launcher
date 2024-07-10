@@ -24,6 +24,10 @@ extern uint32_t MAX_SPIFFS;
 extern uint32_t MAX_FAT_vfs;
 extern uint32_t MAX_FAT_sys;
 
+extern unsigned long dimmerTemp;
+extern int dimmerSet;
+extern int bright;
+extern bool dimmer;
 
 extern int prog_handler;    // 0 - Flash, 1 - SPIFFS, 2 - Download
 

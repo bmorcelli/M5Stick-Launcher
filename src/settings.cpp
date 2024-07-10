@@ -3,29 +3,32 @@
 #include "display.h"
 #include "settings.h"
 #include "sd_functions.h"
+#include "mykeyboard.h"
 
 
 /*********************************************************************
 **  Function: setBrightness                             
 **  save brightness value into EEPROM
 **********************************************************************/
-void setBrightness(int bright, bool save) {
-  if(bright>100) bright=100;
+void setBrightness(int brightval, bool save) {
+  if(brightval>100) brightval=100;
 
   #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); ; // 4 is the number of options
+  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * brightval/100 )); ; // 4 is the number of options
   analogWrite(BACKLIGHT, bl);
   #elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(bright);
+  axp192.ScreenBreath(brightval);
   #elif defined(M5STACK)
-  M5.Display.setBrightness(bright);  
+  M5.Display.setBrightness(brightval);  
   #endif
 
- 
+ if (save) {
   EEPROM.begin(EEPROMSIZE); // open eeprom
-  EEPROM.write(2, bright); //set the byte
+  bright = brightval;
+  EEPROM.write(2, brightval); //set the byte
   EEPROM.commit(); // Store data to EEPROM
   EEPROM.end(); // Free EEPROM memory
+ }
 }
 
 /*********************************************************************
@@ -34,7 +37,7 @@ void setBrightness(int bright, bool save) {
 **********************************************************************/
 void getBrightness() {
   EEPROM.begin(EEPROMSIZE);
-  int bright = EEPROM.read(2);
+  bright = EEPROM.read(2);
   EEPROM.end(); // Free EEPROM memory
   if(bright>100) { 
     bright = 100;
@@ -48,7 +51,6 @@ void getBrightness() {
   M5.Display.setBrightness(bright);  
 #endif
     setBrightness(100);
-
   }
 
 #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
@@ -94,7 +96,7 @@ bool gsetOnlyBins(bool set, bool value) {
 **********************************************************************/
 bool gsetAskSpiffs(bool set, bool value) {
   EEPROM.begin(EEPROMSIZE);
-  int spiffs = EEPROM.read(EEPROMSIZE-2);
+  int spiffs = EEPROM.read(EEPROMSIZE-1);
   bool result = false;
 
   if(spiffs>1) { 
@@ -107,7 +109,7 @@ bool gsetAskSpiffs(bool set, bool value) {
   if(set) {
     result=value;
     askSpiffs=value;         //update the global variable
-    EEPROM.write(EEPROMSIZE-2, result);
+    EEPROM.write(EEPROMSIZE-1, result);
     EEPROM.commit();
   }
   EEPROM.end(); // Free EEPROM memory
@@ -158,32 +160,75 @@ void setBrightnessMenu() {
   saveConfigs();
   delay(200);
 }
+/*********************************************************************
+**  Function: setUiColor
+**  Change Ui Color scheme
+**********************************************************************/
+void setUiColor() {
+  options = {
+    {"Default",   [&]() { FGCOLOR=0x07E0; BGCOLOR=0x0000; ALCOLOR=0xF800; odd_color=0x30c5; even_color=0x32e5; }},
+    {"Red",       [&]() { FGCOLOR=0xF800; BGCOLOR=0x0000; ALCOLOR=0xE3E0; odd_color=0xFBC0; even_color=0xAAC0; }},
+    {"Blue",      [&]() { FGCOLOR=0x94BF; BGCOLOR=0x0000; ALCOLOR=0xd81f; odd_color=0xd69f; even_color=0x079F; }},
+    {"Yellow",    [&]() { FGCOLOR=0xFFE0; BGCOLOR=0x0000; ALCOLOR=0xFB80; odd_color=0x9480; even_color=0xbae0; }},
+    {"Purple",    [&]() { FGCOLOR=0xe01f; BGCOLOR=0x0000; ALCOLOR=0xF800; odd_color=0xf57f; even_color=0x89d3; }},
+    {"White",     [&]() { FGCOLOR=0xFFFF; BGCOLOR=0x0000; ALCOLOR=0x6b6d; odd_color=0x8c71; even_color=0xb596; }},
+    {"Black",     [&]() { FGCOLOR=0x0000; BGCOLOR=0xFFFF; ALCOLOR=0x6b6d; odd_color=0x8c71; even_color=0xb596; }},
+  };
+  delay(200);
+  loopOptions(options);
+  EEPROM.begin(EEPROMSIZE);
+
+  EEPROM.write(EEPROMSIZE-3, int((FGCOLOR >> 8) & 0x00FF));
+  EEPROM.write(EEPROMSIZE-4, int(FGCOLOR & 0x00FF));
+
+  EEPROM.write(EEPROMSIZE-5, int((BGCOLOR >> 8) & 0x00FF));
+  EEPROM.write(EEPROMSIZE-6, int(BGCOLOR & 0x00FF));
+
+  EEPROM.write(EEPROMSIZE-7, int((ALCOLOR >> 8) & 0x00FF));
+  EEPROM.write(EEPROMSIZE-8, int(ALCOLOR & 0x00FF));
+
+  EEPROM.write(EEPROMSIZE-9, int((odd_color >> 8) & 0x00FF));
+  EEPROM.write(EEPROMSIZE-10, int(odd_color & 0x00FF));
+
+  EEPROM.write(EEPROMSIZE-11, int((even_color >> 8) & 0x00FF));
+  EEPROM.write(EEPROMSIZE-12, int(even_color & 0x00FF));
+
+  EEPROM.commit();       // Store data to EEPROM
+  EEPROM.end();
+
+  saveConfigs();
+  delay(200);
+}
+/*********************************************************************
+**  Function: setdimmerSet
+**  set dimmerSet time
+**********************************************************************/
+void setdimmerSet() {
+  int time = 20;
+  options = {
+    {"10s", [&]() { time=10; }},
+    {"15s", [&]() { time=15; }},
+    {"30s", [&]() { time=30; }},
+    {"45s", [&]() { time=45; }},
+    {"60s", [&]() { time=60; }},
+  };
+  delay(200);
+  loopOptions(options);
+  dimmerSet=time;
+  EEPROM.begin(EEPROMSIZE);
+  EEPROM.write(1, dimmerSet);  // 20s Dimm time
+  EEPROM.commit();
+  EEPROM.end();
+  saveConfigs();
+  delay(200);
+}
+
 
 /*********************************************************************
 **  Function: getConfigs                             
 **  getConfigurations from EEPROM or JSON
 **********************************************************************/
 void getConfigs() {
-  EEPROM.begin(EEPROMSIZE); // open eeprom
-  if(EEPROM.read(0) > 3 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-2) > 1) {
-  #if defined(CARDPUTER) || defined(M5STACK)
-    EEPROM.write(0, 1);    // Right rotation for cardputer
-  #else
-    EEPROM.write(0, 3);    // Left rotation
-  #endif
-    EEPROM.write(2, 100);  // 100% brightness
-    EEPROM.write(9, 1);    // OnlyBins
-    EEPROM.write(EEPROMSIZE-2, 1);  // AskSpiffs
-    EEPROM.writeString(10,"");
-    EEPROM.commit();       // Store data to EEPROM
-  }
-  if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  { 
-    EEPROM.write(0, 3);    // Left rotation
-    EEPROM.commit();       // Store data to EEPROM
-  }
-  EEPROM.end(); // Free EEPROM memory
-
-
   if(setupSdCard()) {
     File file = SD.open("/config.conf");
       if(file) {
@@ -197,9 +242,10 @@ void getConfigs() {
 
         onlyBins = gsetOnlyBins(setting["onlyBins"].as<bool>());
         askSpiffs = gsetAskSpiffs(setting["askSpiffs"].as<bool>());
-        int bright = setting["bright"].as<int>();
+        bright = setting["bright"].as<int>();
         log_i("Brightness: %d", bright);
         setBrightness(bright);
+        dimmerSet = setting["dimmerSet"].as<int>();
         rotation = setting["rot"].as<int>();
         FGCOLOR = setting["FGCOLOR"].as<uint16_t>();
         BGCOLOR = setting["BGCOLOR"].as<uint16_t>();
@@ -209,17 +255,37 @@ void getConfigs() {
         wui_usr = setting["wui_usr"].as<String>();
         wui_pwd = setting["wui_pwd"].as<String>();
         dwn_path = setting["dwn_path"].as<String>();
+        if(dimmerSet<10) dimmerSet=10;
         file.close();
+        
+        EEPROM.begin(EEPROMSIZE); // open eeprom
+        EEPROM.write(0, rotation);
+        EEPROM.write(1, dimmerSet);
+        EEPROM.write(2, bright);
+        EEPROM.write(9, int(onlyBins));
+        EEPROM.write(EEPROMSIZE-2, int(askSpiffs));
+
+        EEPROM.write(EEPROMSIZE-3, int((FGCOLOR >> 8) & 0x00FF));
+        EEPROM.write(EEPROMSIZE-4, int(FGCOLOR & 0x00FF));
+
+        EEPROM.write(EEPROMSIZE-5, int((BGCOLOR >> 8) & 0x00FF));
+        EEPROM.write(EEPROMSIZE-6, int(BGCOLOR & 0x00FF));
+
+        EEPROM.write(EEPROMSIZE-7, int((ALCOLOR >> 8) & 0x00FF));
+        EEPROM.write(EEPROMSIZE-8, int(ALCOLOR & 0x00FF));
+
+        EEPROM.write(EEPROMSIZE-9, int((odd_color >> 8) & 0x00FF));
+        EEPROM.write(EEPROMSIZE-10, int(odd_color & 0x00FF));
+
+        EEPROM.write(EEPROMSIZE-11, int((even_color >> 8) & 0x00FF));
+        EEPROM.write(EEPROMSIZE-12, int(even_color & 0x00FF));
+        if(!EEPROM.commit()) log_i("fail to write EEPROM");      // Store data to EEPROM
+        EEPROM.end();
         log_i("Using config.conf setup file");
-        return;
     } else {
 Default:
-        onlyBins = gsetOnlyBins();
-        askSpiffs = gsetAskSpiffs();
-        getBrightness();
-        rotation = gsetRotation();
+        
         log_i("Using settings stored on EEPROM");
-        return;
     }
   }
 }
@@ -235,9 +301,8 @@ void saveConfigs() {
     JsonObject setting = settings[0];
     setting["onlyBins"] = onlyBins;
     setting["askSpiffs"] = askSpiffs;
-    EEPROM.begin(EEPROMSIZE);
-    setting["bright"] = EEPROM.read(2);
-    EEPROM.end();
+    setting["bright"] = bright;
+    setting["dimmerSet"] = dimmerSet;    
     setting["rot"] = rotation;
     setting["FGCOLOR"] = FGCOLOR;
     setting["BGCOLOR"] = BGCOLOR;

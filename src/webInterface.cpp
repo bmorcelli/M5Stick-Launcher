@@ -444,10 +444,10 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   
 #ifndef STICK_C
   tft.drawCentreString("http://m5launcher.local", WIDTH/2,22,1);
-  setTftDisplay(7,47,TFT_WHITE,FONT_P,BGCOLOR);
+  setTftDisplay(7,47,~BGCOLOR,FONT_P,BGCOLOR);
 #else
   tft.drawCentreString("http://m5launcher.local", WIDTH/2,17,1);
-  setTftDisplay(7,26,TFT_WHITE,FONT_P,BGCOLOR);
+  setTftDisplay(7,26,~BGCOLOR,FONT_P,BGCOLOR);
 #endif
   tft.setTextSize(FONT_M);
   tft.print("IP ");   tftprintln(txt,10,1);
@@ -458,7 +458,7 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
 
   tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", WIDTH/2,HEIGHT-15,1);
 
-  while (!checkSelPress())
+  while (!checkSelPress(true))
   {
     if (shouldReboot) {
       ESP.restart();

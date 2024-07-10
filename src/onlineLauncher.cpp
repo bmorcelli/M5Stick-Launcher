@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "display.h"
 #include "mykeyboard.h"
+#include "settings.h"
 
 
 const char* root_ca3 = 
@@ -37,17 +38,51 @@ const char* root_ca3 =
 void wifiConnect(String ssid, int encryptation, bool isAP) {
 
   if(!isAP) {
+    bool found = false;
+    bool wrongPass = false;
+    getConfigs();
+    JsonObject setting = settings[0];
+    JsonArray WifiList = setting["wifi"];
+    JsonObject wifi = WifiList[0];
+    if(sdcardMounted) {
+      for(int i=0; i<WifiList.size(); i++) {
+        wifi = WifiList[i];
+        String name = wifi["ssid"].as<String>();
+        String pass = wifi["pwd"].as<String>();
+        log_i("Usr: %s, Pass: %s", name, pass);
+        if(name==ssid) { 
+          pwd = pass;
+          found = true;
+          break;
+        }
+      }
+    }
 
-    EEPROM.begin(EEPROMSIZE);
-    pwd = EEPROM.readString(10); //43
+Retry:    
+    if(!found || wrongPass) {
+      EEPROM.begin(EEPROMSIZE);
+      pwd = EEPROM.readString(10);
+      delay(200);
+      if(encryptation>0) pwd = keyboard(pwd,63, "Network Password:");
 
-    delay(200);
-    if(encryptation>0) pwd = keyboard(pwd,63, "Network Password:");
+      if (pwd!=EEPROM.readString(10)) {
+        EEPROM.writeString(10, pwd);
+        EEPROM.commit(); // Store data to EEPROM
+        EEPROM.end(); // Free EEPROM memory
+      }
 
-    if (pwd!=EEPROM.readString(10)) { //43
-      EEPROM.writeString(10, pwd); //43
-      EEPROM.commit(); // Store data to EEPROM
-      EEPROM.end(); // Free EEPROM memory
+      if(sdcardMounted && !found) {
+          // Cria um novo objeto JSON para adicionar ao array "wifi"
+        JsonObject newWifi = WifiList.add<JsonObject>();
+        newWifi["ssid"] = ssid;
+        newWifi["pwd"] = pwd;
+        saveConfigs();
+      }
+      else if(found && wrongPass) {
+        wifi["pwd"] = pwd;
+        saveConfigs();
+      }
+
     }
 
     WiFi.begin(ssid, pwd);
@@ -56,9 +91,15 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 
     tftprint("Connecting to: " + ssid + ".",10);
     tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+    int count = 0;
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       tftprint(".",10);
+      count++;
+      if(count>20) { 
+        wrongPass=true;
+        goto Retry;
+      }
     }
 
   } else { //Running in Access point mode
