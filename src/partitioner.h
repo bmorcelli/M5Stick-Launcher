@@ -1,6 +1,7 @@
 #include <esp_partition.h>
 #include <esp_ota_ops.h>
 #include <esp_flash.h>
+#include <EEPROM.h>
 
 
 

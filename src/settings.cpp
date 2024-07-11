@@ -251,6 +251,17 @@ void chargeMode() {
 **********************************************************************/
 void getConfigs() {
   if(setupSdCard()) {
+    if(!SD.exists("/config.conf")) {
+      File conf = SD.open("/config.conf", FILE_WRITE);
+      if(conf) {
+        #if ROTATION >1
+        conf.print("[{\"rot\":3,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"m5launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+        #else
+        conf.print("[{\"rot\":1,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"m5launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+        #endif
+      }
+      conf.close();
+    }
     File file = SD.open("/config.conf");
       if(file && file.size()>10) {
         // Deserialize the JSON document

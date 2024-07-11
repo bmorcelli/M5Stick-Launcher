@@ -20,20 +20,14 @@ config.conf JSON structure
       "odd": 12485,
       "wifi":[
          {
-            "ssid":"Pirata",
-            "pwd":"11111111",
-         },
-         {
-            "ssid":"Pirata2",
-            "pwd":"12345678",
+            "ssid":"myNetSSID",
+            "pwd":"myNetPassword",
          },
       ]
    }
 ]
 
 */
-
-//Functions in this file;
 
 void setBrightnessMenu();
 void setBrightness(int bright, bool save = true);

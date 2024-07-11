@@ -53,6 +53,8 @@ Sourcecode will be released in the future..
      * [x] Allow M5Launcher to be updated OverTheAir
      * [x] Reduced flickering on SD files navigation
      * [x] Fixed Download progressbar https://github.com/bmorcelli/M5Stick-Launcher/issues/41
+     * [x] Fixed problem when firmware names have "/" that prevent downloading
+     * [x] Appended firmware Version into download Name.
 * 2.1.2:
      * [x] Fixed OTA error message
      * [x] Increased Options Menu width and reduced menu flickering

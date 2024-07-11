@@ -422,13 +422,17 @@ void partitionCrawler() {
         return;
     }
 
-    ESP_LOGI(TAG, "Writing 0x00 to first byte of the running partition");
+    ESP_LOGI(TAG, "Writing 0x00 to first byte of the running partition (break OTA0 Launcher)");
     uint8_t zero_byte = 0x00;
     err = esp_partition_write(running_partition, 0, &zero_byte, 1);
+
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to write 0x00 to the first byte of the running partition");
     } else {
         ESP_LOGI(TAG, "Restarting system to boot from test partition");
+        //Forces Recovering EEPROM data to default.
+        EEPROM.begin(EEPROMSIZE);
+        EEPROM.write(0,0xFF);
         esp_restart();
     }
 }
