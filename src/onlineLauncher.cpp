@@ -255,7 +255,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
     http.end();
 
   } else { displayRedStripe("Couldn't Connect"); }
-
+  resetDimmer();
 }
 
 /***************************************************************************************

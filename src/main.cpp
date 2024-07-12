@@ -110,8 +110,30 @@ void get_partition_sizes() {
 void setup() {
   Serial.begin(115200);
 
+  // Setup GPIOs and stuff
+  #if defined(STICK_C_PLUS2)
+    pinMode(UP_BTN, INPUT);
+    pinMode(SEL_BTN, INPUT);
+    pinMode(DW_BTN, INPUT);
+    pinMode(4, OUTPUT);
+    digitalWrite(4,HIGH);
+  #elif defined(STICK_C_PLUS)
+    axp192.begin();
+    pinMode(SEL_BTN, INPUT);
+    pinMode(DW_BTN, INPUT);
+  #elif defined(M5STACK)
+    //M5.begin(); // Begin after TFT, for SDCard to work
+  #elif defined(CARDPUTER)
+    Keyboard.begin();
+    pinMode(10, INPUT);
+  #endif
+
+  #if defined(BACKLIGHT)
+  pinMode(BACKLIGHT, OUTPUT);
+  #endif
+
   EEPROM.begin(EEPROMSIZE); // open eeprom
-  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-2) > 1) {
+  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-2) > 1 || (EEPROM.read(EEPROMSIZE-3)==0xFF && EEPROM.read(EEPROMSIZE-4) == 0xFF && EEPROM.read(EEPROMSIZE-5)==0xFF && EEPROM.read(EEPROMSIZE-6) == 0xFF)) {
     log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(9),EEPROM.read(EEPROMSIZE-2) );
   #if defined(CARDPUTER) || defined(M5STACK)
     EEPROM.write(0, 1);    // Right rotation for cardputer
@@ -156,7 +178,6 @@ void setup() {
   odd_color =  (EEPROM.read(EEPROMSIZE-9)  << 8) | EEPROM.read(EEPROMSIZE-10);
   even_color = (EEPROM.read(EEPROMSIZE-11) << 8) | EEPROM.read(EEPROMSIZE-12);
   EEPROM.end();  
-  setBrightness(bright,false);
 
   // declare variables
   size_t currentIndex=0;  
@@ -164,42 +185,26 @@ void setup() {
   sdcardMounted=false;
   String fileToCopy;
 
-  //Define variables to identify if there is an app installed after Launcher 
-  esp_app_desc_t ota_desc;
-  esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
+  //Init Display
   tft.setAttribute(PSRAM_ENABLE,true);
   tft.init();
-
-  // Setup GPIOs and stuff
-  #if defined(STICK_C_PLUS2)
-    pinMode(UP_BTN, INPUT);
-  #elif defined(STICK_C_PLUS)
-    axp192.begin();
-  #endif
-  #if defined(M5STACK)
-    M5.begin(); // inicia os periféricos do CORE, CORE2 e COREs3 exceto o TFT.
-  #endif
-  #ifndef CARDPUTER
-  pinMode(SEL_BTN, INPUT);
-  pinMode(DW_BTN, INPUT);
-  pinMode(4, OUTPUT);
-  digitalWrite(4,HIGH);
-  #else
-  Keyboard.begin();
-  pinMode(10, INPUT);
-  #endif
-
-
   tft.setRotation(rotation);
-  partitionCrawler(); // Performs the verification when Launcher is installed through OTA
-  
-  resetTftDisplay();
+  tft.fillScreen(TFT_BLACK);
+  setBrightness(bright,false);
   initDisplay(true);  
-  getConfigs();
 
-  #if defined(BACKLIGHT)
-  pinMode(BACKLIGHT, OUTPUT);
-  #endif
+#if defined(M5STACK)
+    M5.begin(); // Begin after TFT, for SDCard to work
+#endif
+  // Performs the verification when Launcher is installed through OTA
+  partitionCrawler(); 
+  // Checks if the fw in the OTA partition is valid. reading the firstByte looking for 0xE9
+  const esp_partition_t* ota_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
+  uint8_t firstByte;
+  esp_partition_read(ota_partition,0,&firstByte,1);
+
+  //Gets the config.conf from SD Card and fill out the settings JSON
+  getConfigs();
 
   //Start Bootscreen timer
   int i = millis();
@@ -239,10 +244,12 @@ void setup() {
   }
   
   // If nothing is done, check if there are any app installed in the ota partition, if it does, restart device to start installed App.
-  if(err == ESP_OK) { 
-	  tft.fillScreen(TFT_BLACK);
-	  ESP.restart(); 
+  if(firstByte==0xE9) {
+    tft.fillScreen(TFT_BLACK);
+	  ESP.restart();  
   }
+  else goto Launcher;
+
 
   // If M5 or Enter button is pressed, continue from here
   Launcher:

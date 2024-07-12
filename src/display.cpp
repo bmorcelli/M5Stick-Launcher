@@ -612,7 +612,7 @@ void loopVersions() {
     }
 
     /* Select to install */
-    if(checkSelPress()) { 
+    if(checkSelPress(true)) { 
 
       // Definição da matriz "Options"
       options = {
@@ -668,7 +668,7 @@ void loopFirmware(){
       }
 
       /* Select to install */
-      if(checkSelPress()) { 
+      if(checkSelPress(true)) { 
         
         //Checks for long press to get back to Main Menu, only for StickCs.. Cardputer uses Esc btn
         #ifndef CARDPUTER

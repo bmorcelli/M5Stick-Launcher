@@ -119,10 +119,10 @@ bool checkPrevPress() {
 
 /* Verifies if Select or OK was pressed */
 bool checkSelPress(bool dimmOff){
-  if(!dimmOff && (dimmerTemp+dimmerSet*1000) < millis() && !dimmer) {
+  if((dimmerTemp+dimmerSet*1000) < millis() && !dimmer) {
     dimmer = true;
     setBrightness(5,false);
-    setCpuFrequencyMhz(80);
+    if(!dimmOff) setCpuFrequencyMhz(80);
   }  
   #if defined (CARDPUTER)
     Keyboard.update();
