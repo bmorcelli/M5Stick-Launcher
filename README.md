@@ -1,5 +1,5 @@
 # M5Stick Launcher
-Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2.
+Application Launcher for Cardputer, M5StickC, M5StickC Plus, M5StickC Plus 2, Core (16Mb), Core2 & Tough and CoreS3.
 
 
 <p align="center" width="100%">
@@ -7,24 +7,36 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 </p>
 
 ## With M5Launcher you'll be able to:
-### OTA Update
+### *OTA* OTA Update
 - Install binaries from M5Burner repository (yes, online, without the need of a USB Cable)
 - Install binaries from a WebUI, that you can start from CFG option, installing binaries you have on your computer or smartphone
 - Install binaries from your SD Card
 
-### SD Card Management
+### *SD* SD Card Management
 - Create new Folders,
 - Delete files and folders,
 - Rename files,
 - Copy and paste files,
 - Install binaries
 
-### Customization
-- You can change brightness
-- change rotation (StickCs)
-- Start WebUI
-- set to see all files on SD Card (see only .bins is default)
-- (new) change Partition Scheme (allows installing big apps or UiFlow, for example)
+### *WUI* Web User Interface 
+- 
+
+### *CFG* Configurations (Customization)
+- Charge Mode
+- Change brightness
+- Change Dim Time
+- Change UI Color
+- Avoid/Ask Spiffs (Change to not ask to install Spiffs file system, only Orca One uses this feature)
+- Change rotation
+- All files/Only Bins (see all files or only .bins - default)
+- Change Partition Scheme (allows installing big apps or UiFlow2, for example)
+- List of Partitions
+- Clear FAT partition
+- Save SPIFFS (Save a copy of the SPIFFS partition to restore when needed)
+- Save FAT vfs (Save a copy of the FAT partition to restore when needed)
+- Restore SPIFFS
+- Restore FAT vfs
 
 ## tips
 * Having an SD card is good for better experience, but not really needed. [SDCard Hat for M5StickCs](https://www.thingiverse.com/thing:6459069) 
@@ -46,15 +58,22 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, and M5StickC Plus 2
 ## Install from source
 Sourcecode will be released in the future..
 
+## Known Issues
+* UiFlow 1 doesn´t work with M5Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
+
 ## Changelog
-* 2.2.0 (Future):
-     * [x] Save more SSIDs and pwd, connect automatically if is a known network (config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/30
-     * [x] change default folder for download (config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/15
-     * [x] Allow M5Launcher to be updated OverTheAir
+* 2.2.0: 
+     * [x] M5Launcher 2.2+ now can be updated OverTheAir or Using SD Card
+     * [x] Ui Color settings (can be customized on /config.conf file)
      * [x] Reduced flickering on SD files navigation
-     * [x] Fixed Download progressbar https://github.com/bmorcelli/M5Stick-Launcher/issues/41
      * [x] Fixed problem when firmware names have "/" that prevent downloading
      * [x] Appended firmware Version into download Name.
+     * [x] Added Dim time to lower brightness and CPU freq while idle
+     * [x] Added "Chage Mode" on settings, reducing CPU fre to 80Mhz and brightness to 5%, https://github.com/bmorcelli/M5Stick-Launcher/issues/40
+     * [x] Fixed Download progressbar https://github.com/bmorcelli/M5Stick-Launcher/issues/41
+     * [x] Change default folder for download (manually on /config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/15     
+     * [x] Save more SSIDs and pwd, connect automatically if is a known network (config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/30
+     * [x] Slightlty increased Wifi Download/OTA Speed, using a customized framework.
 * 2.1.2:
      * [x] Fixed OTA error message
      * [x] Increased Options Menu width and reduced menu flickering

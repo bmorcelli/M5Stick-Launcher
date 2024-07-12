@@ -171,7 +171,7 @@ void setUiColor() {
     {"Blue",      [&]() { FGCOLOR=0x94BF; BGCOLOR=0x0000; ALCOLOR=0xd81f; odd_color=0xd69f; even_color=0x079F; }},
     {"Yellow",    [&]() { FGCOLOR=0xFFE0; BGCOLOR=0x0000; ALCOLOR=0xFB80; odd_color=0x9480; even_color=0xbae0; }},
     {"Purple",    [&]() { FGCOLOR=0xe01f; BGCOLOR=0x0000; ALCOLOR=0xF800; odd_color=0xf57f; even_color=0x89d3; }},
-    {"White",     [&]() { FGCOLOR=0xFFFF; BGCOLOR=0x0000; ALCOLOR=0x6b6d; odd_color=0x8c71; even_color=0xb596; }},
+    {"White",     [&]() { FGCOLOR=0xFFFF; BGCOLOR=0x0000; ALCOLOR=0x6b6d; odd_color=0x630C; even_color=0x8410; }},
     {"Black",     [&]() { FGCOLOR=0x0000; BGCOLOR=0xFFFF; ALCOLOR=0x6b6d; odd_color=0x8c71; even_color=0xb596; }},
   };
   delay(200);

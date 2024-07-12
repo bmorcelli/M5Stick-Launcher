@@ -189,7 +189,7 @@ void setup() {
   tft.setAttribute(PSRAM_ENABLE,true);
   tft.init();
   tft.setRotation(rotation);
-  tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(BGCOLOR);
   setBrightness(bright,false);
   initDisplay(true);  
 
@@ -357,11 +357,7 @@ void loop() {
         
         if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
         else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true); saveConfigs();}});
-
-      #if !defined(CARDPUTER)
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
-      #endif
-
         options.push_back({"Part Change",  [=]() { partitioner(); }});
         options.push_back({"Part List",  [=]() { partList(); }});
 

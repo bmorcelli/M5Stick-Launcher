@@ -342,8 +342,9 @@ Most of the apps over the internet don't need SPIFFS to work, but there are some
 <script>
 function WifiConfig() {
 let wifiSsid = prompt("Please enter the Username of your network", "admin");
-let wifiPwd = prompt("Please enter the Password of your network", "M%L4unch3r");
-if (wifiSsid == null || wifiSsid == "" || wifiPwd == null) {
+let wifiPwd = prompt("Please enter the Password of your network", "m5launcher");
+
+if (wifiSsid == null || wifiSsid == "" || wifiPwd == null) { 
 window.alert("Invalid User or Password");
 } else {
 xmlhttp=new XMLHttpRequest();
@@ -501,7 +502,7 @@ ajax2.addEventListener("abort", abortHandler, false);
 
 uploadForm =
 "<p>Updating...</p>" +
-"<progress id='progressBar' value='0' max='100' style='width:100%;'></progress>" +
+"<progress id='progressBar' value='0' max='100' style='width:100%%;'></progress>" +
 "<h3 id='status'></h3>" +
 "<p id='loaded_n_total'></p>";
 document.getElementById("updetails").innerHTML = uploadForm;
@@ -742,7 +743,7 @@ var currentFileIndex = 0;
     var uploadform =
     "<p>Send file to " + folder + "</p>"+
     "<form id=\"upload_form\" enctype=\"multipart/form-data\" method=\"post\">" +
-    "<progress id=\"progressBar\" value=\"0\" max=\"100\" style=\"width:100%;\"></progress>" +
+    "<progress id=\"progressBar\" value=\"0\" max=\"100\" style=\"width:100%%;\"></progress>" +
     "<h3 id=\"status\"></h3>" +
     "<p id=\"loaded_n_total\"></p>" +
     "</form>";
