@@ -4,7 +4,6 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <M5-HTTPUpdate.h>
-#include <ArduinoJson.h>
 #include <TFT_eSPI.h>
 #include <SPIFFS.h>
 #include "esp_ota_ops.h"
@@ -20,6 +19,15 @@ uint32_t MAX_SPIFFS = 0;
 uint32_t MAX_APP = 0;
 uint32_t MAX_FAT_vfs = 0;
 uint32_t MAX_FAT_sys = 0;
+uint16_t FGCOLOR = TFT_GREEN;
+uint16_t ALCOLOR = TFT_RED;
+uint16_t BGCOLOR = TFT_BLACK;
+uint16_t odd_color = 0x30c5;
+uint16_t even_color = 0x32e5;
+unsigned long dimmerTemp=millis();
+int dimmerSet=20;
+int bright=100;
+bool dimmer=false;
 int prog_handler;    // 0 - Flash, 1 - SPIFFS
 int currentIndex;
 int rotation;
@@ -33,10 +41,14 @@ bool stopOta;
 size_t file_size;
 String ssid;
 String pwd;
+String wui_usr = "admin";
+String wui_pwd = "m5launcher";
+String dwn_path = "/downloads/";
 JsonDocument doc;
+JsonDocument settings;
 std::vector<std::pair<std::string, std::function<void()>>> options;
-const int bufSize = 4096;
-uint8_t buff[4096] = {0};
+const int bufSize = 1024;
+uint8_t buff[1024] = {0};
 
 
 #include "display.h"
@@ -45,170 +57,7 @@ uint8_t buff[4096] = {0};
 #include "sd_functions.h"
 #include "webInterface.h"
 #include "partitioner.h"
-
-
-//Functions in this file;
-
-void setBrightnessMenu();
-void setBrightness(int bright, bool save = true);
-void getBrightness(); 
-bool gsetOnlyBins(bool set = false, bool value = true);
-bool gsetAskSpiffs(bool set = false, bool value = true);
-int gsetRotation(bool set = false);
-
-
-/*********************************************************************
-**  Function: setBrightness                             
-**  save brightness value into EEPROM
-**********************************************************************/
-void setBrightness(int bright, bool save) {
-  if(bright>100) bright=100;
-
-  #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); ; // 4 is the number of options
-  analogWrite(BACKLIGHT, bl);
-  #elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(bright);
-  #elif defined(M5STACK)
-  M5.Display.setBrightness(bright);  
-  #endif
-
- 
-  EEPROM.begin(EEPROMSIZE); // open eeprom
-  EEPROM.write(2, bright); //set the byte
-  EEPROM.commit(); // Store data to EEPROM
-  EEPROM.end(); // Free EEPROM memory
-}
-
-/*********************************************************************
-**  Function: getBrightness                             
-**  save brightness value into EEPROM
-**********************************************************************/
-void getBrightness() {
-  EEPROM.begin(EEPROMSIZE);
-  int bright = EEPROM.read(2);
-  EEPROM.end(); // Free EEPROM memory
-  if(bright>100) { 
-    bright = 100;
-
-#if defined(STICK_C_PLUS2) || defined(CARDPUTER)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
-  analogWrite(BACKLIGHT, bl);
-#elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(bright);
-#elif defined(M5STACK)
-  M5.Display.setBrightness(bright);  
-#endif
-    setBrightness(100);
-
-  }
-
-#if defined(STICK_C_PLUS2) || defined(CARDPUTER)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
-  analogWrite(BACKLIGHT, bl);
-#elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(bright);
-#elif defined(M5STACK)
-  M5.Display.setBrightness(bright);
-#endif
-
-}
-
-/*********************************************************************
-**  Function: gsetOnlyBins                             
-**  get onlyBins from EEPROM
-**********************************************************************/
-bool gsetOnlyBins(bool set, bool value) {
-  EEPROM.begin(EEPROMSIZE);
-  int onlyBin = EEPROM.read(9);
-  bool result = false;
-
-  if(onlyBin>1) { 
-    set=true;
-  } 
-   
-  if(onlyBin==0) result = false;
-  else result = true;
-
-  if(set) {
-    result=value;
-    onlyBins=value;         //update the global variable
-    EEPROM.write(9, result);
-    EEPROM.commit();
-  }
-  EEPROM.end(); // Free EEPROM memory
-  return result;
-}
-
-/*********************************************************************
-**  Function: gsetAskSpiffs                             
-**  get onlyBins from EEPROM
-**********************************************************************/
-bool gsetAskSpiffs(bool set, bool value) {
-  EEPROM.begin(EEPROMSIZE);
-  int spiffs = EEPROM.read(EEPROMSIZE-2);
-  bool result = false;
-
-  if(spiffs>1) { 
-    set=true;
-  } 
-   
-  if(spiffs==0) result = false;
-  else result = true;
-
-  if(set) {
-    result=value;
-    askSpiffs=value;         //update the global variable
-    EEPROM.write(EEPROMSIZE-2, result);
-    EEPROM.commit();
-  }
-  EEPROM.end(); // Free EEPROM memory
-  return result;
-}
-
-/*********************************************************************
-**  Function: gsetRotation                             
-**  get onlyBins from EEPROM
-**********************************************************************/
-int gsetRotation(bool set){
-  EEPROM.begin(EEPROMSIZE);
-  int getRot = EEPROM.read(0);
-  int result = ROTATION;
-  
-  if(getRot==1 && set) result = 3;
-  else if(getRot==3 && set) result = 1;
-  else if(getRot<=3) result = getRot;
-  else {
-    set=true;
-    result = ROTATION;
-  } 
-
-  if(set) {
-    rotation = result;
-    tft.setRotation(result);
-    EEPROM.write(0, result);    // Left rotation
-    EEPROM.commit();
-    tft.fillScreen(BGCOLOR);
-  }
-  EEPROM.end(); // Free EEPROM memory
-  return result;
-}
-/*********************************************************************
-**  Function: setBrightnessMenu                             
-**  Handles Menu to set brightness
-**********************************************************************/
-void setBrightnessMenu() {
-  options = {
-    {"100%", [=]() { setBrightness(100); }},
-    {"75 %", [=]() { setBrightness(75); }},
-    {"50 %", [=]() { setBrightness(50); }},
-    {"25 %", [=]() { setBrightness(25); }},
-    {" 0 %", [=]() { setBrightness(1); }},
-  };
-  delay(200);
-  loopOptions(options, true);
-  delay(200);
-}
+#include "settings.h"
 
 /*********************************************************************
 **  Function: get_partition_sizes                                    
@@ -261,66 +110,101 @@ void get_partition_sizes() {
 void setup() {
   Serial.begin(115200);
 
-  // declare variables
-  size_t currentIndex=0;  
-  prog_handler=0;
-  sdcardMounted=false;
-  String fileToCopy;
-
-  //Define variables to identify if there is an app installed after Launcher 
-  esp_app_desc_t ota_desc;
-  esp_err_t err = esp_ota_get_partition_description(esp_ota_get_next_update_partition(NULL), &ota_desc);  
-  tft.init();
-
   // Setup GPIOs and stuff
   #if defined(STICK_C_PLUS2)
     pinMode(UP_BTN, INPUT);
+    pinMode(SEL_BTN, INPUT);
+    pinMode(DW_BTN, INPUT);
+    pinMode(4, OUTPUT);
+    digitalWrite(4,HIGH);
   #elif defined(STICK_C_PLUS)
     axp192.begin();
+    pinMode(SEL_BTN, INPUT);
+    pinMode(DW_BTN, INPUT);
+  #elif defined(M5STACK)
+    //M5.begin(); // Begin after TFT, for SDCard to work
+  #elif defined(CARDPUTER)
+    Keyboard.begin();
+    pinMode(10, INPUT);
   #endif
-  #if defined(M5STACK)
-    M5.begin(); // inicia os periféricos do CORE, CORE2 e COREs3 exceto o TFT.
-  #endif
-  #ifndef CARDPUTER
-  pinMode(SEL_BTN, INPUT);
-  pinMode(DW_BTN, INPUT);
-  pinMode(4, OUTPUT);
-  digitalWrite(4,HIGH);
-  #else
-  Keyboard.begin();
-  pinMode(10, INPUT);
-  #endif
-
-  rotation = gsetRotation();
-  tft.setRotation(rotation);
-  
-  resetTftDisplay();
-  initDisplay(true);  
-  askSpiffs=gsetAskSpiffs();
 
   #if defined(BACKLIGHT)
   pinMode(BACKLIGHT, OUTPUT);
   #endif
 
   EEPROM.begin(EEPROMSIZE); // open eeprom
-if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100) {
-#if defined(CARDPUTER) || defined(M5STACK)
-  EEPROM.write(0, 1);    // Right rotation for cardputer
-#else
-  EEPROM.write(0, 3);    // Left rotation
-#endif
-  EEPROM.write(1, 15);   // 15 second auto dim time
-  EEPROM.write(2, 100);  // 100% brightness
-  EEPROM.commit();       // Store data to EEPROM
-}
-if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  { 
-  EEPROM.write(0, 3);    // Left rotation
-  EEPROM.commit();       // Store data to EEPROM
-}
-  EEPROM.end(); // Free EEPROM memory
-  getBrightness();  
-  onlyBins=gsetOnlyBins();
+  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-2) > 1 || (EEPROM.read(EEPROMSIZE-3)==0xFF && EEPROM.read(EEPROMSIZE-4) == 0xFF && EEPROM.read(EEPROMSIZE-5)==0xFF && EEPROM.read(EEPROMSIZE-6) == 0xFF)) {
+    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(9),EEPROM.read(EEPROMSIZE-2) );
+  #if defined(CARDPUTER) || defined(M5STACK)
+    EEPROM.write(0, 1);    // Right rotation for cardputer
+  #else
+    EEPROM.write(0, 3);    // Left rotation
+  #endif
+    EEPROM.write(1, 20);  // 20s Dimm time
+    EEPROM.write(2, 100);  // 100% brightness
+    EEPROM.write(9, 1);    // OnlyBins
+    EEPROM.writeString(10,"");
+    EEPROM.write(EEPROMSIZE-2, 1);  // AskSpiffs
+
+    //FGCOLOR
+    EEPROM.write(EEPROMSIZE-3, 0x07); 
+    EEPROM.write(EEPROMSIZE-4, 0xE0);
+    //BGCOLOR
+    EEPROM.write(EEPROMSIZE-5, 0);
+    EEPROM.write(EEPROMSIZE-6, 0);
+    //ALCOLOR
+    EEPROM.write(EEPROMSIZE-7, 0xF8);
+    EEPROM.write(EEPROMSIZE-8, 0x00);
+    //odd
+    EEPROM.write(EEPROMSIZE-9, 0x30);
+    EEPROM.write(EEPROMSIZE-10, 0xC5);
+    //even
+    EEPROM.write(EEPROMSIZE-11, 0x32);
+    EEPROM.write(EEPROMSIZE-12, 0xe5);
+    EEPROM.commit();       // Store data to EEPROM
+  }
+  if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  { 
+    EEPROM.write(0, 3);    // Left rotation
+    EEPROM.commit();       // Store data to EEPROM
+  }
+  rotation = EEPROM.read(0);
+  dimmerSet = EEPROM.read(1);
+  bright = EEPROM.read(2);
+  onlyBins = EEPROM.read(9);
+  askSpiffs = EEPROM.read(EEPROMSIZE-2);
+  FGCOLOR =    (EEPROM.read(EEPROMSIZE-3)  << 8) | EEPROM.read(EEPROMSIZE-4);
+  BGCOLOR =    (EEPROM.read(EEPROMSIZE-5)  << 8) | EEPROM.read(EEPROMSIZE-6);
+  ALCOLOR =    (EEPROM.read(EEPROMSIZE-7)  << 8) | EEPROM.read(EEPROMSIZE-8);
+  odd_color =  (EEPROM.read(EEPROMSIZE-9)  << 8) | EEPROM.read(EEPROMSIZE-10);
+  even_color = (EEPROM.read(EEPROMSIZE-11) << 8) | EEPROM.read(EEPROMSIZE-12);
+  EEPROM.end();  
+
+  // declare variables
+  size_t currentIndex=0;  
+  prog_handler=0;
+  sdcardMounted=false;
+  String fileToCopy;
+
+  //Init Display
   tft.setAttribute(PSRAM_ENABLE,true);
+  tft.init();
+  tft.setRotation(rotation);
+  tft.fillScreen(BGCOLOR);
+  setBrightness(bright,false);
+  initDisplay(true);  
+
+#if defined(M5STACK)
+    M5.begin(); // Begin after TFT, for SDCard to work
+#endif
+  // Performs the verification when Launcher is installed through OTA
+  partitionCrawler(); 
+  // Checks if the fw in the OTA partition is valid. reading the firstByte looking for 0xE9
+  const esp_partition_t* ota_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
+  uint8_t firstByte;
+  esp_partition_read(ota_partition,0,&firstByte,1);
+
+  //Gets the config.conf from SD Card and fill out the settings JSON
+  getConfigs();
 
   //Start Bootscreen timer
   int i = millis();
@@ -339,7 +223,7 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
     if(checkSelPress())        
   #endif
      {
-        tft.fillScreen(TFT_BLACK);
+        tft.fillScreen(BGCOLOR);
         goto Launcher;
       }
 
@@ -360,15 +244,17 @@ if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  {
   }
   
   // If nothing is done, check if there are any app installed in the ota partition, if it does, restart device to start installed App.
-  if(err == ESP_OK) { 
-	  tft.fillScreen(TFT_BLACK);
-	  ESP.restart(); 
+  if(firstByte==0xE9) {
+    tft.fillScreen(TFT_BLACK);
+	  ESP.restart();  
   }
+  else goto Launcher;
+
 
   // If M5 or Enter button is pressed, continue from here
   Launcher:
   get_partition_sizes();
-  tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(BGCOLOR);
 }
 
 /**********************************************************************
@@ -380,8 +266,8 @@ void loop() {
   int index = 0;
   int opt = 4; // there are 3 options> 1 list SD files, 2 OTA and 3 Config
   stopOta = false; // variable used in WebUI, and to prevent open OTA after webUI without restart
-  
-  if(!setupSdCard()) index=1; //if SD card is not present, paint SD square grey and auto select OTA
+  getBrightness();
+  if(sdcardMounted) index=1; //if SD card is not present, paint SD square grey and auto select OTA
   while(1){
     if (redraw) { 
       drawMainMenu(index); 
@@ -458,38 +344,39 @@ void loop() {
 
       if(index == 3) {  
         options = {
+          
+          {"Charge Mode", [=](){ chargeMode(); }},
           {"Brightness", [=]() { setBrightnessMenu(); }},
+          {"Dim time", [=]()   { setdimmerSet();}},
+          {"UI Color", [=]()   { setUiColor();}},
         };
         if(sdcardMounted) {
-          if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false); }});
-          else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true); }});
+          if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false); saveConfigs();}});
+          else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true); saveConfigs();}});
         }
         
-        if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); }});
-        else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true); }});
-
-      #if !defined(CARDPUTER)
+        if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
+        else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true); saveConfigs();}});
         options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
-      #endif
-      #if defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(CARDPUTER)
         options.push_back({"Part Change",  [=]() { partitioner(); }});
         options.push_back({"Part List",  [=]() { partList(); }});
-      #endif
+
       #ifndef STICK_C_PLUS
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
       #endif
+
         if(MAX_SPIFFS>0) options.push_back({"Save SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
         //if(MAX_FAT_sys>0) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
         if(MAX_FAT_vfs>0) options.push_back({"Save FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
         if(MAX_SPIFFS>0) options.push_back({ "Rest SPIFFS",  [=]() { restorePartition("spiffs"); }});
         //if(MAX_FAT_sys>0) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
         if(MAX_FAT_vfs>0) options.push_back({"Rest FAT Vfs",  [=]() { restorePartition("vfs"); }});
-        
 
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
         
         delay(200);
         loopOptions(options);
+        tft.fillScreen(BGCOLOR);
         tft.fillScreen(BGCOLOR);
         redraw=true;
       }

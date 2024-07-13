@@ -13,11 +13,21 @@
 #define U_FAT_vfs 300 
 #define U_FAT_sys 400 
 
+extern uint16_t FGCOLOR;
+extern uint16_t ALCOLOR;
+extern uint16_t BGCOLOR;
+extern uint16_t odd_color;
+extern uint16_t even_color;
+
 extern uint32_t MAX_APP;
 extern uint32_t MAX_SPIFFS;
 extern uint32_t MAX_FAT_vfs;
 extern uint32_t MAX_FAT_sys;
 
+extern unsigned long dimmerTemp;
+extern int dimmerSet;
+extern int bright;
+extern bool dimmer;
 
 extern int prog_handler;    // 0 - Flash, 1 - SPIFFS, 2 - Download
 
@@ -29,9 +39,17 @@ extern  String ssid;
 
 extern  String pwd;
 
+extern  String wui_usr;
+
+extern  String wui_pwd;
+
+extern  String dwn_path;
+
 extern int currentIndex;
 
 extern JsonDocument doc;
+
+extern JsonDocument settings;
 
 extern String fileToCopy;
 
@@ -41,7 +59,7 @@ extern int rotation;
 
 extern bool returnToMenu;
 
-extern uint8_t buff[4096];
+extern uint8_t buff[1024];
 
 extern const int bufSize;
 

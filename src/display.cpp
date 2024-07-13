@@ -62,28 +62,22 @@ void coreFooter2(uint16_t color) {
 ***************************************************************************************/
 void initDisplay(bool doAll) {
     tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
-    srand(time(0));
     tft.setTextSize(FONT_P);
     tft.setCursor(10,10);
-    int cor = rand() % 3;
-
-    if (cor==0) tft.setTextColor(0x35e5,BGCOLOR);
-    else if (cor==1) tft.setTextColor(0x33c5,BGCOLOR);
-    else tft.setTextColor(0x0ce0,BGCOLOR);
-    tftprint(String(random(0,9)),10);
+    int cor = 0;
     String txt;
     int show = random(0,40);
     int _x=tft.getCursorX();
     int _y=tft.getCursorY();
     
     while(tft.getCursorY()<(HEIGHT-12)) {
-      cor = random(0,3);
+      cor = random(0,11);
       tft.setTextSize(FONT_P);
       show = random(0,40);
       if(show==0 || doAll) {
-        if (cor==0) { tft.setTextColor(0x30c5,BGCOLOR); txt=String(cor); }
-        else if (cor==1) { tft.setTextColor(0x32e5,BGCOLOR); txt=String(cor); }
-        else { txt=" "; }
+        if (cor==10) { txt=" "; }
+        else if (cor & 1) { tft.setTextColor(odd_color,BGCOLOR); txt=String(cor); }
+        else { tft.setTextColor(even_color,BGCOLOR); txt=String(cor); }
         
         if(_x>=(WIDTH-10)) {_x=10; _y+=8; }
         else if(_x<10) { _x = 10; }
@@ -99,14 +93,14 @@ void initDisplay(bool doAll) {
         }
     }
     tft.setTextSize(FONT_G);
-    tft.setTextColor(TFT_GREEN);
+    tft.setTextColor(FGCOLOR);
     #ifndef STICK_C
     tft.drawCentreString("M5Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
     #else
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
     #endif
     tft.setTextSize(FONT_G);
-    tft.setTextColor(TFT_GREEN);
+    tft.setTextColor(FGCOLOR);
 
     delay(50);
     
@@ -130,13 +124,13 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   setTftDisplay(10, 10, FGCOLOR,FONT_P);
   tft.print("Firmware: ");
   
-  setTftDisplay(10, 22, TFT_WHITE, FONT_M,BGCOLOR);
+  setTftDisplay(10, 22, ~BGCOLOR, FONT_M,BGCOLOR);
   String name2 = String(name);
   tftprintln(name2,10,3);
   
   setTftDisplay(10, 22+4*FONT_M*8, FGCOLOR);
   tft.print("by: ");
-  tft.setTextColor(TFT_WHITE);
+  tft.setTextColor(~BGCOLOR);
   String author2 = String(author).substring(0,14);
   tftprintln(author2,10);
 
@@ -184,33 +178,33 @@ void displayCurrentVersion(String name, String author, String version, String pu
     tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,ALCOLOR,BGCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
 
-    setTftDisplay(10, 10, TFT_WHITE,FONT_M,BGCOLOR);
+    setTftDisplay(10, 10, ~BGCOLOR,FONT_M,BGCOLOR);
     String name2 = String(name);
     tftprintln(name2,10,2);
     #ifndef STICK_C
     setTftDisplay(10,50,ALCOLOR,FONT_M);
     #endif
     tft.print("by: ");
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(~BGCOLOR);
     tft.println(String(author).substring(0,14));
     
     tft.setTextColor(ALCOLOR);
     tft.setCursor(10,tft.getCursorY());
     tft.print("v: ");
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(~BGCOLOR);
     tft.println(String(version).substring(0,15));
     
     tft.setTextColor(ALCOLOR);
     tft.setCursor(10,tft.getCursorY());
     tft.print("from: ");
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(~BGCOLOR);
     tft.println(String(published_at));
 
     if(versions.size()>1) {
         tft.setTextColor(ALCOLOR);
         tft.drawChar('<', 10, HEIGHT-(10+FONT_M*9));
         tft.drawChar('>', WIDTH-(10+FONT_M*6), HEIGHT-(10+FONT_M*9));
-        tft.setTextColor(TFT_WHITE);
+        tft.setTextColor(~BGCOLOR);
     }
 
     setTftDisplay(-1, -1,ALCOLOR,FONT_M,BGCOLOR);
@@ -273,6 +267,7 @@ void progressHandler(int progress, size_t total) {
 #ifndef STICK_C
   int barWidth = map(progress, 0, total, 0, WIDTH-40);
   if(progress == 0) {
+    tft.setTextSize(FONT_M);
     tft.setTextColor(ALCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);    
@@ -464,27 +459,29 @@ void drawBatteryStatus() {
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
 void listFiles(int index, String fileList[][3]) {
-    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     tft.setCursor(10,10);
     tft.setTextSize(FONT_M);
+    int i=0;
     int arraySize = 0;
     while(fileList[arraySize][2]!="" && arraySize < MAXFILES) arraySize++;
-    int i=0;
     int start=0;
     if(index>=MAX_ITEMS) {
         start=index-MAX_ITEMS+1;
         if(start<0) start=0;
     }
-    
+    int nchars = (WIDTH-20)/(6*tft.textsize);
+    String txt=">";
     while(i<arraySize) {
         if(i>=start && fileList[i][2]!="") {
-            if(fileList[i][2]=="folder") tft.setTextColor(FGCOLOR-0x1111);
-            else if(fileList[i][2]=="operator") tft.setTextColor(ALCOLOR);
-            else tft.setTextColor(FGCOLOR);
             tft.setCursor(10,tft.getCursorY());
-            if (index==i) tft.print(">");
-            else tft.print(" ");
-            tftprintln(fileList[i][0],10,1);
+            if(fileList[i][2]=="folder") tft.setTextColor(FGCOLOR-0x1111, BGCOLOR);
+            else if(fileList[i][2]=="operator") tft.setTextColor(ALCOLOR, BGCOLOR);
+            else { tft.setTextColor(FGCOLOR,BGCOLOR); }
+
+            if (index==i) txt=">";
+            else txt=" ";
+            txt+=fileList[i][0] + "                       ";
+            tft.println(txt.substring(0,nchars));
         }
         i++;
         if (i==(start+MAX_ITEMS) || fileList[i][2]=="") break;
@@ -496,6 +493,7 @@ void listFiles(int index, String fileList[][3]) {
 }
 
 
+
 /*********************************************************************
 **  Function: loopOptions                             
 **  Where you choose among the options in menu
@@ -505,7 +503,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   int index = 0;
   while(1){
     if (redraw) { 
-      drawOptions(index,options, TFT_RED, BGCOLOR);
+      drawOptions(index,options, ALCOLOR, BGCOLOR);
       if(bright){
         #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
         int bl = MINBRIGHT + round(((255 - MINBRIGHT) * (4 - index) * 0.25)); // 4 is the number of options
@@ -614,12 +612,12 @@ void loopVersions() {
     }
 
     /* Select to install */
-    if(checkSelPress()) { 
+    if(checkSelPress(true)) { 
 
       // Definição da matriz "Options"
       options = {
           {"OTA Install", [=]() { installFirmware(String(file), app_size, spiffs, spiffs_offset, spiffs_size, nb, fat, (uint32_t*)FAT_offset, (uint32_t*)FAT_size); }},
-          {"Download->SD", [=]() { downloadFirmware(String(file), String(name)); }},
+          {"Download->SD", [=]() { downloadFirmware(String(file), String(name) + "." + String(version).substring(0,10), dwn_path); }},
           {"Main Menu", [=]() { returnToMenu=true; }},
       };
       delay(200);
@@ -670,7 +668,7 @@ void loopFirmware(){
       }
 
       /* Select to install */
-      if(checkSelPress()) { 
+      if(checkSelPress(true)) { 
         
         //Checks for long press to get back to Main Menu, only for StickCs.. Cardputer uses Esc btn
         #ifndef CARDPUTER

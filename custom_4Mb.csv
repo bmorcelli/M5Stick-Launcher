@@ -1,4 +1,4 @@
-# Default, , , , 
+# Default, , , , ,
 # Name,   Type, SubType, Offset,   Size, Flags
 nvs,      data, nvs,     0x9000,   0x6000,
 test,     app,  test,    0x10000,  0x170000,

@@ -5,6 +5,7 @@
 #include "onlineLauncher.h"
 #include "display.h"
 #include "mykeyboard.h"
+#include "settings.h"
 
 struct Config {
   String httpuser;
@@ -19,8 +20,6 @@ int command = 0;
 bool updateFromSd_var = false;
 
   // WiFi as a Client
-String default_httpuser = "admin";  
-String default_httppassword = "m5launcher";
 const int default_webserverporthttp = 80;
 
 //WiFi as an Access Point
@@ -30,7 +29,6 @@ Config config;                        // configuration
 
 AsyncWebServer *server;               // initialise webserver
 const char* host = "m5launcher";
-const String fileconf = "/M5Launcher.txt";
 bool shouldReboot = false;            // schedule a reboot
 String uploadFolder="";
 
@@ -58,6 +56,8 @@ void webUIMyNet() {
   }
   // On fail installing will run the following line
 }
+
+
 /**********************************************************************
 **  Function: loopOptionsWebUi
 **  Display options to launch the WebUI
@@ -73,7 +73,6 @@ void loopOptionsWebUi() {
   loopOptions(options);
   // On fail installing will run the following line
 }
-
 
 
 // Make size of files human readable
@@ -351,15 +350,14 @@ void configureWebServer() {
   server->on("/wifi", HTTP_GET, [](AsyncWebServerRequest * request) {
     if (checkUserWebAuth(request)) {
       if (request->hasParam("usr") && request->hasParam("pwd")) {
-        const char *ssid = request->getParam("usr")->value().c_str();
+        const char *usr = request->getParam("usr")->value().c_str();
         const char *pwd = request->getParam("pwd")->value().c_str();
-        SD.remove(fileconf);
-        File file = SD.open(fileconf, FILE_WRITE);        
-        file.print(String(ssid) + ";" + String(pwd) + ";\n");
-        config.httpuser = ssid;
+        wui_pwd = pwd;
+        wui_usr = usr;
+        saveConfigs();
+        config.httpuser = usr;
         config.httppassword = pwd;
-        file.print("#ManagerUser;ManagerPassword;");
-        file.close();
+        
         request->send(200, "text/plain", "User: " + String(ssid) + " configured with password: " + String(pwd));
       }
       } else {
@@ -385,33 +383,12 @@ String readLineFromFile(File myFile) {
 
 
 void startWebUi(String ssid, int encryptation, bool mode_ap) {
-
-
-  config.httpuser     = default_httpuser;
-  config.httppassword = default_httppassword;
-  config.webserverporthttp = default_webserverporthttp;
   file_size = 0;
-  //log_i("Recovering User info from M5Launcher.txt");
-  if(setupSdCard()) {
-    if(SD.exists(fileconf)) {
-      Serial.println("File Exists, reading " + fileconf);
-      File file = SD.open(fileconf, FILE_READ);
-      if(file) {
-        default_httpuser = readLineFromFile(file);
-        default_httppassword = readLineFromFile(file);
-        config.httpuser     = default_httpuser;
-        config.httppassword = default_httppassword;
-
-        file.close();
-      }
-    }
-    else {
-      File file = SD.open(fileconf, FILE_WRITE);
-      file.print( default_httpuser + ";" + default_httppassword + ";\n");
-      file.print("#ManagerUser;ManagerPassword;");
-      file.close();
-    }
-  }
+  //log_i("Recovering User info from config.conf");
+  getConfigs();
+  config.httpuser     = wui_usr;
+  config.httppassword = wui_pwd;
+  config.webserverporthttp = default_webserverporthttp;
 
   //log_i("Connecting to WiFi");
   if (WiFi.status() != WL_CONNECTED) {
@@ -444,21 +421,21 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   
 #ifndef STICK_C
   tft.drawCentreString("http://m5launcher.local", WIDTH/2,22,1);
-  setTftDisplay(7,47,TFT_WHITE,FONT_P,BGCOLOR);
+  setTftDisplay(7,47,~BGCOLOR,FONT_P,BGCOLOR);
 #else
   tft.drawCentreString("http://m5launcher.local", WIDTH/2,17,1);
-  setTftDisplay(7,26,TFT_WHITE,FONT_P,BGCOLOR);
+  setTftDisplay(7,26,~BGCOLOR,FONT_P,BGCOLOR);
 #endif
   tft.setTextSize(FONT_M);
   tft.print("IP ");   tftprintln(txt,10,1);
-  tftprintln("Usr: " + String(default_httpuser),10,1);
-  tftprintln("Pwd: " + String(default_httppassword),10,1);
+  tftprintln("Usr: " + String(wui_usr),10,1);
+  tftprintln("Pwd: " + String(wui_pwd),10,1);
 
   setTftDisplay(7,HEIGHT-39,ALCOLOR,FONT_P);
 
   tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", WIDTH/2,HEIGHT-15,1);
 
-  while (!checkSelPress())
+  while (!checkSelPress(true))
   {
     if (shouldReboot) {
       ESP.restart();

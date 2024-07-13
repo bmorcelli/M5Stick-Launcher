@@ -6,11 +6,7 @@
 #include <ArduinoJson.h>
 #include <functional>
 #include <vector>
-
-#define FGCOLOR TFT_GREEN
-#define ALCOLOR TFT_RED
-#define BGCOLOR TFT_BLACK
-
+#include "globals.h"
 // Declaração dos objetos TFT
 
 extern TFT_eSPI tft; 

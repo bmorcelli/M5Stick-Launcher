@@ -15,7 +15,9 @@ bool checkNextPress();
 
 bool checkPrevPress();
 
-bool checkSelPress();
+bool checkSelPress(bool dimmOff=false);
 
 //It is here to not create a new set of files just to use AXP192 library again
 int getBattery();
+
+void resetDimmer();

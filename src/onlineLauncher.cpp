@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "display.h"
 #include "mykeyboard.h"
+#include "settings.h"
 
 
 const char* root_ca3 = 
@@ -35,44 +36,105 @@ const char* root_ca3 =
 ** Description:   Connects to wifiNetwork
 ***************************************************************************************/
 void wifiConnect(String ssid, int encryptation, bool isAP) {
-
-  if(!isAP) {
-
+  if (!isAP) {
+    bool found = false;
+    bool wrongPass = false;
+    getConfigs();
+    JsonArray WifiList = settings["wifi"].as<JsonArray>();
     EEPROM.begin(EEPROMSIZE);
-    pwd = EEPROM.readString(10); //43
+    pwd = EEPROM.readString(10);
+    EEPROM.end();
 
-    delay(200);
-    if(encryptation>0) pwd = keyboard(pwd,63, "Network Password:");
-
-    if (pwd!=EEPROM.readString(10)) { //43
-      EEPROM.writeString(10, pwd); //43
-      EEPROM.commit(); // Store data to EEPROM
-      EEPROM.end(); // Free EEPROM memory
+    if (sdcardMounted) {
+      for (JsonObject wifiEntry : WifiList) {
+        String name = wifiEntry["ssid"].as<String>();
+        String pass = wifiEntry["pwd"].as<String>();
+        log_i("SSID: %s, Pass: %s", name, pass);
+        if (name == ssid) {
+          pwd = pass;
+          found = true;
+          log_i("Found SSID: %s", name);
+          break;
+        }
+      }
     }
 
-    WiFi.begin(ssid, pwd);
+  Retry:
+    if (!found || wrongPass) {
+      delay(200);
+      if (encryptation > 0) pwd = keyboard(pwd, 63, "Network Password:");
+      
+      EEPROM.begin(EEPROMSIZE);
+      if (pwd != EEPROM.readString(10)) {  
+        EEPROM.writeString(10, pwd);
+        EEPROM.commit(); // Store data to EEPROM
+      }
+      EEPROM.end(); // Free EEPROM memory
+      if (sdcardMounted && !found) {
+        // Cria um novo objeto JSON para adicionar ao array "wifi"
+        JsonObject newWifi = WifiList.add<JsonObject>();
+        newWifi["ssid"] = ssid;
+        newWifi["pwd"] = pwd;
+        found=true;
+        saveConfigs();
+      } else if (sdcardMounted && found && wrongPass) {
+        for (JsonObject wifiEntry : WifiList) {
+          if (wifiEntry["ssid"].as<String>() == ssid) {
+            wifiEntry["pwd"] = pwd;
+            log_i("Mudou pwd de SSID: %s", ssid);
+            break;
+          }
+        }
+        saveConfigs();
+      }
 
-    resetTftDisplay(10, 10, FGCOLOR,FONT_P);
+    }
 
-    tftprint("Connecting to: " + ssid + ".",10);
+    WiFi.begin(ssid.c_str(), pwd.c_str());
+
+    resetTftDisplay(10, 10, FGCOLOR, FONT_P);
+    tft.fillScreen(BGCOLOR);
+    tftprint("Connecting to: " + ssid + ".", 10);
     tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+    // Simulação da função de desenho no display TFT
+    int count = 0;
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
-      tftprint(".",10);
+      tftprint(".", 10);
+      count++;
+      if (count > 20) {
+        wrongPass = true;
+        goto Retry;
+      }
     }
 
-  } else { //Running in Access point mode
+  } else { // Running in Access point mode
     IPAddress AP_GATEWAY(172, 0, 0, 1);
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(AP_GATEWAY, AP_GATEWAY, IPAddress(255, 255, 255, 0));
-    WiFi.softAP("M5Launcher", "",6,0,1,false);
-    Serial.print("IP: "); Serial.println(WiFi.softAPIP());
-  } 
+    WiFi.softAP("M5Launcher", "", 6, 0, 1, false);
+    Serial.print("IP: ");
+    Serial.println(WiFi.softAPIP());
+  }
 
   delay(200);
-
 }
+/***************************************************************************************
+** Function name: replaceChars
+** Description:   Replace some characters for _
+***************************************************************************************/
+String replaceChars(String input) {
+  // Define os caracteres que devem ser substituídos
+  const char charsToReplace[] = {'/', '\\', '\"', '\'', '`'};
+  // Define o caractere de substituição (neste exemplo, usamos um espaço)
+  const char replacementChar = '_';
 
+  // Percorre a string e substitui os caracteres especificados
+  for (size_t i = 0; i < sizeof(charsToReplace); i++) {
+    input.replace(String(charsToReplace[i]), String(replacementChar));
+  }
+  return input;
+}
 /***************************************************************************************
 ** Function name: GetJsonFromM5
 ** Description:   Gets JSON from github server
@@ -127,6 +189,7 @@ bool GetJsonFromM5() {
 ***************************************************************************************/
 void downloadFirmware(String file_str, String fileName, String folder) {
   String fileAddr = "https://m5burner-cdn.m5stack.com/firmware/" + file_str;
+  fileName = replaceChars(fileName);
   prog_handler = 2;
   if(!setupSdCard()) {
     displayRedStripe("SDCard Not Found");
@@ -192,7 +255,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
     http.end();
 
   } else { displayRedStripe("Couldn't Connect"); }
-
+  resetDimmer();
 }
 
 /***************************************************************************************

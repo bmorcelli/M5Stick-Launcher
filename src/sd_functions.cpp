@@ -373,6 +373,7 @@ void readFs(String folder, String result[][3]) {
 **  Where you choose what to do wuth your SD Files   
 **********************************************************************/
 String loopSD(bool filePicker) {
+  prog_handler = 0;
   String result = "";
   bool reload=false;
   bool redraw = true;
@@ -384,6 +385,7 @@ String loopSD(bool filePicker) {
   tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
 
   readFs(Folder, fileList);
+  listFiles(0, fileList);
 
   for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
   while(1){
@@ -397,6 +399,8 @@ String loopSD(bool filePicker) {
         maxFiles=0;
         for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
         reload=false;
+        tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+        tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
       }
       listFiles(index, fileList);
 
@@ -655,12 +659,13 @@ void updateFromSD(String path) {
     }
 
     if (fat) {
+      displayRedStripe("Formating FAT");
       if (fat_size_sys > 0) {
         if (!file.seek(fat_offset_sys)) goto Exit;
         if (!performFATUpdate(file, fat_size_sys, "sys")) log_i("FAIL updating FAT sys");
         else displayRedStripe("sys FAT complete");
       } 
-      
+      displayRedStripe("Formating FAT");
       if (fat_size_vfs > 0) {
         if (!file.seek(fat_offset_vfs)) goto Exit;
         if (!performFATUpdate(file, fat_size_vfs, "vfs")) log_i("FAIL updating FAT vfs");
