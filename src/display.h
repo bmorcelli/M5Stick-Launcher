@@ -43,6 +43,10 @@ void coreFooter(uint16_t color = FGCOLOR);
 
 void coreFooter2(uint16_t color = FGCOLOR);
 
+void TdisplayS3Footer(uint16_t color = FGCOLOR);
+
+void TdisplayS3Footer2(uint16_t color = FGCOLOR);
+
 void tftprintln(String txt, int margin, int numlines = 0);
 
 void tftprint(String txt, int margin, int numlines = 0);

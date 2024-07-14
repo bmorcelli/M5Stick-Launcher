@@ -15,6 +15,11 @@
   #include <soc/adc_channel.h>
 #endif
 
+#if defined(T_DISPLAY_S3)
+  #include <esp_adc_cal.h>
+  TouchLib touch(Wire, 18, 17, CTS820_SLAVE_ADDRESS, 21);
+#endif
+
 #if defined(CARDPUTER)
   Keyboard_Class Keyboard = Keyboard_Class();
 
@@ -22,7 +27,7 @@
   AXP192 axp192;
 #endif
 
-#if defined(M5STACK)
+#if defined(M5STACK) || defined(T_DISPLAY_S3)
 struct box_t
 {
   int x;
@@ -69,24 +74,47 @@ void resetDimmer() {
   dimmer=false;
   delay(200);
 }
+
+#if defined(T_DISPLAY_S3)
+bool menuPress(int bot) {
+  //0 - prev
+  //1 - Sel
+  //2 - next
+  int terco=WIDTH/3;
+  if (touch.read()) {
+    auto t = touch.getPoint(0);
+    if(rotation==3) t.x = WIDTH-t.x;
+    else if (rotation==1) t.y = (HEIGHT+20)-t.y;
+
+    if(t.y>(HEIGHT) && t.x>terco*bot && t.x<terco*(1+bot)) { 
+      t.x=WIDTH+1;
+      t.y=HEIGHT+11;
+      return true;
+    } else return false;
+  } else return false;
+}
+#endif
+
 /* Verifies Upper Btn to go to previous item */
 bool checkNextPress(){
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed('/') || Keyboard.isKeyPressed('.'))
   #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C)
-    if(digitalRead(DW_BTN)==LOW) 
+    if(digitalRead(DW_BTN)==BTN_ACT) 
   #elif defined(M5STACK)
     M5.update();
     if(M5.BtnC.isHolding() || M5.BtnC.isPressed())               // read touchscreen
+  #elif defined(T_DISPLAY_S3)
+    if(digitalRead(DW_BTN)==BTN_ACT || menuPress(2)) 
   #endif
     { 
-    if(dimmer) {
-      resetDimmer();
-      return false;
-    }
-    dimmerTemp=millis(); 
-    return true; 
+      if(dimmer) {
+        resetDimmer();
+        return false;
+      }
+      dimmerTemp=millis(); 
+      return true; 
     }
 
   else return false;
@@ -95,7 +123,7 @@ bool checkNextPress(){
 /* Verifies Down Btn to go to next item */
 bool checkPrevPress() {
   #if defined(STICK_C_PLUS2)
-    if(digitalRead(UP_BTN)==LOW) 
+    if(digitalRead(UP_BTN)==BTN_ACT) 
   #elif defined(STICK_C_PLUS)
     if(axp192.GetBtnPress())
   #elif defined(CARDPUTER)
@@ -104,6 +132,8 @@ bool checkPrevPress() {
   #elif defined(M5STACK)
     M5.update();
     if(M5.BtnA.isHolding() || M5.BtnA.isPressed())               // read touchscreen
+  #elif defined(T_DISPLAY_S3)
+    if(menuPress(0)) 
   #endif
   { 
     if(dimmer) {
@@ -129,12 +159,14 @@ bool checkSelPress(bool dimmOff){
     if(Keyboard.isKeyPressed(KEY_ENTER))
   
   #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C)
-    if(digitalRead(SEL_BTN)==LOW) 
+    if(digitalRead(SEL_BTN)==BTN_ACT) 
   
   #elif defined(M5STACK)
     M5.update();
     if(M5.BtnB.isHolding() || M5.BtnB.isPressed())               // read touchscreen
   
+  #elif defined(T_DISPLAY_S3)
+    if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1)) 
   #endif
     { 
     if(dimmer) {
@@ -161,6 +193,19 @@ int getBattery() {
 
   #elif defined(M5STACK)
   percent = M5.Power.getBatteryLevel();
+
+  #elif defined(T_DISPLAY_S3)
+
+  esp_adc_cal_characteristics_t adc_chars;
+
+  // Get the internal calibration value of the chip
+  esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+  uint32_t raw = analogRead(BAT_PIN);
+  uint32_t v1 = esp_adc_cal_raw_to_voltage(raw, &adc_chars) * 2; //The partial pressure is one-half
+  if(v1<4300) {
+    float mv = v1 * 2;
+    percent = (mv - 3300) * 100 / (float)(4150 - 3350);
+  } else  { percent = 0; } 
 
   #else
   
@@ -265,7 +310,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   int _y = (HEIGHT - 54)/4;
   int _xo = _x/2-3;
 
-#if defined(M5STACK)
+#if defined(M5STACK) || defined(T_DISPLAY_S3)
   int k=0;
   for(x2=0; x2<12;x2++) {
     for(y2=0; y2<4; y2++) {
@@ -414,9 +459,15 @@ String keyboard(String mytext, int maxSize, String msg) {
       y2=y;
       redraw = false;
       resetDimmer();
+    #if defined(T_DISPLAY_S3)
+      touch.read();
+    #endif      
     }
   #if defined(M5STACK)
     coreFooter();
+  #endif
+  #if defined(T_DISPLAY_S3)
+    TdisplayS3Footer();
   #endif
     //cursor handler
     if(mytext.length()>19) { 
@@ -478,11 +529,24 @@ String keyboard(String mytext, int maxSize, String msg) {
     #else
 
     int z=0;
-  #if defined(M5STACK)
+  #if defined(M5STACK) || defined(T_DISPLAY_S3)
+    #if defined(M5STACK)
     M5.update();
     auto t = M5.Touch.getDetail();
-    
-    if (t.wasClicked()) {
+    if (t.wasClicked()) 
+    #elif defined(T_DISPLAY_S3)
+    if (touch.read())
+    #endif
+     {
+      #if defined(T_DISPLAY_S3)
+        auto t = touch.getPoint(0);
+        if(rotation==3) {
+          //t.y = HEIGHT-t.y;
+          t.x = WIDTH-t.x;
+        } else if (rotation==1) {
+          t.y = (HEIGHT+20)-t.y;
+        }
+      #endif
       if (box_list[48].contain(t.x, t.y)) { break;      goto THIS_END; }      // Ok
       if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,BGCOLOR); goto THIS_END; } // CAP
       if (box_list[50].contain(t.x, t.y)) goto DEL;               // DEL
@@ -494,6 +558,10 @@ String keyboard(String mytext, int maxSize, String msg) {
         }
       }
       THIS_END:
+      #if defined(T_DISPLAY_S3)
+      t.x=WIDTH+1;
+      t.y=HEIGHT+11;
+      #endif      
       redraw=true;
     }
 

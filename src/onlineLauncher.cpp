@@ -40,10 +40,12 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
     bool found = false;
     bool wrongPass = false;
     getConfigs();
-    JsonArray WifiList = settings["wifi"].as<JsonArray>();
+    JsonObject setting = settings[0];
+    JsonArray WifiList = setting["wifi"].as<JsonArray>();
     EEPROM.begin(EEPROMSIZE);
     pwd = EEPROM.readString(10);
     EEPROM.end();
+    log_i("sdcardMounted: %d", sdcardMounted);
 
     if (sdcardMounted) {
       for (JsonObject wifiEntry : WifiList) {
@@ -150,6 +152,8 @@ bool GetJsonFromM5() {
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core.json";  
   #elif defined(CORE3)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/cores3.json";
+  #elif defined(T_DISPLAY_S3)
+  const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/third_party.json";
   #endif
 
   if (WiFi.status() == WL_CONNECTED) {
@@ -212,9 +216,9 @@ void downloadFirmware(String file_str, String fileName, String folder) {
       httpResponseCode = http.GET();
       if (httpResponseCode > 0) {
         setupSdCard();
-        if (!SD.exists("/downloads")) SD.mkdir("/downloads");
+        if (!SDM.exists("/downloads")) SDM.mkdir("/downloads");
 
-        File file = SD.open(folder + fileName + ".bin", FILE_WRITE);
+        File file = SDM.open(folder + fileName + ".bin", FILE_WRITE);
         int size = http.getSize();
         displayRedStripe("Downloading FW");
         if(file) {

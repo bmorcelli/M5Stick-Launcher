@@ -86,7 +86,8 @@ const uint8_t orca[192] = { // 4Mb app partition
     0xEB, 0xEB, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
     0xE5, 0x00, 0x17, 0x0A, 0x68, 0x12, 0x14, 0xEA, 0xFE, 0x89, 0x1E, 0x0F, 0x92, 0x04, 0x16, 0x1A,
 };
-#elif defined(CORE) || defined(CORE2) || defined(CORE3)
+#elif defined(CORE) || defined(CORE2) || defined(CORE3) || defined(T_DISPLAY_S3)
+  
   const uint8_t def_part[288] PROGMEM = {
     0xAA, 0x50, 0x01, 0x02, 0x00, 0x90, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0x6E, 0x76, 0x73, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -282,9 +283,9 @@ void dumpPartition(const char* partitionLabel, const char* outputPath) {
   }
 
   setupSdCard();
-  if (!SD.exists("/bkp")) SD.mkdir("/bkp");
+  if (!SDM.exists("/bkp")) SDM.mkdir("/bkp");
 
-  File outputFile = SD.open(outputPath, FILE_WRITE);
+  File outputFile = SDM.open(outputPath, FILE_WRITE);
   if (!outputFile) {
     Serial.printf("Falha ao abrir o arquivo %s no cartão SD\n", outputPath);
     return;
@@ -321,7 +322,7 @@ void restorePartition(const char* partitionLabel) {
   tft.fillScreen(BGCOLOR);
   if(filepath=="") return;
   else {
-    File source = SD.open(filepath, "r");
+    File source = SDM.open(filepath, "r");
     if(strcmp(partitionLabel,"spiffs")==0) {
       prog_handler=1;
       Update.begin(source.size(),U_SPIFFS);

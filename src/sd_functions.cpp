@@ -54,12 +54,14 @@ bool eraseFAT() {
 ** Description:   Start SD Card
 ***************************************************************************************/
 bool setupSdCard() {
-  #if !defined(M5STACK) // Core2 uses the same SPI bus as TFT
+  #if defined(T_DISPLAY_S3) // Core2 uses the same SPI bus as TFT
+  if (!SD_MMC.begin("/sdcard",true)) 
+  #elif defined(M5STACK)
+  if (!SDM.begin(SDCARD_CS)) 
+  #else
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
   delay(10);
-  if (!SD.begin(SDCARD_CS, sdcardSPI))  
-  #else
-  if (!SD.begin(SDCARD_CS)) 
+  if (!SDM.begin(SDCARD_CS, sdcardSPI))  
   #endif
   {
    // sdcardSPI.end(); // Closes SPI connections and release pin header.
@@ -79,7 +81,7 @@ bool setupSdCard() {
 ** Description:   Turn Off SDCard, set sdcardMounted state to false
 ***************************************************************************************/
 void closeSdCard() {
-  SD.end();
+  SDM.end();
   #if !defined(M5STACK)
   //sdcardSPI.end(); // Closes SPI connections and release pins.
   #endif
@@ -106,9 +108,9 @@ bool ToggleSDCard() {
 ** Description:   delete file or folder
 ***************************************************************************************/
   bool deleteFromSd(String path) {
-  File dir = SD.open(path);
+  File dir = SDM.open(path);
   if (!dir.isDirectory()) {
-    return SD.remove(path.c_str());
+    return SDM.remove(path.c_str());
   }
 
   dir.rewindDirectory();
@@ -119,14 +121,14 @@ bool ToggleSDCard() {
     if (file.isDirectory()) {
       success &= deleteFromSd(file.path());
     } else {
-      success &= SD.remove(file.path());
+      success &= SDM.remove(file.path());
     }
     file = dir.openNextFile();
   }
 
   dir.close();
   // Apaga a própria pasta depois de apagar seu conteúdo
-  success &= SD.rmdir(path.c_str());
+  success &= SDM.rmdir(path.c_str());
   return success;
 }
 
@@ -136,13 +138,13 @@ bool ToggleSDCard() {
 ***************************************************************************************/
 bool renameFile(String path, String filename) {
   String newName = keyboard(filename,76,"Type the new Name:");
-    if(!SD.begin()) {
+    if(!setupSdCard()) {
         //Serial.println("Falha ao inicializar o cartão SD");
         return false;
     }
 
     // Rename the file of folder
-    if (SD.rename(path, path.substring(0,path.lastIndexOf('/')) + "/" + newName)) {
+    if (SDM.rename(path, path.substring(0,path.lastIndexOf('/')) + "/" + newName)) {
         //Serial.println("Renamed from " + filename + " to " + newName);
         return true;
     } else {
@@ -156,11 +158,11 @@ bool renameFile(String path, String filename) {
 ** Description:   copy file address to memory
 ***************************************************************************************/
 bool copyFile(String path) {
-  if(!SD.begin()) {
+  if(!setupSdCard()) {
     //Serial.println("Fail to start SDCard");
     return false;
   }
-  File file = SD.open(path, FILE_READ);
+  File file = SDM.open(path, FILE_READ);
   if(!file.isDirectory()) {
     fileToCopy = path;
     file.close();
@@ -184,14 +186,14 @@ bool pasteFile(String path) {
   uint8_t buffer[bufferSize];
 
   // Abrir o arquivo original
-  File sourceFile = SD.open(fileToCopy, FILE_READ);
+  File sourceFile = SDM.open(fileToCopy, FILE_READ);
   if (!sourceFile) {
     //Serial.println("Falha ao abrir o arquivo original para leitura");
     return false;
   }
 
   // Criar o arquivo de destino
-  File destFile = SD.open(path + "/" + fileToCopy.substring(fileToCopy.lastIndexOf('/') + 1), FILE_WRITE);
+  File destFile = SDM.open(path + "/" + fileToCopy.substring(fileToCopy.lastIndexOf('/') + 1), FILE_WRITE);
   if (!destFile) {
     //Serial.println("Falha ao criar o arquivo de destino");
     sourceFile.close();
@@ -230,11 +232,11 @@ bool pasteFile(String path) {
 ***************************************************************************************/
 bool createFolder(String path) {
   String foldername=keyboard("",76,"Folder Name: ");
-  if(!SD.begin()) {
+  if(!setupSdCard()) {
     //Serial.println("Fail to start SDCard");
     return false;
   }
-  if(!SD.mkdir(path + foldername)) {
+  if(!SDM.mkdir(path + foldername)) {
     displayRedStripe("Couldn't create folder");
     return false;
   }
@@ -302,14 +304,14 @@ void readFs(String folder, String result[][3]) {
     }
     allFilesCount=0;
 
-    if (!SD.begin()) {
+    if (!setupSdCard()) {
         //Serial.println("Falha ao iniciar o cartão SD");
         displayRedStripe("SD not found or not formatted in FAT32");
         delay(2000);
         return; // Retornar imediatamente em caso de falha
     }
 
-    File root = SD.open(folder);
+    File root = SDM.open(folder);
     if (!root || !root.isDirectory()) {
         displayRedStripe("Fail open root");
         delay(2000);
@@ -344,7 +346,7 @@ void readFs(String folder, String result[][3]) {
     file2.close();
     root.close();
 
-    root = SD.open(folder);
+    root = SDM.open(folder);
     File file = root.openNextFile();
     while (file && allFilesCount < (MAXFILES-1)) {
         String fileName = file.name();
@@ -568,7 +570,7 @@ void updateFromSD(String path) {
   uint32_t fat_size_vfs = 0;  
   bool fat = false;
 
-  File file = SD.open(path);
+  File file = SDM.open(path);
 
   if (!file) goto Exit;
   if (!file.seek(0x8000)) goto Exit; 

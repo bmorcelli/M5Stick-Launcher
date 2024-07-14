@@ -1,0 +1,18 @@
+{
+  "name": "Lilygo T-Display S3 touchscreen",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "improv": false,
+      "parts": [
+        { "path": "Launcher_2.0_T-Display-S3-Touchscreen.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        { "path": "esp8266.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

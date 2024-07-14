@@ -4,6 +4,7 @@
 #include "mykeyboard.h"
 #include "onlineLauncher.h"
 #include "sd_functions.h"
+#include "settings.h"
 
 TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 
@@ -56,6 +57,33 @@ void coreFooter2(uint16_t color) {
   tft.drawCentreString("Skip",5*WIDTH/6,HEIGHT+15,1);
 }
 
+
+/***************************************************************************************
+** Function name: TdisplayS3Footer
+** Description:   Draw Core2 footer
+***************************************************************************************/
+void TdisplayS3Footer(uint16_t color) {
+  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
+  tft.setTextColor(color);
+  tft.setTextSize(FONT_M);
+  tft.drawCentreString("PREV",WIDTH/6,HEIGHT+4,1);
+  tft.drawCentreString("SEL",WIDTH/2,HEIGHT+4,1);
+  tft.drawCentreString("NEXT",5*WIDTH/6,HEIGHT+4,1);
+}
+
+/***************************************************************************************
+** Function name: TdisplayS3Footer
+** Description:   Draw Core2 footer
+***************************************************************************************/
+void TdisplayS3Footer2(uint16_t color) {
+  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,17,5,color);
+  tft.setTextColor(color);
+  tft.setTextSize(FONT_M);
+  tft.drawCentreString("Skip",WIDTH/6,HEIGHT+4,1);
+  tft.drawCentreString("LAUNCHER",WIDTH/2,HEIGHT+5,1);
+  tft.drawCentreString("Skip",5*WIDTH/6,HEIGHT+4,1);
+}
+
 /***************************************************************************************
 ** Function name: BootScreen
 ** Description:   Start Display functions and display bootscreen
@@ -95,7 +123,7 @@ void initDisplay(bool doAll) {
     tft.setTextSize(FONT_G);
     tft.setTextColor(FGCOLOR);
     #ifndef STICK_C
-    tft.drawCentreString("M5Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
+    tft.drawCentreString("M5Launcher",WIDTH/2,HEIGHT/2-10,1); //SMOOTH_FONT
     #else
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
     #endif
@@ -161,7 +189,9 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   #if defined(M5STACK)
   coreFooter();
   #endif  
-
+  #if defined(T_DISPLAY_S3)
+  TdisplayS3Footer();
+  #endif
   int bar = int(WIDTH/(doc.size()));
   if (bar<5) bar = 5;
   tft.fillRect((WIDTH*currentIndex)/doc.size(),HEIGHT-5,bar,5,FGCOLOR);
@@ -217,6 +247,9 @@ void displayCurrentVersion(String name, String author, String version, String pu
     #if defined(M5STACK)
     coreFooter(ALCOLOR);
     #endif
+    #if defined(T_DISPLAY_S3)
+    TdisplayS3Footer(ALCOLOR);
+    #endif
 
     int bar = int(WIDTH/div);
     if (bar<5) bar = 5;
@@ -270,7 +303,7 @@ void progressHandler(int progress, size_t total) {
     tft.setTextSize(FONT_M);
     tft.setTextColor(ALCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-    tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,SMOOTH_FONT);    
+    tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,1);    
     tft.drawRoundRect(5, 5, WIDTH - 10, HEIGHT - 10, 5, FGCOLOR);
     if (prog_handler == 1) { 
       tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
@@ -430,7 +463,7 @@ void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, b
     }
     tft.drawRoundRect(x, y, w, h, 5, color);
 #ifndef STICK_C
-    tft.drawCentreString(text, x + w/2, y + h/2 - 12, SMOOTH_FONT);
+    tft.drawCentreString(text, x + w/2, y + h/2 - 12, 1);
 #else
     tft.drawCentreString(text,x + w/2, y + h/2 - 6, SMOOTH_FONT);
 #endif
@@ -490,6 +523,9 @@ void listFiles(int index, String fileList[][3]) {
     #if defined(M5STACK)
     coreFooter();
     #endif    
+    #if defined(T_DISPLAY_S3)
+    TdisplayS3Footer();
+    #endif    
 }
 
 
@@ -501,18 +537,13 @@ void listFiles(int index, String fileList[][3]) {
 void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>>& options, bool bright){
   bool redraw = true;
   int index = 0;
+  log_i("Number of options: %d", options.size());
+  int numOpt = options.size()-1;
   while(1){
     if (redraw) { 
       drawOptions(index,options, ALCOLOR, BGCOLOR);
       if(bright){
-        #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
-        int bl = MINBRIGHT + round(((255 - MINBRIGHT) * (4 - index) * 0.25)); // 4 is the number of options
-        analogWrite(BACKLIGHT, bl);
-        #elif defined(STICK_C) || defined(STICK_C_PLUS)
-        axp192.ScreenBreath(100*(4 - index) * 0.25);  // 4 is the number of options
-        #elif defined(M5STACK)
-        M5.Display.setBrightness(100*(4 - index) * 0.25);
-        #endif
+        setBrightness(100*(numOpt-index)/numOpt,false);
       }
       redraw=false;
       delay(200); 

@@ -126,6 +126,20 @@ void setup() {
   #elif defined(CARDPUTER)
     Keyboard.begin();
     pinMode(10, INPUT);
+  #elif defined(T_DISPLAY_S3)
+    SD_MMC.setPins(PIN_SD_CLK, PIN_SD_CMD, PIN_SD_D0);
+    gpio_hold_dis((gpio_num_t)21);//PIN_TOUCH_RES 
+    pinMode(15, OUTPUT);
+    digitalWrite(15, HIGH);//PIN_POWER_ON 
+    pinMode(21, OUTPUT); //PIN_TOUCH_RES 
+    digitalWrite(21, LOW);//PIN_TOUCH_RES 
+    delay(500);
+    digitalWrite(21, HIGH);//PIN_TOUCH_RES 
+    Wire.begin(18, 17);//SDA, SCL
+    if (!touch.init()) {
+        Serial.println("Touch IC not found");
+    }
+    
   #endif
 
   #if defined(BACKLIGHT)
@@ -193,6 +207,16 @@ void setup() {
   setBrightness(bright,false);
   initDisplay(true);  
 
+#if defined(T_DISPLAY_S3)
+  touch.setRotation(1);
+    // PWM backlight setup
+  ledcSetup(0,10000,8); //Channel 0, 10khz, 8bits
+  ledcAttachPin(TFT_BL, 0);
+  ledcWrite(0,125);
+  
+#endif
+
+
 #if defined(M5STACK)
     M5.begin(); // Begin after TFT, for SDCard to work
 #endif
@@ -213,12 +237,17 @@ void setup() {
     #if defined(M5STACK)
     coreFooter2();
     #endif    
+    #if defined(T_DISPLAY_S3)
+    TdisplayS3Footer2();
+    #endif    
   
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed(KEY_ENTER))
+  #elif defined(T_DISPLAY_S3)
+    if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1))
   #elif !defined(M5STACK)
-    if(digitalRead(SEL_BTN)==LOW) 
+    if(digitalRead(SEL_BTN)==BTN_ACT) 
   #elif defined(M5STACK)
     if(checkSelPress())        
   #endif
@@ -231,11 +260,13 @@ void setup() {
     Keyboard.update();
     if (Keyboard.isPressed() && !(Keyboard.isKeyPressed(KEY_ENTER)))
   #elif defined(STICK_C_PLUS2)
-    if((digitalRead(UP_BTN)==LOW && (millis()-i>2000)) || digitalRead(DW_BTN)==LOW) 
+    if((digitalRead(UP_BTN)==BTN_ACT && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT) 
   #elif defined(STICK_C_PLUS)
-    if((axp192.GetBtnPress() && (millis()-i>2000)) || digitalRead(DW_BTN)==LOW)
+    if((axp192.GetBtnPress() && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT)
   #elif defined(M5STACK)
     if(checkNextPress() || checkPrevPress())    
+  #elif defined(T_DISPLAY_S3)
+    if(checkNextPress() || checkPrevPress() || menuPress(0) ||  menuPress(2))
   #endif 
       {
         tft.fillScreen(TFT_BLACK);
@@ -267,13 +298,16 @@ void loop() {
   int opt = 4; // there are 3 options> 1 list SD files, 2 OTA and 3 Config
   stopOta = false; // variable used in WebUI, and to prevent open OTA after webUI without restart
   getBrightness();
-  if(sdcardMounted) index=1; //if SD card is not present, paint SD square grey and auto select OTA
+  if(!sdcardMounted) index=1; //if SD card is not present, paint SD square grey and auto select OTA
   while(1){
     if (redraw) { 
       drawMainMenu(index); 
       #if defined(M5STACK)
       coreFooter();
       #endif
+      #if defined(T_DISPLAY_S3)
+      TdisplayS3Footer();
+      #endif      
       redraw = false; 
       delay(200); 
     }

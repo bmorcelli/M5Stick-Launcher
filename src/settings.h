@@ -1,4 +1,7 @@
 #include <EEPROM.h>
+#include <FS.h>
+#include <SD_MMC.h>
+#include <SD.h>
 //#include <ArduinoJson.h>
 
 /*
