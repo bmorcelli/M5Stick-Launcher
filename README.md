@@ -62,6 +62,9 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with M5Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.2.1:
+     * [x] Port fot [Lilygo T-Display S3 Touch](https://www.lilygo.cc/products/t-display-s3?variant=42351558590645)
+     * [x] Fixed JSON read/write
 * 2.2.0: 
      * [x] M5Launcher 2.2+ now can be updated OverTheAir or Using SD Card
      * [x] Ui Color settings (can be customized on /config.conf file)

@@ -90,7 +90,7 @@ String listFiles(String folder) {
   String returnText = "pa:" + folder + ":0\n";
   Serial.println("Listing files stored on SD");
 
-  File root = SD.open(folder);
+  File root = SDM.open(folder);
   File foundfile = root.openNextFile();
   if (folder=="//") folder = "/";
   uploadFolder = folder;
@@ -107,7 +107,7 @@ String listFiles(String folder) {
   foundfile.close();
 
   if (folder=="") folder = "/";
-  root = SD.open(folder);
+  root = SDM.open(folder);
   foundfile = root.openNextFile();
   while (foundfile) {
     if(!(foundfile.isDirectory())) returnText+="Fi:" + String(foundfile.name()) + ":" + humanReadableSize(foundfile.size()) + "\n";
@@ -124,9 +124,9 @@ String listFiles(String folder) {
 // if the webpage has %SOMETHING% or %SOMETHINGELSE% it will replace those strings with the ones defined
 String processor(const String& var) {
   if (var == "FIRMWARE") return String(LAUNCHER);
-  else if (var == "FREESD") return humanReadableSize(SD.totalBytes() - SD.usedBytes());
-  else if (var == "USEDSD") return humanReadableSize(SD.usedBytes());
-  else if (var == "TOTALSD") return humanReadableSize(SD.totalBytes());
+  else if (var == "FREESD") return humanReadableSize(SDM.totalBytes() - SDM.usedBytes());
+  else if (var == "USEDSD") return humanReadableSize(SDM.usedBytes());
+  else if (var == "TOTALSD") return humanReadableSize(SDM.totalBytes());
   else return "Attribute not configured"; 
 }
 
@@ -149,7 +149,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
     if (!index || runOnce) {
       if(!update) {
         // open the file on first call and store the file handle in the request object
-        request->_tempFile = SD.open(uploadFolder + "/" + filename, "w");
+        request->_tempFile = SDM.open(uploadFolder + "/" + filename, "w");
       } else {
         runOnce=false;
         // open the file on first call and store the file handle in the request object
@@ -235,11 +235,11 @@ void configureWebServer() {
         String fileName = request->getParam("fileName", true)->value().c_str();
         String filePath = request->getParam("filePath", true)->value().c_str();
         String filePath2 = filePath.substring(0,filePath.lastIndexOf('/')+1) + fileName;
-        if(!SD.begin()) {
+        if(!setupSdCard()) {
             request->send(200, "text/plain", "Fail starting SD Card.");
         } else {
           // Rename the file of folder
-          if (SD.rename(filePath, filePath2)) {
+          if (SDM.rename(filePath, filePath2)) {
               request->send(200, "text/plain", filePath + " renamed to " + filePath2);
           } else {
               request->send(200, "text/plain", "Fail renaming file.");
@@ -313,10 +313,10 @@ void configureWebServer() {
         const char *fileName = request->getParam("name")->value().c_str();
         const char *fileAction = request->getParam("action")->value().c_str();
 
-        if (!SD.exists(fileName)) {
+        if (!SDM.exists(fileName)) {
           if (strcmp(fileAction, "create") == 0) {
             //log_i("New Folder: %s",fileName);
-            if(!SD.mkdir(fileName)) { request->send(200, "text/plain", "FAIL creating folder: " + String(fileName));}
+            if(!SDM.mkdir(fileName)) { request->send(200, "text/plain", "FAIL creating folder: " + String(fileName));}
             else { request->send(200, "text/plain", "Created new folder: " + String(fileName)); }
           } 
           else {
@@ -325,14 +325,14 @@ void configureWebServer() {
         } 
         else {
           if (strcmp(fileAction, "download") == 0) {
-            request->send(SD, fileName, "application/octet-stream");
+            request->send(SDM, fileName, "application/octet-stream");
           } else if (strcmp(fileAction, "delete") == 0) {
             if(deleteFromSd(fileName)) { request->send(200, "text/plain", "Deleted : " + String(fileName)); }
             else { request->send(200, "text/plain", "FAIL delating: " + String(fileName));}
             
           } else if (strcmp(fileAction, "create") == 0) {
             //i("Folder Exists: %s",fileName);
-            if(SD.mkdir(fileName)) {
+            if(SDM.mkdir(fileName)) {
             } else { request->send(200, "text/plain", "FAIL creating existing folder: " + String(fileName));}
             request->send(200, "text/plain", "Created new folder: " + String(fileName));
           } else {

@@ -5,7 +5,11 @@
 #include <ArduinoJson.h>
 #include <functional>
 #include <vector>
-
+#if defined(T_DISPLAY_S3)
+    #define SDM SD_MMC
+#else
+    #define SDM SD
+#endif
 #if defined (M5STACK)
   #include <util/Unified/M5Unified.h>
 #endif

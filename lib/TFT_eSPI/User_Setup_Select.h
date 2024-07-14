@@ -23,9 +23,11 @@
 ///////////////////////////////////////////////////////
 
 // Only ONE line below should be uncommented to define your setup.  Add extra lines and files as needed.
-
-#include <User_Setup.h>           // Default setup is root library folder
-
+#ifdef LILYGO_T_DISP_S3
+     #include <User_Setups/Setup206_LilyGo_T_Display_S3.h>     // For the LilyGo T-Display S3 based ESP32S3 with ST7789 170 x 320 TFT
+#else
+     #include <User_Setup.h>           // Default setup is root library folder
+#endif
 //#include <User_Setups/Setup1_ILI9341.h>  // Setup file for ESP8266 configured for my ILI9341
 //#include <User_Setups/Setup2_ST7735.h>   // Setup file for ESP8266 configured for my ST7735
 //#include <User_Setups/Setup3_ILI9163.h>  // Setup file for ESP8266 configured for my ILI9163
