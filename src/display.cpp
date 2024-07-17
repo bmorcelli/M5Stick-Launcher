@@ -59,7 +59,7 @@ void coreFooter2(uint16_t color) {
 
 
 /***************************************************************************************
-** Function name: TdisplayS3Footer
+** Function name: coreFooter
 ** Description:   Draw Core2 footer
 ***************************************************************************************/
 void TdisplayS3Footer(uint16_t color) {
@@ -72,7 +72,7 @@ void TdisplayS3Footer(uint16_t color) {
 }
 
 /***************************************************************************************
-** Function name: TdisplayS3Footer
+** Function name: coreFooter2
 ** Description:   Draw Core2 footer
 ***************************************************************************************/
 void TdisplayS3Footer2(uint16_t color) {
@@ -189,7 +189,7 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   #if defined(M5STACK)
   coreFooter();
   #endif  
-  #if defined(T_DISPLAY_S3)
+  #if defined(T_DISPLAY_S3) || defined(CYD)
   TdisplayS3Footer();
   #endif
   int bar = int(WIDTH/(doc.size()));
@@ -247,7 +247,7 @@ void displayCurrentVersion(String name, String author, String version, String pu
     #if defined(M5STACK)
     coreFooter(ALCOLOR);
     #endif
-    #if defined(T_DISPLAY_S3)
+    #if defined(T_DISPLAY_S3)  || defined(CYD)
     TdisplayS3Footer(ALCOLOR);
     #endif
 
@@ -523,7 +523,7 @@ void listFiles(int index, String fileList[][3]) {
     #if defined(M5STACK)
     coreFooter();
     #endif    
-    #if defined(T_DISPLAY_S3)
+    #if defined(T_DISPLAY_S3)  || defined(CYD)
     TdisplayS3Footer();
     #endif    
 }

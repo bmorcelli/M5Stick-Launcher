@@ -152,7 +152,7 @@ bool GetJsonFromM5() {
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core.json";  
   #elif defined(CORE3)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/cores3.json";
-  #elif defined(T_DISPLAY_S3)
+  #elif defined(T_DISPLAY_S3) || defined(CYD)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/third_party.json";
   #endif
 

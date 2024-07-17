@@ -13,6 +13,16 @@
   extern TouchLib touch;
 #endif
 
+#if defined(CYD)
+  //#include <XPT2046_Touchscreen.h>
+  //extern XPT2046_Touchscreen touch;
+  #include "CYD28_TouchscreenR.h"
+  #define CYD28_DISPLAY_HOR_RES_MAX 320
+  #define CYD28_DISPLAY_VER_RES_MAX 240  
+  extern CYD28_TouchR touch;
+#endif
+
+
 String keyboard(String mytext, int maxSize = 76, String msg = "Type your message:");
 
 bool checkNextPress();
