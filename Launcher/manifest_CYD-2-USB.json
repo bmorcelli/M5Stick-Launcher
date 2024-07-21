@@ -1,5 +1,5 @@
 {
-  "name": "M5stickC",
+  "name": "CYD-2-USB",
   "builds": [
     {
       "chipFamily": "ESP32",
