@@ -43,7 +43,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
     JsonObject setting = settings[0];
     JsonArray WifiList = setting["wifi"].as<JsonArray>();
     EEPROM.begin(EEPROMSIZE);
-    pwd = EEPROM.readString(10);
+    pwd = EEPROM.readString(20);
     EEPROM.end();
     log_i("sdcardMounted: %d", sdcardMounted);
 
@@ -67,8 +67,8 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
       if (encryptation > 0) pwd = keyboard(pwd, 63, "Network Password:");
       
       EEPROM.begin(EEPROMSIZE);
-      if (pwd != EEPROM.readString(10)) {  
-        EEPROM.writeString(10, pwd);
+      if (pwd != EEPROM.readString(20)) {  
+        EEPROM.writeString(20, pwd);
         EEPROM.commit(); // Store data to EEPROM
       }
       EEPROM.end(); // Free EEPROM memory

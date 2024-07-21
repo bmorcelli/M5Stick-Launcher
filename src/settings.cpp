@@ -100,7 +100,7 @@ void getBrightness() {
 **********************************************************************/
 bool gsetOnlyBins(bool set, bool value) {
   EEPROM.begin(EEPROMSIZE);
-  int onlyBin = EEPROM.read(9);
+  int onlyBin = EEPROM.read(EEPROMSIZE-1);
   bool result = false;
 
   if(onlyBin>1) { 
@@ -113,7 +113,7 @@ bool gsetOnlyBins(bool set, bool value) {
   if(set) {
     result=value;
     onlyBins=value;         //update the global variable
-    EEPROM.write(9, result);
+    EEPROM.write(EEPROMSIZE-1, result);
     EEPROM.commit();
   }
   EEPROM.end(); // Free EEPROM memory
@@ -126,7 +126,7 @@ bool gsetOnlyBins(bool set, bool value) {
 **********************************************************************/
 bool gsetAskSpiffs(bool set, bool value) {
   EEPROM.begin(EEPROMSIZE);
-  int spiffs = EEPROM.read(EEPROMSIZE-1);
+  int spiffs = EEPROM.read(EEPROMSIZE-2);
   bool result = false;
 
   if(spiffs>1) { 
@@ -139,7 +139,7 @@ bool gsetAskSpiffs(bool set, bool value) {
   if(set) {
     result=value;
     askSpiffs=value;         //update the global variable
-    EEPROM.write(EEPROMSIZE-1, result);
+    EEPROM.write(EEPROMSIZE-2, result);
     EEPROM.commit();
   }
   EEPROM.end(); // Free EEPROM memory
@@ -349,7 +349,7 @@ void getConfigs() {
         EEPROM.write(0, rotation);
         EEPROM.write(1, dimmerSet);
         EEPROM.write(2, bright);
-        EEPROM.write(9, int(onlyBins));
+        EEPROM.write(EEPROMSIZE-1, int(onlyBins));
         EEPROM.write(EEPROMSIZE-2, int(askSpiffs));
 
         EEPROM.write(EEPROMSIZE-3, int((FGCOLOR >> 8) & 0x00FF));

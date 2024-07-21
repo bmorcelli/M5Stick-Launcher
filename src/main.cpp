@@ -162,8 +162,8 @@ void setup() {
   #endif
 
   EEPROM.begin(EEPROMSIZE); // open eeprom
-  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(9) > 1 || EEPROM.read(EEPROMSIZE-2) > 1 || (EEPROM.read(EEPROMSIZE-3)==0xFF && EEPROM.read(EEPROMSIZE-4) == 0xFF && EEPROM.read(EEPROMSIZE-5)==0xFF && EEPROM.read(EEPROMSIZE-6) == 0xFF)) {
-    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(9),EEPROM.read(EEPROMSIZE-2) );
+  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(EEPROMSIZE-1) > 1 || EEPROM.read(EEPROMSIZE-2) > 1 || (EEPROM.read(EEPROMSIZE-3)==0xFF && EEPROM.read(EEPROMSIZE-4) == 0xFF && EEPROM.read(EEPROMSIZE-5)==0xFF && EEPROM.read(EEPROMSIZE-6) == 0xFF)) {
+    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(EEPROMSIZE-1),EEPROM.read(EEPROMSIZE-2) );
   #if defined(CARDPUTER) || defined(M5STACK)
     EEPROM.write(0, 1);    // Right rotation for cardputer
   #else
@@ -171,8 +171,8 @@ void setup() {
   #endif
     EEPROM.write(1, 20);  // 20s Dimm time
     EEPROM.write(2, 100);  // 100% brightness
-    EEPROM.write(9, 1);    // OnlyBins
-    EEPROM.writeString(10,"");
+    EEPROM.write(EEPROMSIZE-1, 1);    // OnlyBins
+    EEPROM.writeString(20,"");
     EEPROM.write(EEPROMSIZE-2, 1);  // AskSpiffs
 
     //FGCOLOR
@@ -199,7 +199,7 @@ void setup() {
   rotation = EEPROM.read(0);
   dimmerSet = EEPROM.read(1);
   bright = EEPROM.read(2);
-  onlyBins = EEPROM.read(9);
+  onlyBins = EEPROM.read(EEPROMSIZE-1);
   askSpiffs = EEPROM.read(EEPROMSIZE-2);
   FGCOLOR =    (EEPROM.read(EEPROMSIZE-3)  << 8) | EEPROM.read(EEPROMSIZE-4);
   BGCOLOR =    (EEPROM.read(EEPROMSIZE-5)  << 8) | EEPROM.read(EEPROMSIZE-6);
