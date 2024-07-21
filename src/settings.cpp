@@ -19,14 +19,10 @@ void setBrightness(int brightval, bool save) {
   axp192.ScreenBreath(brightval);
   #elif defined(M5STACK)
   M5.Display.setBrightness(brightval);  
-  #elif  defined(T_DISPLAY_S3)
+  #elif  defined(T_DISPLAY_S3) || defined(CYD)
   int dutyCycle = (brightval*255)/100;
   log_i("dutyCycle for bright 0-255: %d",dutyCycle);
-  ledcWrite(0,dutyCycle); // Channel 0
-  delay(5);
-  ledcWrite(0,dutyCycle); // Channel 0
-  delay(5);
-  ledcWrite(0,dutyCycle); // Channel 0
+  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
   #endif
 
  if (save) {
@@ -56,14 +52,10 @@ void getBrightness() {
   axp192.ScreenBreath(bright);
 #elif defined(M5STACK)
   M5.Display.setBrightness(bright);  
-#elif  defined(T_DISPLAY_S3)
+#elif  defined(T_DISPLAY_S3) || defined(CYD)
   int dutyCycle = (bright*255)/100;
   log_i("dutyCycle for bright 0-255: %d",dutyCycle);
-  ledcWrite(0,dutyCycle); // Channel 0
-  delay(5);
-  ledcWrite(0,dutyCycle); // Channel 0
-  delay(5);
-  ledcWrite(0,dutyCycle); // Channel 0
+  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
 #endif
     setBrightness(100);
   }
@@ -75,14 +67,10 @@ void getBrightness() {
   axp192.ScreenBreath(bright);
 #elif defined(M5STACK)
   M5.Display.setBrightness(bright);
-#elif  defined(T_DISPLAY_S3)
+#elif  defined(T_DISPLAY_S3) || defined(CYD)
   int dutyCycle = (bright*255)/100;
   log_i("dutyCycle for bright 0-255: %d",dutyCycle);
-  ledcWrite(0,dutyCycle); // Channel 0
-  delay(5);
-  ledcWrite(0,dutyCycle); // Channel 0
-  delay(5);
-  ledcWrite(0,dutyCycle); // Channel 0
+  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
 #endif
 
 }

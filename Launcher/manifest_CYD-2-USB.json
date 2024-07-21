@@ -1,11 +1,11 @@
 {
-  "name": "M5stickCP",
+  "name": "M5stickC",
   "builds": [
     {
       "chipFamily": "ESP32",
       "improv": false,
       "parts": [
-        { "path": "Launcher_2.0_cplus1_1.bin", "offset": 0 }
+        { "path": "Launcher_2.0_CYD-2-USB.bin", "offset": 0 }
       ]
     }
   ]

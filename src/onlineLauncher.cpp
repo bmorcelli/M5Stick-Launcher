@@ -152,7 +152,7 @@ bool GetJsonFromM5() {
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/core.json";  
   #elif defined(CORE3)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/cores3.json";
-  #elif defined(T_DISPLAY_S3)
+  #elif defined(T_DISPLAY_S3) || defined(CYD)
   const char* serverUrl = "https://raw.githubusercontent.com/bmorcelli/M5Stack-json-fw/main/v2/third_party.json";
   #endif
 
@@ -193,6 +193,7 @@ bool GetJsonFromM5() {
 ***************************************************************************************/
 void downloadFirmware(String file_str, String fileName, String folder) {
   String fileAddr = "https://m5burner-cdn.m5stack.com/firmware/" + file_str;
+  int tries=0;
   fileName = replaceChars(fileName);
   prog_handler = 2;
   if(!setupSdCard()) {
@@ -206,6 +207,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
 
   WiFiClientSecure *client = new WiFiClientSecure;
   client->setCACert(root_ca3);  
+retry:  
   if(client) {
     HTTPClient http;
     int httpResponseCode=-1;
@@ -219,7 +221,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
         if (!SDM.exists("/downloads")) SDM.mkdir("/downloads");
 
         File file = SDM.open(folder + fileName + ".bin", FILE_WRITE);
-        int size = http.getSize();
+        size_t size = http.getSize();
         displayRedStripe("Downloading FW");
         if(file) {
 
@@ -244,12 +246,34 @@ void downloadFirmware(String file_str, String fileName, String folder) {
 
               downloaded += c;
               progressHandler(downloaded, size);  // Chama a função de progresso
+              progressHandler(downloaded, size);  // Chama a função de progresso
             }
-            delay(1);
-          }          
-
-          delay(2500);
+          }
+          file.close();
+        } else { 
+          log_i("Download> Couldn't create file %s", String(folder + fileName + ".bin"));
+          displayRedStripe("Fail creating file.");
         }
+        // Checks if the file was preatically not downloaded and try one more time (size <= bufSize)
+        file = SDM.open(folder + fileName + ".bin");
+        if(file.size()<=bufSize & tries<1)  {
+          tries++;
+          http.end();
+          goto retry;
+        }
+        // Checks if the file was completely downloaded
+        log_i("File size in get() = %d\nFile size in SD    = %d", size, file.size());
+        if (file.size()!=size) {
+          SDM.remove(file.path());
+          displayRedStripe("Download FAILED");
+          while(!checkSelPress()) yield();
+        } else { 
+          log_i("File successfully downloaded.");
+          displayRedStripe(" Downloaded ");
+          while(!checkSelPress()) yield();
+        }
+        file.close();
+        delay(2000);
         break;
       } else {
         http.end();
