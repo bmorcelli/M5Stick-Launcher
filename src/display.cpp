@@ -539,6 +539,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   int index = 0;
   log_i("Number of options: %d", options.size());
   int numOpt = options.size()-1;
+  drawOptions(0,options, ALCOLOR, BGCOLOR);
   while(1){
     if (redraw) { 
       drawOptions(index,options, ALCOLOR, BGCOLOR);

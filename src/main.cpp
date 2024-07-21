@@ -225,9 +225,9 @@ void setup() {
 #if defined(T_DISPLAY_S3) || defined(CYD)
   touch.setRotation(1);
     // PWM backlight setup
-  ledcSetup(0,10000,8); //Channel 0, 10khz, 8bits
-  ledcAttachPin(TFT_BL, 0);
-  ledcWrite(0,255);
+  ledcSetup(TFT_BRIGHT_CHANNEL,TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits); //Channel 0, 10khz, 8bits
+  ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
+  ledcWrite(TFT_BRIGHT_CHANNEL,255);
 #endif
 
 
@@ -243,49 +243,48 @@ void setup() {
 
   //Gets the config.conf from SD Card and fill out the settings JSON
   getConfigs();
-
+  #if defined(M5STACK)
+  coreFooter2();
+  #endif    
+  #if defined(T_DISPLAY_S3) || defined(CYD)
+  TdisplayS3Footer2();
+  #endif  
   //Start Bootscreen timer
   int i = millis();
   while(millis()<i+5000) { // increased from 2500 to 5000
-    initDisplay();        //Inicia o display
-    #if defined(M5STACK)
-    coreFooter2();
-    #endif    
-    #if defined(T_DISPLAY_S3) || defined(CYD)
-    TdisplayS3Footer2();
-    #endif    
+    initDisplay();        //Inicia o display 
   
-  #if defined (CARDPUTER)
-    Keyboard.update();
-    if(Keyboard.isKeyPressed(KEY_ENTER))
-  #elif defined(T_DISPLAY_S3)
-    if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1))
-  #elif !defined(M5STACK)
-    if(digitalRead(SEL_BTN)==BTN_ACT) 
-  #elif defined(M5STACK)
-    if(checkSelPress())
-  #elif defined(CYD)
-    if(menuPress(1))
-  #endif
-     {
-        tft.fillScreen(BGCOLOR);
-        goto Launcher;
-      }
+    #if defined (CARDPUTER)
+      Keyboard.update();
+      if(Keyboard.isKeyPressed(KEY_ENTER))
+    #elif defined(T_DISPLAY_S3)
+      if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1))
+    #elif defined(M5STACK)
+      if(checkSelPress())
+    #elif defined(CYD)
+      if(menuPress(1))
+    #elif !defined(M5STACK)
+      if(digitalRead(SEL_BTN)==BTN_ACT)       
+    #endif
+      {
+          tft.fillScreen(BGCOLOR);
+          goto Launcher;
+        }
 
-  #if defined (CARDPUTER)
-    Keyboard.update();
-    if (Keyboard.isPressed() && !(Keyboard.isKeyPressed(KEY_ENTER)))
-  #elif defined(STICK_C_PLUS2)
-    if((digitalRead(UP_BTN)==BTN_ACT && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT) 
-  #elif defined(STICK_C_PLUS)
-    if((axp192.GetBtnPress() && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT)
-  #elif defined(M5STACK)
-    if(checkNextPress() || checkPrevPress())    
-  #elif defined(T_DISPLAY_S3)
-    if(checkNextPress() || checkPrevPress() || menuPress(0) ||  menuPress(2))
-  #elif defined(CYD)
-    if(menuPress(0) ||  menuPress(2))    
-  #endif 
+    #if defined (CARDPUTER)
+      Keyboard.update();
+      if (Keyboard.isPressed() && !(Keyboard.isKeyPressed(KEY_ENTER)))
+    #elif defined(STICK_C_PLUS2)
+      if((digitalRead(UP_BTN)==BTN_ACT && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT) 
+    #elif defined(STICK_C_PLUS)
+      if((axp192.GetBtnPress() && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT)
+    #elif defined(M5STACK)
+      if(checkNextPress() || checkPrevPress())    
+    #elif defined(T_DISPLAY_S3)
+      if(checkNextPress() || checkPrevPress() || menuPress(0) ||  menuPress(2))
+    #elif defined(CYD)
+      if(menuPress(0) || menuPress(2))    
+    #endif 
       {
         tft.fillScreen(TFT_BLACK);
         ESP.restart();

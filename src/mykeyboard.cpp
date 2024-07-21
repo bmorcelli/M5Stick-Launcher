@@ -105,13 +105,13 @@ bool menuPress(int bot) {
 #if defined(CYD)
 
 bool menuPress(int bot) {
-  digitalWrite(XPT2046_CS, LOW);
   //0 - prev
   //1 - Sel
   //2 - next
   int terco=WIDTH/3;
   if (touch.touched()) { //touch.tirqTouched() && 
     auto t = touch.getPointScaled();
+    t = touch.getPointScaled();
     log_i("Touchscreen Pressed at x=%d, y=%d, z=%d", t.x,t.y,t.z);
         if(rotation==3) { 
           t.y = (HEIGHT+20)-t.y;

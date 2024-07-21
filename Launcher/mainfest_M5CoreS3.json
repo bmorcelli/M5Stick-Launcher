@@ -7,12 +7,6 @@
         "parts": [
           { "path": "Launcher_2.0_CoreS3.bin", "offset": 0 }
         ]
-      },
-      {
-        "chipFamily": "ESP8266",
-        "parts": [
-          { "path": "esp8266.bin", "offset": 0 }
-        ]
       }
     ]
   }
