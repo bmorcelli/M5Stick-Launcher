@@ -162,15 +162,15 @@ void setup() {
   #endif
 
   EEPROM.begin(EEPROMSIZE); // open eeprom
-  if(EEPROM.read(0) > 3 || EEPROM.read(1) > 240 || EEPROM.read(2) > 100 || EEPROM.read(EEPROMSIZE-1) > 1 || EEPROM.read(EEPROMSIZE-2) > 1 || (EEPROM.read(EEPROMSIZE-3)==0xFF && EEPROM.read(EEPROMSIZE-4) == 0xFF && EEPROM.read(EEPROMSIZE-5)==0xFF && EEPROM.read(EEPROMSIZE-6) == 0xFF)) {
-    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(0),EEPROM.read(1),EEPROM.read(2),EEPROM.read(EEPROMSIZE-1),EEPROM.read(EEPROMSIZE-2) );
+  if(EEPROM.read(EEPROMSIZE-13) > 3 || EEPROM.read(EEPROMSIZE-14) > 240 || EEPROM.read(EEPROMSIZE-15) > 100 || EEPROM.read(EEPROMSIZE-1) > 1 || EEPROM.read(EEPROMSIZE-2) > 1 || (EEPROM.read(EEPROMSIZE-3)==0xFF && EEPROM.read(EEPROMSIZE-4) == 0xFF && EEPROM.read(EEPROMSIZE-5)==0xFF && EEPROM.read(EEPROMSIZE-6) == 0xFF)) {
+    log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(EEPROMSIZE-13),EEPROM.read(EEPROMSIZE-14),EEPROM.read(EEPROMSIZE-15),EEPROM.read(EEPROMSIZE-1),EEPROM.read(EEPROMSIZE-2) );
   #if defined(CARDPUTER) || defined(M5STACK)
-    EEPROM.write(0, 1);    // Right rotation for cardputer
+    EEPROM.write(EEPROMSIZE-13, 1);    // Right rotation for cardputer
   #else
-    EEPROM.write(0, 3);    // Left rotation
+    EEPROM.write(EEPROMSIZE-13, 3);    // Left rotation
   #endif
-    EEPROM.write(1, 20);  // 20s Dimm time
-    EEPROM.write(2, 100);  // 100% brightness
+    EEPROM.write(EEPROMSIZE-14, 20);  // 20s Dimm time
+    EEPROM.write(EEPROMSIZE-15, 100);  // 100% brightness
     EEPROM.write(EEPROMSIZE-1, 1);    // OnlyBins
     EEPROM.writeString(20,"");
     EEPROM.write(EEPROMSIZE-2, 1);  // AskSpiffs
@@ -192,13 +192,13 @@ void setup() {
     EEPROM.write(EEPROMSIZE-12, 0xe5);
     EEPROM.commit();       // Store data to EEPROM
   }
-  if(EEPROM.read(0) != 1 && EEPROM.read(0) != 3)  { 
-    EEPROM.write(0, 3);    // Left rotation
+  if(EEPROM.read(EEPROMSIZE-13) != 1 && EEPROM.read(EEPROMSIZE-13) != 3)  { 
+    EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
     EEPROM.commit();       // Store data to EEPROM
   }
-  rotation = EEPROM.read(0);
-  dimmerSet = EEPROM.read(1);
-  bright = EEPROM.read(2);
+  rotation = EEPROM.read(EEPROMSIZE-13);
+  dimmerSet = EEPROM.read(EEPROMSIZE-14);
+  bright = EEPROM.read(EEPROMSIZE-15);
   onlyBins = EEPROM.read(EEPROMSIZE-1);
   askSpiffs = EEPROM.read(EEPROMSIZE-2);
   FGCOLOR =    (EEPROM.read(EEPROMSIZE-3)  << 8) | EEPROM.read(EEPROMSIZE-4);
@@ -275,9 +275,9 @@ void setup() {
       Keyboard.update();
       if (Keyboard.isPressed() && !(Keyboard.isKeyPressed(KEY_ENTER)))
     #elif defined(STICK_C_PLUS2)
-      if((digitalRead(UP_BTN)==BTN_ACT && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT) 
+      if(digitalRead(DW_BTN)==BTN_ACT) 
     #elif defined(STICK_C_PLUS)
-      if((axp192.GetBtnPress() && (millis()-i>2000)) || digitalRead(DW_BTN)==BTN_ACT)
+      if(digitalRead(DW_BTN)==BTN_ACT)
     #elif defined(M5STACK)
       if(checkNextPress() || checkPrevPress())    
     #elif defined(T_DISPLAY_S3)

@@ -62,6 +62,9 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with M5Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.2.3:
+     * [x] StickC, Plus and Plus2: removed power btn from skip logic at start.
+     * [x] Changed EEPROM Addresses to avoid problems with the new Bruce and other firmwares..
 * 2.2.2:
      * [x] Port for [CYD-2432S028R](https://www.amazon.com/dp/B0BVFXR313) and [CYD-2-Usb](https://www.amazon.com/dp/B0CLR7MQ91)
      * [x] Added check after finish the download that will delete failed downloaded files

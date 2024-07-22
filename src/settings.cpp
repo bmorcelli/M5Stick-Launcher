@@ -5,6 +5,33 @@
 #include "sd_functions.h"
 #include "mykeyboard.h"
 
+/**************************************************************************************
+EEPROM ADDRESSES MAP
+
+
+0	N/B Rot 	  16		      32	Pass	  48	Pass	64	Pass	80	Pass	96		112	
+1	N/B Dim	    17		      33	Pass	  49	Pass	65	Pass	81	Pass	97		113	
+2	N/B Bri     18		      34	Pass  	50	Pass	66	Pass	82	Pass	98		114	
+3	N	          19		      35	Pass	  51	Pass	67	Pass	83	Pass	99		115	(L- Brigh)
+4	N	          20	Pass  	36	Pass	  52	Pass	68	Pass	84	Pass	100		116	(L- Dim)
+5	N	          21	Pass  	37	Pass  	53	Pass	69	Pass	85		    101		117	(L- Rotation)
+6	B-IrTX      22	Pass  	38	Pass  	54	Pass	70	Pass	86		    102		118	(L-odd)
+7	B-IrRx      23	Pass  	39	Pass  	55	Pass	71	Pass	87		    103		119	(L-odd)
+8	B-RfTX      24	Pass  	40	Pass  	56	Pass	72	Pass	88		    104		120	(L-even)
+9	B-RfRx      25	Pass  	41	Pass  	57	Pass	73	Pass	89		    105		121	(L-even)
+10 TimeZone	  26	Pass  	42	Pass  	58	Pass	74	Pass	90		    106		122	(L-BGCOLOR)
+11 FGCOLOR    27	Pass  	43	Pass  	59	Pass	75	Pass	91		    107		123	(L-BGCOLOR)
+12 FGCOLOR    28	Pass  	44	Pass  	60	Pass	76	Pass	92		    108		124	(L-FGCOLOR)
+13		        29	Pass  	45	Pass  	61	Pass	77	Pass	93		    109		125	(L-FGCOLOR)
+14		        30	Pass	  46	Pass  	62	Pass	78	Pass	94		    110		126	(L-AskSpiffs)
+15		        31	Pass  	47	Pass  	63	Pass	79	Pass	95		    111		127	(L-OnlyBins)
+
+From 1 to 5: Nemo shared addresses
+(L -*) stands for Launcher addresses
+
+***************************************************************************************/
+
+
 /*********************************************************************
 **  Function: setBrightness                             
 **  save brightness value into EEPROM
@@ -35,7 +62,7 @@ void setBrightness(int brightval, bool save) {
  if (save) {
   EEPROM.begin(EEPROMSIZE); // open eeprom
   bright = brightval;
-  EEPROM.write(2, brightval); //set the byte
+  EEPROM.write(EEPROMSIZE-15, brightval); //set the byte
   EEPROM.commit(); // Store data to EEPROM
   EEPROM.end(); // Free EEPROM memory
  }
@@ -47,7 +74,7 @@ void setBrightness(int brightval, bool save) {
 **********************************************************************/
 void getBrightness() {
   EEPROM.begin(EEPROMSIZE);
-  bright = EEPROM.read(2);
+  bright = EEPROM.read(EEPROMSIZE-15);
   EEPROM.end(); // Free EEPROM memory
   if(bright>100) { 
     bright = 100;
@@ -152,7 +179,7 @@ bool gsetAskSpiffs(bool set, bool value) {
 **********************************************************************/
 int gsetRotation(bool set){
   EEPROM.begin(EEPROMSIZE);
-  int getRot = EEPROM.read(0);
+  int getRot = EEPROM.read(EEPROMSIZE-13);
   int result = ROTATION;
   
   if(getRot==1 && set) result = 3;
@@ -166,7 +193,7 @@ int gsetRotation(bool set){
   if(set) {
     rotation = result;
     tft.setRotation(result);
-    EEPROM.write(0, result);    // Left rotation
+    EEPROM.write(EEPROMSIZE-13, result);    // Left rotation
     EEPROM.commit();
     tft.fillScreen(BGCOLOR);
   }
@@ -247,7 +274,7 @@ void setdimmerSet() {
   loopOptions(options);
   dimmerSet=time;
   EEPROM.begin(EEPROMSIZE);
-  EEPROM.write(1, dimmerSet);  // 20s Dimm time
+  EEPROM.write(EEPROMSIZE-14, dimmerSet);  // 20s Dimm time
   EEPROM.commit();
   EEPROM.end();
   saveConfigs();
@@ -301,25 +328,7 @@ void getConfigs() {
           log_i("Failed to read file, using default configuration");
           goto Default;
         } else log_i("getConfigs: deserialized correctly");
-        
-        /*
-        int count=0;
-        if(settings.containsKey("onlyBins"))  { onlyBins  = gsetOnlyBins(settings["onlyBins"].as<bool>()); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("askSpiffs")) { askSpiffs = gsetAskSpiffs(settings["askSpiffs"].as<bool>()); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("bright"))    { bright    = settings["bright"].as<int>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("dimmerSet")) { dimmerSet = settings["dimmerSet"].as<int>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("rot"))       { rotation  = settings["rot"].as<int>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("FGCOLOR"))   { FGCOLOR   = settings["FGCOLOR"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("BGCOLOR"))   { BGCOLOR   = settings["BGCOLOR"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("ALCOLOR"))   { ALCOLOR   = settings["ALCOLOR"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("odd"))       { odd_color = settings["odd"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("even"))      { even_color= settings["even"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("wui_usr"))   { wui_usr   = settings["wui_usr"].as<String>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("wui_pwd"))   { wui_pwd   = settings["wui_pwd"].as<String>(); } else { count++; log_i("Fail"); }
-        if(settings.containsKey("dwn_path"))  { dwn_path  = settings["dwn_path"].as<String>(); } else { count++; log_i("Fail"); }
-        if(!settings.containsKey("wifi"))  { count++; log_i("Fail"); }
-        if(count>0) saveConfigs();
-*/
+
         int count=0;
         JsonObject setting = settings[0];
         if(setting.containsKey("onlyBins"))  { onlyBins  = gsetOnlyBins(setting["onlyBins"].as<bool>()); } else { count++; log_i("Fail"); }
@@ -346,9 +355,9 @@ void getConfigs() {
         
         
         EEPROM.begin(EEPROMSIZE); // open eeprom
-        EEPROM.write(0, rotation);
-        EEPROM.write(1, dimmerSet);
-        EEPROM.write(2, bright);
+        EEPROM.write(EEPROMSIZE-13, rotation);
+        EEPROM.write(EEPROMSIZE-14, dimmerSet);
+        EEPROM.write(EEPROMSIZE-15, bright);
         EEPROM.write(EEPROMSIZE-1, int(onlyBins));
         EEPROM.write(EEPROMSIZE-2, int(askSpiffs));
 

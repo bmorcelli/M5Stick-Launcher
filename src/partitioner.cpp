@@ -433,7 +433,7 @@ void partitionCrawler() {
         ESP_LOGI(TAG, "Restarting system to boot from test partition");
         //Forces Recovering EEPROM data to default.
         EEPROM.begin(EEPROMSIZE);
-        EEPROM.write(0,0xFF);
+        EEPROM.write(EEPROMSIZE-13,0xFF);
         esp_restart();
     }
 }
