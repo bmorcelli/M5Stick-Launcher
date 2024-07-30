@@ -222,6 +222,12 @@ void setup() {
   setBrightness(bright,false);
   initDisplay(true);  
 
+  #if defined(MARAUDERV4)
+    uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; 
+    //uint16_t calData[5] = { 339, 3470, 237, 3438, 2 };
+    tft.setTouch(calData);
+  #endif
+
 #if defined(T_DISPLAY_S3) || defined(CYD)
   touch.setRotation(1);
     // PWM backlight setup
@@ -246,7 +252,7 @@ void setup() {
   #if defined(M5STACK)
   coreFooter2();
   #endif    
-  #if defined(T_DISPLAY_S3) || defined(CYD)
+  #if defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
   TdisplayS3Footer2();
   #endif  
   //Start Bootscreen timer
@@ -261,7 +267,7 @@ void setup() {
       if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1))
     #elif defined(M5STACK)
       if(checkSelPress())
-    #elif defined(CYD)
+    #elif defined(CYD) || defined(MARAUDERV4)
       if(menuPress(1))
     #elif !defined(M5STACK)
       if(digitalRead(SEL_BTN)==BTN_ACT)       
@@ -282,7 +288,7 @@ void setup() {
       if(checkNextPress() || checkPrevPress())    
     #elif defined(T_DISPLAY_S3)
       if(checkNextPress() || checkPrevPress() || menuPress(0) ||  menuPress(2))
-    #elif defined(CYD)
+    #elif defined(CYD) || defined(MARAUDERV4)
       if(menuPress(0) || menuPress(2))    
     #endif 
       {
@@ -322,7 +328,7 @@ void loop() {
       #if defined(M5STACK)
       coreFooter();
       #endif
-      #if defined(T_DISPLAY_S3) || defined(CYD)
+      #if defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
       TdisplayS3Footer();
       #endif      
       redraw = false; 
