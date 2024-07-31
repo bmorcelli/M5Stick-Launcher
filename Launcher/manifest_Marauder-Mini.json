@@ -1,0 +1,12 @@
+{
+  "name": "Marauder-Mini",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "improv": false,
+      "parts": [
+        { "path": "Launcher_2.0_Marauder-Mini.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

@@ -163,7 +163,7 @@ bool checkNextPress(){
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed('/') || Keyboard.isKeyPressed('.'))
-  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C)
+  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C) || defined(MARAUDERMINI)
     if(digitalRead(DW_BTN)==BTN_ACT) 
   #elif defined(M5STACK)
     M5.update();
@@ -187,7 +187,7 @@ bool checkNextPress(){
 
 /* Verifies Down Btn to go to next item */
 bool checkPrevPress() {
-  #if defined(STICK_C_PLUS2)
+  #if defined(STICK_C_PLUS2) || defined(MARAUDERMINI)
     if(digitalRead(UP_BTN)==BTN_ACT) 
   #elif defined(STICK_C_PLUS)
     if(axp192.GetBtnPress())
@@ -223,7 +223,7 @@ bool checkSelPress(bool dimmOff){
     Keyboard.update();
     if(Keyboard.isKeyPressed(KEY_ENTER))
   
-  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C)
+  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C) || defined(MARAUDERMINI)
     if(digitalRead(SEL_BTN)==BTN_ACT) 
   
   #elif defined(M5STACK)
