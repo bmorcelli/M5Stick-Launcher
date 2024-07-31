@@ -34,7 +34,7 @@
   AXP192 axp192;
 #endif
 
-#if defined(M5STACK) || defined(T_DISPLAY_S3) || defined(CYD)
+#if defined(M5STACK) || defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
 struct box_t
 {
   int x;
@@ -127,6 +127,36 @@ bool menuPress(int bot) {
 }
 #endif
 
+#if defined(MARAUDERV4)
+struct TouchPoint {
+  uint16_t x;
+  uint16_t y;
+};
+
+bool menuPress(int bot) {
+  //0 - prev
+  //1 - Sel
+  //2 - next
+  TouchPoint t;
+   bool touched = tft.getTouch(&t.x, &t.y, 600);
+  int terco=WIDTH/3;
+  if(touched) { 
+    log_i("Touchscreen Pressed at x=%d, y=%d", t.x,t.y);
+    if(rotation==3) { 
+      t.y = (HEIGHT+20)-t.y;
+      t.x = WIDTH-t.x;
+    }
+
+    if(t.y>(HEIGHT) && t.x>terco*bot && t.x<terco*(1+bot)) { 
+      t.x=WIDTH+1;
+      t.y=HEIGHT+11;
+      return true;
+    } else return false;
+  } else return false;
+}
+#endif
+
+
 /* Verifies Upper Btn to go to previous item */
 bool checkNextPress(){
   #if defined (CARDPUTER)
@@ -139,7 +169,7 @@ bool checkNextPress(){
     if(M5.BtnC.isHolding() || M5.BtnC.isPressed())               // read touchscreen
   #elif defined(T_DISPLAY_S3)
     if(digitalRead(DW_BTN)==BTN_ACT || menuPress(2)) 
-  #elif defined(CYD)
+  #elif defined(CYD) || defined(MARAUDERV4)
     if(menuPress(2)) 
   #endif
     { 
@@ -166,10 +196,8 @@ bool checkPrevPress() {
   #elif defined(M5STACK)
     M5.update();
     if(M5.BtnA.isHolding() || M5.BtnA.isPressed())               // read touchscreen
-  #elif defined(T_DISPLAY_S3)
+  #elif defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
     if(menuPress(0)) 
-  #elif defined(CYD)
-    if(menuPress(0))     
   #endif
   { 
     if(dimmer) {
@@ -204,7 +232,7 @@ bool checkSelPress(bool dimmOff){
   #elif defined(T_DISPLAY_S3)
     if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1)) 
 
-  #elif defined(CYD)
+  #elif defined(CYD) || defined(MARAUDERV4)
     if(menuPress(1)) 
 
   #endif
@@ -270,8 +298,6 @@ int getBattery() {
     float mv = volt * 2;
     percent = (mv - 3300) * 100 / (float)(4150 - 3350);
 
-  #elif defined(CYD) // Need todo
-    percent=0;
   #else
     percent=0;
 
@@ -355,7 +381,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   int _y = (HEIGHT - 54)/4;
   int _xo = _x/2-3;
 
-#if defined(M5STACK) || defined(T_DISPLAY_S3) || defined(CYD)
+#if defined(M5STACK) || defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
   int k=0;
   for(x2=0; x2<12;x2++) {
     for(y2=0; y2<4; y2++) {
@@ -511,7 +537,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   #if defined(M5STACK)
     coreFooter();
   #endif
-  #if defined(T_DISPLAY_S3) || defined(CYD)
+  #if defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
     TdisplayS3Footer();
   #endif
     //cursor handler
@@ -574,7 +600,7 @@ String keyboard(String mytext, int maxSize, String msg) {
     #else
 
     int z=0;
-  #if defined(M5STACK) || defined(T_DISPLAY_S3) || defined(CYD)
+  #if defined(M5STACK) || defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
     #if defined(M5STACK)
     M5.update();
     auto t = M5.Touch.getDetail();
@@ -583,6 +609,14 @@ String keyboard(String mytext, int maxSize, String msg) {
     if (touch.read())
     #elif defined(CYD)
     if (touch.touched())
+    #elif defined(MARAUDERV4)
+    TouchPoint t;
+    bool touched = tft.getTouch(&t.x, &t.y, 600);
+    if(rotation==3) { 
+      t.y = (HEIGHT+20)-t.y;
+      t.x = WIDTH-t.x;
+    }
+    if(touched)
     #endif
      {
       #if defined(T_DISPLAY_S3)
