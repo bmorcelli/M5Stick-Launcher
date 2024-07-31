@@ -1,0 +1,12 @@
+{
+  "name": "Marauder-v4-OG",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "improv": false,
+      "parts": [
+        { "path": "Launcher_2.0_Marauder-v4-OG.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

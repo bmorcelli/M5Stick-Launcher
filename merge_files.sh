@@ -8,4 +8,5 @@ esptool.py --chip esp32s3 merge_bin --output Launcher/Launcher_2.0_CoreS3.bin   
 esptool.py --chip esp32s3 merge_bin --output Launcher/Launcher_2.0_T-Display-S3-Touchscreen.bin      0x0 .pio/build/lilygo-t-display-S3/bootloader.bin        0x8000 .pio/build/lilygo-t-display-S3/partitions.bin     0x10000 .pio/build/lilygo-t-display-S3/firmware.bin
 esptool.py --chip esp32 merge_bin --output Launcher/Launcher_2.0_CYD-2432S028.bin       0x1000 .pio/build/CYD-2432S028/bootloader.bin        0x8000 .pio/build/CYD-2432S028/partitions.bin     0x10000 .pio/build/CYD-2432S028/firmware.bin
 esptool.py --chip esp32 merge_bin --output Launcher/Launcher_2.0_CYD-2-USB.bin          0x1000 .pio/build/CYD-2-USB/bootloader.bin           0x8000 .pio/build/CYD-2-USB/partitions.bin        0x10000 .pio/build/CYD-2-USB/firmware.bin
+esptool.py --chip esp32 merge_bin --output Launcher/Launcher_2.0_Marauder-v4-OG.bin          0x1000 .pio/build/Marauder-v4-OG/bootloader.bin      0x8000 .pio/build/Marauder-v4-OG/partitions.bin   0x10000 .pio/build/Marauder-v4-OG/firmware.bin
 

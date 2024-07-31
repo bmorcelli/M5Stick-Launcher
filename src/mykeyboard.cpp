@@ -138,7 +138,8 @@ bool menuPress(int bot) {
   //1 - Sel
   //2 - next
   TouchPoint t;
-   bool touched = tft.getTouch(&t.x, &t.y, 600);
+  bool touched = tft.getTouch(&t.x, &t.y, 600);
+
   int terco=WIDTH/3;
   if(touched) { 
     log_i("Touchscreen Pressed at x=%d, y=%d", t.x,t.y);
@@ -612,6 +613,7 @@ String keyboard(String mytext, int maxSize, String msg) {
     #elif defined(MARAUDERV4)
     TouchPoint t;
     bool touched = tft.getTouch(&t.x, &t.y, 600);
+
     if(rotation==3) { 
       t.y = (HEIGHT+20)-t.y;
       t.x = WIDTH-t.x;
