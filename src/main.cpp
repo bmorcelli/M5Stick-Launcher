@@ -229,7 +229,7 @@ void setup() {
  //uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; //org portrait
 uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from maruader
 //uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY  from maruader
- 
+ //   uint16_t calData[5] = {  323, 3373, 462, 3398, 4}; //
 
 
     
