@@ -21,7 +21,6 @@
 #endif
 
 #if defined(CYD)
-  //XPT2046_Touchscreen touch(XPT2046_CS, XPT2046_IRQ);
   CYD28_TouchR touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
 #endif
 
@@ -163,7 +162,7 @@ bool checkNextPress(){
   #if defined (CARDPUTER)
     Keyboard.update();
     if(Keyboard.isKeyPressed('/') || Keyboard.isKeyPressed('.'))
-  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C) || defined(MARAUDERMINI)
+  #elif defined(STICK_C_PLUS) || defined(STICK_C_PLUS2) || defined(STICK_C)
     if(digitalRead(DW_BTN)==BTN_ACT) 
   #elif defined(M5STACK)
     M5.update();
@@ -172,6 +171,8 @@ bool checkNextPress(){
     if(digitalRead(DW_BTN)==BTN_ACT || menuPress(2)) 
   #elif defined(CYD) || defined(MARAUDERV4)
     if(menuPress(2)) 
+  #elif defined(HAS_BTN)
+    if(digitalRead(DW_BTN)==BTN_ACT)
   #endif
     { 
       if(dimmer) {
@@ -187,7 +188,7 @@ bool checkNextPress(){
 
 /* Verifies Down Btn to go to next item */
 bool checkPrevPress() {
-  #if defined(STICK_C_PLUS2) || defined(MARAUDERMINI)
+  #if defined(STICK_C_PLUS2)
     if(digitalRead(UP_BTN)==BTN_ACT) 
   #elif defined(STICK_C_PLUS)
     if(axp192.GetBtnPress())
@@ -199,6 +200,8 @@ bool checkPrevPress() {
     if(M5.BtnA.isHolding() || M5.BtnA.isPressed())               // read touchscreen
   #elif defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
     if(menuPress(0)) 
+  #elif defined(HAS_BTN)
+    if(digitalRead(UP_BTN)==BTN_ACT)     
   #endif
   { 
     if(dimmer) {
@@ -235,6 +238,9 @@ bool checkSelPress(bool dimmOff){
 
   #elif defined(CYD) || defined(MARAUDERV4)
     if(menuPress(1)) 
+  
+  #elif defined(HAS_BTN)
+    if(digitalRead(SEL_BTN)==BTN_ACT) 
 
   #endif
     { 
