@@ -192,10 +192,17 @@ void setup() {
     EEPROM.write(EEPROMSIZE-12, 0xe5);
     EEPROM.commit();       // Store data to EEPROM
   }
+  #if !defined(MARAUDERMINI)
   if(EEPROM.read(EEPROMSIZE-13) != 1 && EEPROM.read(EEPROMSIZE-13) != 3)  { 
     EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
     EEPROM.commit();       // Store data to EEPROM
   }
+  #else
+  if(EEPROM.read(EEPROMSIZE-13) != 0 && EEPROM.read(EEPROMSIZE-13) != 2)  { 
+    EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
+    EEPROM.commit();       // Store data to EEPROM
+  }
+  #endif
   rotation = EEPROM.read(EEPROMSIZE-13);
   dimmerSet = EEPROM.read(EEPROMSIZE-14);
   bright = EEPROM.read(EEPROMSIZE-15);

@@ -177,14 +177,19 @@ bool gsetAskSpiffs(bool set, bool value) {
 **  Function: gsetRotation                             
 **  get onlyBins from EEPROM
 **********************************************************************/
+#if !defined(MARAUDERMINI)
+#define DRV 0
+#else
+#define DRV 1
+#endif
 int gsetRotation(bool set){
   EEPROM.begin(EEPROMSIZE);
   int getRot = EEPROM.read(EEPROMSIZE-13);
   int result = ROTATION;
   
-  if(getRot==1 && set) result = 3;
-  else if(getRot==3 && set) result = 1;
-  else if(getRot<=3) result = getRot;
+  if(getRot==(DRV) && set) result = (DRV+2);
+  else if(getRot==(DRV+2) && set) result = DRV;
+  else if(getRot<=(DRV+2)) result = getRot;
   else {
     set=true;
     result = ROTATION;
