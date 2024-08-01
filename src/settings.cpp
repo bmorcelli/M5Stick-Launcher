@@ -46,7 +46,7 @@ void setBrightness(int brightval, bool save) {
   axp192.ScreenBreath(brightval);
   #elif defined(M5STACK)
   M5.Display.setBrightness(brightval);  
-  #elif  defined(T_DISPLAY_S3) || defined(CYD)
+  #else
   int dutyCycle;
   if (brightval==100) dutyCycle=255;
   else if (brightval==75) dutyCycle=130;
@@ -86,7 +86,7 @@ void getBrightness() {
   axp192.ScreenBreath(bright);
 #elif defined(M5STACK)
   M5.Display.setBrightness(bright);  
-  #elif  defined(T_DISPLAY_S3) || defined(CYD)
+#else
   int dutyCycle;
   if (bright==100) dutyCycle=255;
   else if (bright==75) dutyCycle=130;
@@ -107,7 +107,7 @@ void getBrightness() {
   axp192.ScreenBreath(bright);
 #elif defined(M5STACK)
   M5.Display.setBrightness(bright);
-  #elif  defined(T_DISPLAY_S3) || defined(CYD)
+#else
   int dutyCycle;
   if (bright==100) dutyCycle=255;
   else if (bright==75) dutyCycle=130;
@@ -177,14 +177,19 @@ bool gsetAskSpiffs(bool set, bool value) {
 **  Function: gsetRotation                             
 **  get onlyBins from EEPROM
 **********************************************************************/
+#if ROTATION==0
+#define DRV 0
+#else
+#define DRV 1
+#endif
 int gsetRotation(bool set){
   EEPROM.begin(EEPROMSIZE);
   int getRot = EEPROM.read(EEPROMSIZE-13);
   int result = ROTATION;
   
-  if(getRot==1 && set) result = 3;
-  else if(getRot==3 && set) result = 1;
-  else if(getRot<=3) result = getRot;
+  if(getRot==(DRV) && set) result = (DRV+2);
+  else if(getRot==(DRV+2) && set) result = DRV;
+  else if(getRot<=(DRV+2)) result = getRot;
   else {
     set=true;
     result = ROTATION;

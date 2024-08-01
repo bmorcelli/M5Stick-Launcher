@@ -50,10 +50,6 @@ std::vector<std::pair<std::string, std::function<void()>>> options;
 const int bufSize = 1024;
 uint8_t buff[1024] = {0};
 
-#if defined(CYD)
-//SPIClass touchSPI;
-#endif
-
 #include "display.h"
 #include "mykeyboard.h"
 #include "onlineLauncher.h"
@@ -154,7 +150,16 @@ void setup() {
       log_i("Touch IC not Started");
   } else log_i("Touch IC Started");
   digitalWrite(XPT2046_CS, LOW);
-
+  #elif defined(HAS_BTN)
+    #if UP_BTN >= 0
+    pinMode(UP_BTN, INPUT);
+    #endif
+    #if SEL_BTN >= 0
+    pinMode(SEL_BTN, INPUT);
+    #endif
+    #if DW_BTN >= 0
+    pinMode(DW_BTN, INPUT);
+    #endif
   #endif
 
   #if defined(BACKLIGHT)
@@ -192,10 +197,17 @@ void setup() {
     EEPROM.write(EEPROMSIZE-12, 0xe5);
     EEPROM.commit();       // Store data to EEPROM
   }
+  #if ROTATION == 0 // Marauder mini
+  if(EEPROM.read(EEPROMSIZE-13) != 0 && EEPROM.read(EEPROMSIZE-13) != 2)  { 
+    EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
+    EEPROM.commit();       // Store data to EEPROM
+  }
+  #else
   if(EEPROM.read(EEPROMSIZE-13) != 1 && EEPROM.read(EEPROMSIZE-13) != 3)  { 
     EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
     EEPROM.commit();       // Store data to EEPROM
   }
+  #endif
   rotation = EEPROM.read(EEPROMSIZE-13);
   dimmerSet = EEPROM.read(EEPROMSIZE-14);
   bright = EEPROM.read(EEPROMSIZE-15);
@@ -222,6 +234,16 @@ void setup() {
   setBrightness(bright,false);
   initDisplay(true);  
 
+
+  #if defined(MARAUDERV4)    
+
+ //uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; //org portrait
+uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from maruader
+//uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY  from maruader
+
+    tft.setTouch(calData);
+  #endif
+
 #if defined(T_DISPLAY_S3) || defined(CYD)
   touch.setRotation(1);
     // PWM backlight setup
@@ -246,7 +268,7 @@ void setup() {
   #if defined(M5STACK)
   coreFooter2();
   #endif    
-  #if defined(T_DISPLAY_S3) || defined(CYD)
+  #if defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
   TdisplayS3Footer2();
   #endif  
   //Start Bootscreen timer
@@ -254,18 +276,7 @@ void setup() {
   while(millis()<i+5000) { // increased from 2500 to 5000
     initDisplay();        //Inicia o display 
   
-    #if defined (CARDPUTER)
-      Keyboard.update();
-      if(Keyboard.isKeyPressed(KEY_ENTER))
-    #elif defined(T_DISPLAY_S3)
-      if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1))
-    #elif defined(M5STACK)
-      if(checkSelPress())
-    #elif defined(CYD)
-      if(menuPress(1))
-    #elif !defined(M5STACK)
-      if(digitalRead(SEL_BTN)==BTN_ACT)       
-    #endif
+      if(checkSelPress())    
       {
           tft.fillScreen(BGCOLOR);
           goto Launcher;
@@ -274,16 +285,10 @@ void setup() {
     #if defined (CARDPUTER)
       Keyboard.update();
       if (Keyboard.isPressed() && !(Keyboard.isKeyPressed(KEY_ENTER)))
-    #elif defined(STICK_C_PLUS2)
-      if(digitalRead(DW_BTN)==BTN_ACT) 
-    #elif defined(STICK_C_PLUS)
-      if(digitalRead(DW_BTN)==BTN_ACT)
-    #elif defined(M5STACK)
-      if(checkNextPress() || checkPrevPress())    
-    #elif defined(T_DISPLAY_S3)
-      if(checkNextPress() || checkPrevPress() || menuPress(0) ||  menuPress(2))
-    #elif defined(CYD)
-      if(menuPress(0) || menuPress(2))    
+    #elif defined(STICK_C_PLUS2) || defined(STICK_C_PLUS)
+      if(checkNextPress()) 
+    #else
+      if(checkNextPress() || checkPrevPress())
     #endif 
       {
         tft.fillScreen(TFT_BLACK);
@@ -321,8 +326,7 @@ void loop() {
       drawMainMenu(index); 
       #if defined(M5STACK)
       coreFooter();
-      #endif
-      #if defined(T_DISPLAY_S3) || defined(CYD)
+      #elif defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
       TdisplayS3Footer();
       #endif      
       redraw = false; 

@@ -56,7 +56,7 @@ bool eraseFAT() {
 bool setupSdCard() {
   #if defined(T_DISPLAY_S3) // Core2 uses the same SPI bus as TFT
   if (!SD_MMC.begin("/sdcard",true)) 
-  #elif defined(M5STACK)
+  #elif (TFT_MOSI == SDCARD_MOSI)
   if (!SDM.begin(SDCARD_CS)) 
   #else
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
@@ -82,10 +82,6 @@ bool setupSdCard() {
 ***************************************************************************************/
 void closeSdCard() {
   SDM.end();
-  #if !defined(M5STACK)
-  //sdcardSPI.end(); // Closes SPI connections and release pins.
-  #endif
-  //Serial.println("SD Card Unmounted...");
   sdcardMounted = false;
 }
 

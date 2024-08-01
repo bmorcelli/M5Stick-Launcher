@@ -9,7 +9,7 @@
 #define PARTITION_SIZE 4096
 
 // Using "buff[4096]" to store and write the partitions
-#if defined(CARDPUTER) || defined(STICK_C_PLUS2)
+#if defined(PART_08MB)
 const uint8_t def_part[224] PROGMEM = { // default partition scheme(App, FAT and SPIFFS)
     0xAA, 0x50, 0x01, 0x02, 0x00, 0x90, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0x6E, 0x76, 0x73, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -55,7 +55,7 @@ const uint8_t uiflow2[192] PROGMEM = { // uiflow partition scheme, APP, sys(FAT)
     0x48, 0xF8, 0x55, 0x10, 0x56, 0x7F, 0x21, 0xB9, 0x2C, 0x39, 0x4A, 0xA9, 0xF7, 0xC9, 0x22, 0x3B,
 };
 
-#elif defined(STICK_C_PLUS) || defined(CYD)
+#elif defined(PART_04MB)
 
 const uint8_t def_part[192] = { // 4Mb app partition
     0xAA, 0x50, 0x01, 0x02, 0x00, 0x90, 0x00, 0x00, 0x00, 0x50, 0x00, 0x00, 0x6E, 0x76, 0x73, 0x00, 
@@ -86,7 +86,7 @@ const uint8_t orca[192] = { // 4Mb app partition
     0xEB, 0xEB, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
     0xE5, 0x00, 0x17, 0x0A, 0x68, 0x12, 0x14, 0xEA, 0xFE, 0x89, 0x1E, 0x0F, 0x92, 0x04, 0x16, 0x1A,
 };
-#elif defined(CORE) || defined(CORE2) || defined(CORE3) || defined(T_DISPLAY_S3)
+#elif defined(PART_16MB)
   
   const uint8_t def_part[288] PROGMEM = {
     0xAA, 0x50, 0x01, 0x02, 0x00, 0x90, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0x6E, 0x76, 0x73, 0x00, 
@@ -178,12 +178,12 @@ void partitioner() {
     // Opções de partição
     options = {
         {"Default", [&](){ partition = 0; }},
-      #if defined(CARDPUTER) || defined(STICK_C_PLUS2)  
+      #if defined(PART_08MB)  
         {"Doom", [&](){ partition = 1; }},
         {"UiFlow2", [&](){ partition = 2; }},
-      #elif defined(STICK_C_PLUS)
+      #elif defined(PART_04MB)
         {"Orca", [&](){ partition = 1; }},
-      #elif defined(CORE) || defined(CORE2) || defined(CORE3)
+      #elif defined(PART_16MB)
         {"UiFlow1", [&](){ partition = 1; }},
       #endif      
     };
@@ -195,18 +195,18 @@ void partitioner() {
         case 0: data = def_part;
                 data_size = sizeof(def_part);
                 break;
-      #if defined(CARDPUTER) || defined(STICK_C_PLUS2)
+      #if defined(PART_08MB)
         case 1: data = doom;
                 data_size = sizeof(doom);
                 break;
         case 2: data = uiflow2;
                 data_size = sizeof(uiflow2);
                 break;
-      #elif defined(STICK_C_PLUS)
+      #elif defined(PART_04MB)
         case 1: data = orca;
                 data_size = sizeof(orca);
                 break;
-      #elif defined(CORE) || defined(CORE2) || defined(CORE3)
+      #elif defined(PART_16MB)
         case 1: data = uiFlow1;
                 displayRedStripe("Experimental");
                 delay(2000);

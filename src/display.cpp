@@ -189,7 +189,7 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   #if defined(M5STACK)
   coreFooter();
   #endif  
-  #if defined(T_DISPLAY_S3) || defined(CYD)
+  #if defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
   TdisplayS3Footer();
   #endif
   int bar = int(WIDTH/(doc.size()));
@@ -247,7 +247,7 @@ void displayCurrentVersion(String name, String author, String version, String pu
     #if defined(M5STACK)
     coreFooter(ALCOLOR);
     #endif
-    #if defined(T_DISPLAY_S3)  || defined(CYD)
+    #if defined(T_DISPLAY_S3)  || defined(CYD) || defined(MARAUDERV4)
     TdisplayS3Footer(ALCOLOR);
     #endif
 
@@ -415,26 +415,26 @@ void drawMainMenu(int index) {
   };
 
     const char* texts[4] = { "SD", "OTA", "WUI","CFG" };
-#ifndef STICK_C
-    const char* messages[4] = { "Launch from or mng SDCard", 
-                                "Install/download from M5Burner", 
-                                "Start Web User Interface",
-                                "Change Launcher settings." };
-#else
+#if defined(STICK_C) || defined(MARAUDERMINI)
     const char* messages[4] = { "Launch from SDCard", 
                                 "Online Installer", 
                                 "Start WebUI",
                                 "Launcher settings." };
-
+#else
+    const char* messages[4] = { "Launch from or mng SDCard", 
+                                "Install/download from M5Burner", 
+                                "Start Web User Interface",
+                                "Change Launcher settings." };
 #endif
     tft.fillSmoothRoundRect(6,26,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     setTftDisplay(12, 12, FGCOLOR, 1, BGCOLOR);
-#ifndef STICK_C
-    tft.print("M5Launcher " + String(LAUNCHER));
-    tft.setTextSize(FONT_G);
-#else
+    
+#if defined(STICK_C) || defined(MARAUDERMINI)
     tft.print("Launcher " + String(LAUNCHER));
     tft.setTextSize(FONT_M);
+#else
+    tft.print("M5Launcher " + String(LAUNCHER));
+    tft.setTextSize(FONT_G);
 #endif
     for (int i = 0; i < 3; ++i) {
         int x = border / 2 + i * ((WIDTH-20) / 3) + 10;
@@ -523,7 +523,7 @@ void listFiles(int index, String fileList[][3]) {
     #if defined(M5STACK)
     coreFooter();
     #endif    
-    #if defined(T_DISPLAY_S3)  || defined(CYD)
+    #if defined(T_DISPLAY_S3)  || defined(CYD) || defined(MARAUDERV4)
     TdisplayS3Footer();
     #endif    
 }

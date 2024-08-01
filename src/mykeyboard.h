@@ -11,11 +11,7 @@
   #include <Wire.h>
   #define LCD_MODULE_CMD_1
   extern TouchLib touch;
-#endif
-
-#if defined(CYD)
-  //#include <XPT2046_Touchscreen.h>
-  //extern XPT2046_Touchscreen touch;
+#elif defined(CYD)
   #include "CYD28_TouchscreenR.h"
   #define CYD28_DISPLAY_HOR_RES_MAX 320
   #define CYD28_DISPLAY_VER_RES_MAX 240  
