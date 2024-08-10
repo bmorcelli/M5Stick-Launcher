@@ -6,6 +6,7 @@
 #include "display.h"
 #include "mykeyboard.h"
 #include "settings.h"
+#include "esp_task_wdt.h"
 
 struct Config {
   String httpuser;
@@ -100,8 +101,11 @@ String listFiles(String folder) {
 
   if (folder=="/") folder = "";
   while (foundfile) {
-    if(foundfile.isDirectory()) returnText+="Fo:" + String(foundfile.name()) + ":0\n";
+    if(esp_get_free_heap_size()>(String("Fo:" + String(foundfile.name()) + ":0\n").length())+1024) {
+      if(foundfile.isDirectory()) returnText+="Fo:" + String(foundfile.name()) + ":0\n";
+    } else break;
     foundfile = root.openNextFile();
+    esp_task_wdt_reset();
   }
   root.close();
   foundfile.close();
@@ -110,8 +114,11 @@ String listFiles(String folder) {
   root = SDM.open(folder);
   foundfile = root.openNextFile();
   while (foundfile) {
-    if(!(foundfile.isDirectory())) returnText+="Fi:" + String(foundfile.name()) + ":" + humanReadableSize(foundfile.size()) + "\n";
+    if(esp_get_free_heap_size()>(String("Fo:" + String(foundfile.name()) + ":0\n").length())+1024) {
+      if(!(foundfile.isDirectory())) returnText+="Fi:" + String(foundfile.name()) + ":" + humanReadableSize(foundfile.size()) + "\n";
+    } else break;
     foundfile = root.openNextFile();
+    esp_task_wdt_reset();
   }
   root.close();
   foundfile.close();
@@ -171,8 +178,10 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
       // stream the incoming chunk to the opened file
       if(!update) {
         request->_tempFile.write(data, len);
+        esp_task_wdt_reset();
       } else {
         if(!Update.write(data,len)) displayRedStripe("FAIL 172");
+        esp_task_wdt_reset();
       }
     }
 
@@ -411,7 +420,7 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   disableCore1WDT(); // disable WDT
   disableLoopWDT();  // disable WDT
 
-  tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,ALCOLOR,BGCOLOR);
+  tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,ALCOLOR);
   tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
   setTftDisplay(7,7,ALCOLOR,FONT_P,BGCOLOR);
   tft.drawCentreString("-= M5Launcher WebUI =-",WIDTH/2,0,8);

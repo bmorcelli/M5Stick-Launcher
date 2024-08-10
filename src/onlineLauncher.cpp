@@ -97,7 +97,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
     resetTftDisplay(10, 10, FGCOLOR, FONT_P);
     tft.fillScreen(BGCOLOR);
     tftprint("Connecting to: " + ssid + ".", 10);
-    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
     // Simulação da função de desenho no display TFT
     int count = 0;
     while (WiFi.status() != WL_CONNECTED) {
@@ -161,7 +161,7 @@ bool GetJsonFromM5() {
     int httpResponseCode=-1;
     resetTftDisplay(WIDTH/2 - 6*String("Getting info from").length(),32);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
     tft.drawCentreString("Getting info from", WIDTH/2, HEIGHT/3,1);
     tft.drawCentreString("M5Burner repo", WIDTH/2, HEIGHT/3+FONT_M*9,1);
 
@@ -335,13 +335,6 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   //eraseFAT();
 #endif
 
-#ifndef STICK_C
-  tft.drawRect(18, HEIGHT - 47, 204, 17, FGCOLOR);        
-  if (spiffs) tft.drawRect(18, HEIGHT - 28, 204, 17, ALCOLOR);
-#else
-  tft.drawRect(28, HEIGHT - 47, 104, 17, FGCOLOR);
-  if (spiffs) tft.drawRect(28, HEIGHT - 28, 104, 17, ALCOLOR);
-#endif
   if(nb) app_offset = 0;
   if(!httpUpdate.updateFromOffset(*client, fileAddr, app_offset, app_size)) {
     displayRedStripe("Instalation Failed");

@@ -6,7 +6,12 @@
 #include "sd_functions.h"
 #include "settings.h"
 
+#if defined(M5STACK) && defined(CORE3)
+#define tft M5.Lcd
+#else
 TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
+#endif
+
 
 /***************************************************************************************
 ** Function name: resetTftDisplay
@@ -89,7 +94,7 @@ void TdisplayS3Footer2(uint16_t color) {
 ** Description:   Start Display functions and display bootscreen
 ***************************************************************************************/
 void initDisplay(bool doAll) {
-    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
+    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
     tft.setTextSize(FONT_P);
     tft.setCursor(10,10);
     int cor = 0;
@@ -146,8 +151,8 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
 
   //tft.fillScreen(BGCOLOR);
   tft.fillRect(0,HEIGHT-5,WIDTH,5,BGCOLOR);
-  tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,FGCOLOR,BGCOLOR);
-  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+  tft.fillRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
 
   setTftDisplay(10, 10, FGCOLOR,FONT_P);
   tft.print("Firmware: ");
@@ -205,7 +210,7 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
 void displayCurrentVersion(String name, String author, String version, String published_at, int versionIndex, JsonArray versions) {
     //tft.fillScreen(BGCOLOR);
     tft.fillRect(0,HEIGHT-5,WIDTH,5,BGCOLOR);
-    tft.drawSmoothRoundRect(5,5,5,5,WIDTH-10,HEIGHT-10,ALCOLOR,BGCOLOR);
+    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
 
     setTftDisplay(10, 10, ~BGCOLOR,FONT_M,BGCOLOR);

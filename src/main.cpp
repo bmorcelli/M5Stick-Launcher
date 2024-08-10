@@ -123,8 +123,8 @@ void setup() {
     axp192.begin();
     pinMode(SEL_BTN, INPUT);
     pinMode(DW_BTN, INPUT);
-  #elif defined(M5STACK)
-    //M5.begin(); // Begin after TFT, for SDCard to work
+  #elif defined(M5STACK) && defined(CORE3)
+    M5.begin(); // Begin after TFT, for SDCard to work
   #elif defined(CARDPUTER)
     Keyboard.begin();
     pinMode(10, INPUT);
@@ -141,7 +141,6 @@ void setup() {
     if (!touch.init()) {
         Serial.println("Touch IC not found");
     }
-
   #elif defined(CYD)
   pinMode(XPT2046_CS, OUTPUT);
   //touchSPI.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
@@ -150,7 +149,7 @@ void setup() {
       log_i("Touch IC not Started");
   } else log_i("Touch IC Started");
   digitalWrite(XPT2046_CS, LOW);
-  #elif defined(HAS_BTN)
+  #elif HAS_BTN>0
     #if UP_BTN >= 0
     pinMode(UP_BTN, INPUT);
     #endif
@@ -161,7 +160,6 @@ void setup() {
     pinMode(DW_BTN, INPUT);
     #endif
   #endif
-
   #if defined(BACKLIGHT)
   pinMode(BACKLIGHT, OUTPUT);
   #endif
@@ -227,8 +225,11 @@ void setup() {
   String fileToCopy;
 
   //Init Display
+  #if !defined(M5STACK)
   tft.setAttribute(PSRAM_ENABLE,true);
   tft.init();
+  #endif
+  //log_i("Passou init %d", (int)count); count++;
   tft.setRotation(rotation);
   tft.fillScreen(BGCOLOR);
   setBrightness(bright,false);
@@ -253,7 +254,7 @@ uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from 
 #endif
 
 
-#if defined(M5STACK)
+#if defined(M5STACK) && !defined(CORE3)
     M5.begin(); // Begin after TFT, for SDCard to work
 #endif
   // Performs the verification when Launcher is installed through OTA
@@ -262,7 +263,6 @@ uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from 
   const esp_partition_t* ota_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0, NULL);
   uint8_t firstByte;
   esp_partition_read(ota_partition,0,&firstByte,1);
-
   //Gets the config.conf from SD Card and fill out the settings JSON
   getConfigs();
   #if defined(M5STACK)

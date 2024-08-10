@@ -8,9 +8,11 @@
 #include <vector>
 #include "globals.h"
 // Declaração dos objetos TFT
-
+#if defined(M5STACK) && defined(CORE3)
+#define tft M5.Lcd
+#else
 extern TFT_eSPI tft; 
-
+#endif
 void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>>& options, bool bright = false);
 void loopVersions();
 void loopFirmware();

@@ -61,7 +61,11 @@ namespace lgfx
   public:
     LGFXBase(void) = default;
     virtual ~LGFXBase(void) = default;
-
+    LGFX_INLINE static constexpr uint16_t tftwidth = WIDTH;
+    LGFX_INLINE static constexpr uint16_t tftheight = HEIGHT;
+    LGFX_INLINE static constexpr uint16_t textsize = 2;
+    LGFX_INLINE static constexpr uint16_t textcolor = TFT_GREEN;
+    LGFX_INLINE static constexpr uint16_t textbgcolor = TFT_BLACK;
     /// @brief Converts RGB information to 8-bit color code.
     /// @param r red
     /// @param g green
@@ -217,6 +221,7 @@ namespace lgfx
     /// @param h Height in pixels
     /// @note Draws in the color specified by setColor().
                   void drawRect        ( int32_t x, int32_t y, int32_t w, int32_t h);
+    LGFX_INLINE_T void drawRoundRect   ( int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, const T& color, uint16_t _nada) { setColor(color); drawRoundRect(x, y, w, h, r); }                  
     LGFX_INLINE_T void drawRoundRect   ( int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, const T& color) { setColor(color); drawRoundRect(x, y, w, h, r); }
                   void drawRoundRect   ( int32_t x, int32_t y, int32_t w, int32_t h, int32_t r);
     LGFX_INLINE_T void fillRoundRect   ( int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, const T& color) { setColor(color); fillRoundRect(x, y, w, h, r); }
@@ -243,6 +248,7 @@ namespace lgfx
                   void drawEllipseArc  ( int32_t x, int32_t y, int32_t r0x, int32_t r1x, int32_t r0y, int32_t r1y, float angle0, float angle1);
     LGFX_INLINE_T void fillEllipseArc  ( int32_t x, int32_t y, int32_t r0x, int32_t r1x, int32_t r0y, int32_t r1y, float angle0, float angle1, const T& color) { setColor(color); fillEllipseArc( x, y, r0x, r1x, r0y, r1y, angle0, angle1); }
                   void fillEllipseArc  ( int32_t x, int32_t y, int32_t r0x, int32_t r1x, int32_t r0y, int32_t r1y, float angle0, float angle1);
+    LGFX_INLINE_T void drawArc         ( int32_t x, int32_t y, int32_t r0, int32_t r1, float angle0, float angle1, const T& color, uint16_t __x, bool __s) { setColor(color); drawEllipseArc( x, y, r0, r1, r0, r1, angle0, angle1); }
     LGFX_INLINE_T void drawArc         ( int32_t x, int32_t y, int32_t r0, int32_t r1, float angle0, float angle1, const T& color) { setColor(color); drawEllipseArc( x, y, r0, r1, r0, r1, angle0, angle1); }
                   void drawArc         ( int32_t x, int32_t y, int32_t r0, int32_t r1, float angle0, float angle1)                 {                  drawEllipseArc( x, y, r0, r1, r0, r1, angle0, angle1); }
     LGFX_INLINE_T void fillArc         ( int32_t x, int32_t y, int32_t r0, int32_t r1, float angle0, float angle1, const T& color) { setColor(color); fillEllipseArc( x, y, r0, r1, r0, r1, angle0, angle1); }
