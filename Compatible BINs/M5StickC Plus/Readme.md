@@ -9,4 +9,5 @@
   * Nemo: https://github.com/n0xa/m5stick-nemo
   * Resistor_Calc: https://github.com/IcingTomato/M5StickC-Resistor-Calculator
   * WifiChanViz: https://github.com/tobozo/WiFiChanViz
+  * Minigotchi-ESP32: https://github.com/dj1ch/minigotchi-ESP32
 

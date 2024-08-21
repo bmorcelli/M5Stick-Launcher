@@ -17,5 +17,6 @@
   * Saturn: https://github.com/henriquesebastiao/saturn
   * UserDemo: https://github.com/m5stack/M5Cardputer
   * Volos TV-Remote: https://github.com/VolosR/M5CardRemote
+  * Minigotchi-ESP32: https://github.com/dj1ch/minigotchi-ESP32
   
   

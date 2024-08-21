@@ -14,6 +14,7 @@
   * SlotMachine: https://github.com/Sarah-C/M5StickC_Plus_Slot_Machine (modified)
   * TiltFlappy: M5Burner, from Lama_Lama
   * twM5StickCP2Sensor: https://github.com/twsnmp/twESP32Sensor
+  * Minigotchi-ESP32: https://github.com/dj1ch/minigotchi-ESP32
   
 
   
