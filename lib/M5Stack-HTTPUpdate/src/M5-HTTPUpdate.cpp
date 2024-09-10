@@ -433,7 +433,6 @@ bool HTTPUpdate::runUpdate(Stream& in, uint32_t size, String md5, int command)
 
     StreamString error;
     
-    disableCore0WDT(); // disable WDT it as suggested by twitter.com/@lovyan03
 
     if (_cbProgress) {
         Update.onProgress(_cbProgress);
@@ -444,7 +443,6 @@ bool HTTPUpdate::runUpdate(Stream& in, uint32_t size, String md5, int command)
         Update.printError(error);
         error.trim(); // remove line ending
         log_e("Update.begin failed! (%s)\n", error.c_str());
-        enableCore0WDT();
         return false;
     }
 
@@ -456,7 +454,6 @@ bool HTTPUpdate::runUpdate(Stream& in, uint32_t size, String md5, int command)
         if(!Update.setMD5(md5.c_str())) {
             _lastError = HTTP_UE_SERVER_FAULTY_MD5;
             log_e("Update.setMD5 failed! (%s)\n", md5.c_str());
-            enableCore0WDT();
             return false;
         }
     }
@@ -468,7 +465,6 @@ bool HTTPUpdate::runUpdate(Stream& in, uint32_t size, String md5, int command)
         Update.printError(error);
         error.trim(); // remove line ending
         log_e("Update.writeStream failed! (%s)\n", error.c_str());
-        enableCore0WDT();
         return false;
     }
 
@@ -481,11 +477,9 @@ bool HTTPUpdate::runUpdate(Stream& in, uint32_t size, String md5, int command)
         Update.printError(error);
         error.trim(); // remove line ending
         log_e("Update.end failed! (%s)\n", error.c_str());
-        enableCore0WDT();
         return false;
     }
 
-    enableCore0WDT();
     return true;
 }
 

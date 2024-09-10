@@ -94,7 +94,7 @@ void TdisplayS3Footer2(uint16_t color) {
 ** Description:   Start Display functions and display bootscreen
 ***************************************************************************************/
 void initDisplay(bool doAll) {
-    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+    tft.drawRoundRect(3,3,WIDTH-6,HEIGHT-6,5,FGCOLOR);
     tft.setTextSize(FONT_P);
     tft.setCursor(10,10);
     int cor = 0;

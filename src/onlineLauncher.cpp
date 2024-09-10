@@ -273,11 +273,10 @@ retry:
           while(!checkSelPress()) yield();
         }
         file.close();
-        delay(2000);
         break;
       } else {
         http.end();
-        delay(1000);
+        delay(500);
       }
     }
     http.end();

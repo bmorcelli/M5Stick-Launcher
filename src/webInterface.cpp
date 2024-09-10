@@ -178,10 +178,8 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
       // stream the incoming chunk to the opened file
       if(!update) {
         request->_tempFile.write(data, len);
-        esp_task_wdt_reset();
       } else {
         if(!Update.write(data,len)) displayRedStripe("FAIL 172");
-        esp_task_wdt_reset();
       }
     }
 
@@ -195,7 +193,6 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
         if(!Update.end()) { displayRedStripe("Fail 183: " + String(Update.getError())); delay(3000); }
         else displayRedStripe("Restart your device");
       }
-      enableCore0WDT();
     }
   } else {
     return request->requestAuthentication();
@@ -414,11 +411,6 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   // startup web server
   server->begin();
   delay(500);
-
-  //log_i("Disabling WatchDogs");
-  disableCore0WDT(); // disable WDT
-  disableCore1WDT(); // disable WDT
-  disableLoopWDT();  // disable WDT
 
   tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,ALCOLOR);
   tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);

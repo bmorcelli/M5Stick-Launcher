@@ -62,6 +62,9 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with M5Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.2.5: 
+     * [x] Changed framework to remove all Watchdog Timers https://github.com/bmorcelli/M5Stick-Launcher/issues/61 https://github.com/bmorcelli/M5Stick-Launcher/issues/63 and solve some SD related issues
+     * [x] Set Grove pins to LOW state on StickCs and Cardputer to avoid 433Mhz jamming while RF433T is connected
 * 2.2.4: 
      * [x] Finally ported to CoreS3 and CoreS3-SE
      * [x] Added reset to watchdog on WebUI and check for free memory when loading files to WebUI, to avoid crashes.
