@@ -119,15 +119,31 @@ void setup() {
     pinMode(DW_BTN, INPUT);
     pinMode(4, OUTPUT);
     digitalWrite(4,HIGH);
+    //Grove pins down
+    pinMode(32, OUTPUT);
+    pinMode(33, OUTPUT);
+    digitalWrite(32,LOW);
+    digitalWrite(33,LOW);
+
   #elif defined(STICK_C_PLUS)
     axp192.begin();
     pinMode(SEL_BTN, INPUT);
     pinMode(DW_BTN, INPUT);
+    //Grove Pins down
+    pinMode(32, OUTPUT);
+    pinMode(33, OUTPUT);
+    digitalWrite(32,LOW);
+    digitalWrite(33,LOW);
   #elif defined(M5STACK) && defined(CORE3)
     M5.begin(); // Begin after TFT, for SDCard to work
   #elif defined(CARDPUTER)
     Keyboard.begin();
     pinMode(10, INPUT);
+    //Grove Pins down
+    pinMode(1, OUTPUT);
+    pinMode(2, OUTPUT);
+    digitalWrite(1,LOW);
+    digitalWrite(2,LOW);
   #elif defined(T_DISPLAY_S3)
     SD_MMC.setPins(PIN_SD_CLK, PIN_SD_CMD, PIN_SD_D0);
     gpio_hold_dis((gpio_num_t)21);//PIN_TOUCH_RES 
