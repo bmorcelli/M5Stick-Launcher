@@ -137,7 +137,7 @@
                 description: "",
                 link: "",
                 family: "ESP32",
-                env: "headless-4mb",
+                env: "headless-esp32-4mb",
                 partitions: {
                   bootloader_addr: "0x1000",
                 },
@@ -148,7 +148,7 @@
                 description: "",
                 link: "",
                 family: "ESP32",
-                env: "headless-8mb",
+                env: "headless-esp32-8mb",
                 partitions: {
                   bootloader_addr: "0x1000",
                 },
