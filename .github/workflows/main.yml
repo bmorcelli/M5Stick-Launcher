@@ -1,242 +1,390 @@
 ---
-name: Compile M5Stick Launcher Firmware
+  name: Build and Push OR check-PR
 
-on:
-  push:
-    branches:
-      - main
-    tags:
-      - "*"
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      board:
-        description: 'Board to Compile'
-        type: choice
-        required: true
-        default: 'M5StickCPlus2'
-        options: ['M5Cardputer', 'M5StickCPlus2', 'M5StickCPlus', 'M5StickC']
-        
-jobs:
-  compile_sketch:
-    name: Build ${{ matrix.board.name }}
-    runs-on: ubuntu-latest
-    strategy:
-      # max-parallel: 4
-      fail-fast: false
-      matrix:
-        board:
-          - {
-              name: "M5Cardputer",
-              fqbn: "m5stack:esp32:m5stack_cardputer",
-              extra_flags: "-DCARDPUTER",
-              libraries: "M5Cardputer M5Unified SdFat",
-              partitions: {
-                bootloader_addr: "0x0000",
-              },
-            }
-          - {
-              name: "M5StickCPlus2",
-              fqbn: "m5stack:esp32:m5stack_stickc_plus2",
-              extra_flags: "-DSTICK_C_PLUS2",
-              libraries: "M5StickCPlus2 M5Unified SdFat",
-              partitions: {
-                bootloader_addr: "0x1000",
-              },
-            }
-          - {
-              name: "M5StickCPlus",
-              fqbn: "m5stack:esp32:m5stack_stickc_plus",
-              extra_flags: "-DSTICK_C_PLUS",
-              libraries: "M5StickCPlus M5Unified SdFat",
-              partitions: {
-                bootloader_addr: "0x1000",
-              },
-            }
-          - {
-              name: "M5StickC",
-              fqbn: "m5stack:esp32:m5stack_stickc",
-              extra_flags: "-DSTICK_C",
-              # TODO: M5StickC's latest version has some dependency issues with M5Hat-JoyC library
-              libraries: "M5StickC@0.2.8 M5Unified SdFat",
-              partitions: {
-                bootloader_addr: "0x1000",
-              },
-            }
+  on:
+    pull_request:
+      branches:
+        - main
+    push:
+      branches:
+        - main
+        - dev
+      tags:
+        - "*"
+    workflow_dispatch:
+          
+  jobs:
+    compile_sketch:
+      name: Build ${{ matrix.board.name }}
+      runs-on: ubuntu-latest
+      strategy:
+        fail-fast: false
+        matrix:
+          board:
+            - {
+                vendor: "M5Stack",
+                name: "Cardputer",
+                description: "",
+                link: "https://shop.m5stack.com/products/m5stack-cardputer-kit-w-m5stamps3?ref=Pirata",
+                family: "ESP32-S3",
+                env: "m5stack-cardputer",
+                partitions: {
+                  bootloader_addr: "0x0000",
+                },
+              }
+            - {
+                vendor: "M5Stack",
+                name: "StickCPlus2",
+                description: "",
+                link: "https://shop.m5stack.com/products/m5stickc-plus2-esp32-mini-iot-development-kit?ref=Pirata",
+                family: "ESP32",
+                env: "m5stack-cplus2",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "M5Stack",
+                name: "StickCPlus",
+                description: "",
+                link: "https://shop.m5stack.com/products/m5stickc-plus-esp32-pico-mini-iot-development-kit?ref=Pirata",
+                family: "ESP32",
+                env: "m5stack-cplus1_1",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "M5Stack",
+                name: "StickC",
+                description: "",
+                link: "https://shop.m5stack.com/collections/m5-controllers?ref=Pirata",
+                family: "ESP32",
+                env: "m5stack-c",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "M5Stack",
+                name: "Core2",
+                description: "",
+                link: "https://shop.m5stack.com/products/m5stack-core2-esp32-iot-development-kit?ref=Pirata",
+                family: "ESP32",
+                env: "m5stack-core2",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }                
+            - {
+                vendor: "M5Stack",
+                name: "Core16mb",
+                description: "",
+                link: "https://shop.m5stack.com/products/esp32-basic-core-lot-development-kit-v2-7?ref=Pirata",
+                family: "ESP32",
+                env: "m5stack-core",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }        
+            - {
+                vendor: "M5Stack",
+                name: "CoreS3",
+                description: "",
+                link: "https://shop.m5stack.com/products/m5stack-cores3-esp32s3-lotdevelopment-kit?ref=Pirata",
+                family: "ESP32-S3",
+                env: "m5stack-cores3",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              } 
+            - {
+                vendor: "Espressif",
+                name: "ESP32-S3-4mb",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "headless-esp32s3-4mb",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+            - {
+                vendor: "Espressif",
+                name: "ESP32-S3-8mb",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "headless-esp32s3-8mb",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+            - {
+                vendor: "Espressif",
+                name: "ESP32-S3-16mb",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "headless-esp32s3-16mb",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+            - {
+                vendor: "Espressif",
+                name: "ESP32-4mb",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "headless-4mb",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "Espressif",
+                name: "ESP32-8mb",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "headless-8mb",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "CYD",
+                name: "CYD-2432S028",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2432S028",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              } 
+            - {
+                vendor: "CYD",
+                name: "CYD-2USB",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2-USB",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }  
+            - {
+                vendor: "Marauder",
+                name: "V4-OG",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "Marauder-v4-OG",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }    
+            - {
+                vendor: "Marauder",
+                name: "Mini",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "Marauder-Mini",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }     
+            - {
+                vendor: "Lilygo",
+                name: "T-Display_S3_Touch",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "lilygo-t-display-S3",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              } 
+            - {
+                vendor: "Lilygo",
+                name: "T-Embed",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "lilygo-t-embed",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }  
+            - {
+                vendor: "Lilygo",
+                name: "T-Embed_CC1101",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "lilygo-t-embed-cc1101",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+            - {
+                vendor: "Lilygo",
+                name: "T-Deck",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "lilygo-t-deck",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+      outputs:
+        boards_json: ${{ toJson(matrix.board) }}
+      steps:
+          - uses: actions/checkout@v4
+          
+          - id: build
+            name: setup Python
+            uses: actions/setup-python@v2
+            with:
+              python-version: "3.x"
+          
+          - name: Install dependencies
+            run: | 
+              pip install requests esptool
+          
+          - name: Install PlatformIO Core
+            run: |
+              pip install platformio
 
-    steps:
-      - uses: actions/checkout@v4
-      
+              if [[ "${{ github.ref_type }}" == "tag" ]]; then
+                version=${{ github.ref_name }}
+              else
+                version="${GITHUB_SHA::7}"
+              fi
+
+              sed -i "s/-DLAUNCHER=/-DLAUNCHER='\"$version\"' ; /g" ./platformio.ini
+
+          - name: Run Compile
+            run: | 
+              platformio run -e ${{ matrix.board.env }}
+
+          - name: Merge files
+            run: | 
+              esptool.py --chip esp32s3 merge_bin -o Launcher-${{ matrix.board.env }}.bin \
+                ${{ matrix.board.partitions.bootloader_addr }} .pio/build/${{ matrix.board.env }}/bootloader.bin \
+                0x8000 .pio/build/${{ matrix.board.env }}/partitions.bin \
+                0x10000 .pio/build/${{ matrix.board.env }}/firmware.bin
+
+          - name: Upload ${{ matrix.board.name }}
+            uses: actions/upload-artifact@v4
+            with:
+              name: Launcher-${{ matrix.board.env }}
+              path: Launcher-*.bin
+              retention-days: 5
+              if-no-files-found: error
+
+    post_compile_steps:
+      name: Post-compile steps
+      runs-on: ubuntu-latest
+      needs: compile_sketch
+      if: github.ref_type == 'tag'
+      steps:
+        - uses: actions/checkout@v4
+          with:
+          # Configura para garantir que todas as branches sejam buscadas
+            fetch-depth: 0
+  
+        - name: Download all artifacts
+          uses: actions/download-artifact@v4
+          with:
+            path: ~/LauncherArtifacts
+            
+        - name: Clone Launcher repository and switch to WebPage branch
+          run: |
+            git fetch origin
+            git checkout WebPage || git checkout -b WebPage origin/WebPage
+
+        - name: Generate HTML and manifests from Boards
+          run: |
+            boards=$(jq -c '.[]' <<<'${{ needs.compile_sketch.outputs.boards_json }}')
+
+            html="<ul class='radios'>"
+            for board in $boards; do
+              name=$(echo "$board" | jq -r '.name')
+              vendor=$(echo "$board" | jq -r '.vendor')
+              desc=$(echo "$board" | jq -r '.description')
+              link=$(echo "$board" | jq -r '.link')
+              family=$(echo "$board" | jq -r '.family')
+              env=$(echo "$board" | jq -r '.env')
+              
+              html+="<li><label><input type='radio' name='type' value='$name' />$vendor - <a href='$link'>$name</a> $description</label></li>\n"
+
+              js_content='{"name":"$name","builds":[{"chipFamily":"$family","improv":false,"parts":[{"path":"bins/Launcher-$env.bin","offset":0}]}]}'
+              echo "$js_content" > ./Release/Manifest-$name.json
+            done
+
+            html+="</ul>"
+            echo "$html" > ~/generated.html
+            rm ./index.html
+            cp ./support_files/flasher ./index.html
+            sed -i '/<!-- INSERT_BOARDS_HERE -->/r ~/generated.html' ./index.html
+
+
+        - name: Move artifacts to the correct folders
+          run: |
+            set -x
+            pwd
+            ls -all
+            tree
+            mv -f ~/LauncherArtifacts/*/*.bin ./Release/bins
+  
+        - name: Commit and push changes
+          run: |
+            git config user.name "GitHub Actions"
+            git config user.email "actions@github.com"
+            git add BetaRelease LastRelease
+            git commit -m "Update artifacts from build"
+            git push origin WebPage
+
+    create_release:
+      runs-on: ubuntu-latest
+      environment: github_release
+      needs: [compile_sketch]
+      if: github.ref_type == 'tag'
+      steps:
       - id: launcher_version
-        name: Get M5Stick Launcher Version
+        name: Get Version
         run: |
           set -x
-
+  
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             version=${{ github.ref_name }}
           else
             version="${GITHUB_SHA::7}"
           fi
-
-          echo "version=${version}" > $GITHUB_OUTPUT
-
-      - name: Setup Arduino CLI
-        uses: arduino/setup-arduino-cli@v1
-
-      - name: Install platform
-        run: |
-          set -x
-          
-          # arduino-cli core install esp32:esp32
-          arduino-cli core install m5stack:esp32 --additional-urls "file:///${PWD}/support_files/package_m5stack_index.json"
-
-          arduino-cli core search m5stack
-          arduino-cli board listall
-
-          arduino-cli lib install ${{ matrix.board.libraries }} --log-level warn --verbose
-      
-      - name: Install esptool
-        run: |
-          pip install -U esptool
-
-      - name: Compile Launcher for ${{ matrix.board.name }} Sketch
-        run: |
-          set -x
-
-          version=${{ steps.launcher_version.outputs.version }}
-          
-          extra_flags="${{ matrix.board.extra_flags }} -DLAUNCHER_VERSION=\"${version}\""
-       
-          if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
-            baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
-            
-            # Find the latest version of the folder
-            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
   
-            # Full path to the file to be copied
-            file="$baseFolder/$latestVersion/tools/partitions/custom_4Mb.csv "
-            cp support_files/custom_4Mb.csv ${file}
-            
-            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
-                                --build-property build.partitions=custom_4Mb \
-                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
-                                ./Launcher/Launcher.ino
-       
-          else
-                        baseFolder="$HOME/.arduino15/packages/m5stack/hardware/esp32"
-            
-            # Find the latest version of the folder
-            latestVersion=$(find "$baseFolder" -maxdepth 1 -type d -exec basename {} \; | sort -V | head -n 1)
-  
-            # Full path to the file to be copied
-            file="$baseFolder/$latestVersion/tools/partitions/custom_8Mb.csv "
-            
-            cp support_files/custom_8Mb.csv ${file} ## original
-           
-            
-            arduino-cli compile --fqbn ${{ matrix.board.fqbn }} -e \
-                                --build-property build.partitions=custom_8Mb \
-                                --build-property upload.maximum_size=3342336 \
-                                --build-property compiler.cpp.extra_flags="${extra_flags}" \
-                                ./Launcher/Launcher.ino
+          echo "version=${version}" > $GITHUB_OUTPUT          
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
 
-          fi
-
-      - name: Create ${{ matrix.board.name }} Firmware Binary
-        run: |
-          set -x
-          
-          version=${{ steps.launcher_version.outputs.version }}
-          
-          output_file="M5Launcher-${version}-${{ matrix.board.name }}.bin"
-          
-          fqbn=${{ matrix.board.fqbn }}
-          directory="${fqbn//:/.}"
-          if [[ "${{ matrix.board.name }}" == "M5StickCPlus" ||  "${{ matrix.board.name }}" == "M5StickC" ]]; then
-          
-            esptool.py --chip esp32s3 merge_bin --output ${output_file} \
-              ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_4Mb.bin \
-              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin \
-              0x10000 Launcher/build/${directory}/Launcher.ino.bin
-          fi
-
-          if [[ "${{ matrix.board.name }}" == "M5StickCPlus2" ]]; then
-                   
-            esptool.py --chip esp32s3 merge_bin --output ${output_file} \
-              ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_8Mb.bin \
-              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin \
-              0x10000 Launcher/build/${directory}/Launcher.ino.bin
-              
-          fi
-
-          if [[ "${{ matrix.board.name }}" == "M5Cardputer" ]]; then
-                   
-            esptool.py --chip esp32s3 merge_bin --output ${output_file} \
-              ${{ matrix.board.partitions.bootloader_addr }} support_files/bootloader_CP.bin \
-              0x8000 Launcher/build/${directory}/Launcher.ino.partitions.bin \
-              0x10000 Launcher/build/${directory}/Launcher.ino.bin
-              
-          fi
-
-          
       - name: List all files
         if: always()
-        continue-on-error: true
         run: |
           set -x
           pwd
           ls -all
           tree
 
-      # TODO: Validate the firmware
-        
-      - name: Upload ${{ matrix.board.name }} Firmware Bin File
-        uses: actions/upload-artifact@v4
+      - name: Create Release ${{ steps.launcher_version.outputs.version }}
+        uses: softprops/action-gh-release@v1
         with:
-          name: Launcher-${version}-${{ matrix.board.name }}
-          path: M5Launcher-*.bin
-          if-no-files-found: error
-
-  create_release:
-    runs-on: ubuntu-latest
-    environment: github_release
-    needs: [compile_sketch]
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-
-    steps:
-    - id: launcher_version
-      name: Get Launcher Version
-      run: |
-        set -x
-
-        if [[ "${{ github.ref_type }}" == "tag" ]]; then
-          version=${{ github.ref_name }}
-        else
-          version="${GITHUB_SHA::7}"
-        fi
-
-        echo "version=${version}" > $GITHUB_OUTPUT
-
-    - uses: actions/download-artifact@v4
-      with:
-        merge-multiple: true
-
-    - name: List all files
-      if: always()
-      run: |
-        set -x
-        pwd
-        ls -all
-        tree
-
-    - name: Create Release ${{ steps.launcher_version.outputs.version }}
-      uses: softprops/action-gh-release@v1
-      with:
-        name: M5Stick Launcher Release ${{ steps.launcher_version.outputs.version }}
-        tag_name: ${{ steps.launcher_version.outputs.version }}
-        generate_release_notes: true
-        files: |
-          M5Launcher-*.bin
-
+          name: Launcher Release ${{ steps.launcher_version.outputs.version }}
+          tag_name: ${{ steps.launcher_version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            Launcher-*.bin
