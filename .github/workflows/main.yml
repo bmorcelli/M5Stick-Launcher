@@ -311,10 +311,10 @@
         - name: Generate HTML and manifests from Boards
           run: |
             echo '${{ needs.compile_sketch.outputs.boards_json }}' | jq -c '.[]' > boards.json
-            boards=$(cat boards.json)
 
             html="<ul class='radios'>"
-            while read -r board; do
+            
+            while IFS= read -r board; do
               name=$(echo "$board" | jq -r '.name')
               vendor=$(echo "$board" | jq -r '.vendor')
               desc=$(echo "$board" | jq -r '.description')
