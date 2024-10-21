@@ -319,6 +319,8 @@
 
             html="<ul class='radios'>"
             
+            mkdir -p ./Release  # Garante que o diretório existe
+
             while IFS= read -r board; do
               name=$(echo "$board" | jq -r '.name')
               vendor=$(echo "$board" | jq -r '.vendor')
@@ -330,7 +332,15 @@
               html+="<li><label><input type='radio' name='type' value='$name' />$vendor - <a href='$link'>$name</a> $desc</label></li>\n"
 
               js_content="{\"name\":\"$name\",\"builds\":[{\"chipFamily\":\"$family\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-$env.bin\",\"offset\":0}]}]}"
-              echo "$js_content" > ./Release/Manifest-$name.json
+              echo "$js_content" > "./Release/Manifest-$name.json"
+
+              # Verifica se o arquivo foi criado com sucesso
+              if [[ -f "./Release/Manifest-$name.json" ]]; then
+                echo "Manifest $name.json created successfully."
+              else
+                echo "Failed to create Manifest-$name.json" >&2
+                exit 1
+              fi
             done < boards.json
 
             html+="</ul>"
@@ -352,7 +362,7 @@
           run: |
             git config user.name "GitHub Actions"
             git config user.email "actions@github.com"
-            git add BetaRelease LastRelease
+            git add .
             git commit -m "Update artifacts from build"
             git push origin WebPage
 
