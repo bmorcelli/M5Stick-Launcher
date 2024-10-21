@@ -249,7 +249,7 @@
             name: Export Boards as JSON
             run: |
               echo '{"boards": '$(echo '${{ toJson(matrix.board) }}')'}' > boards.json
-              echo "::set-output name=boards_json::$(cat boards.json)"
+              echo "boards_json=$(cat boards.json)" >> $GITHUB_ENV
           
           - id: build
             name: setup Python
@@ -315,7 +315,7 @@
 
         - name: Generate HTML and manifests from Boards
           run: |
-            echo '${{ needs.compile_sketch.outputs.boards_json }}' | jq -c '.boards[]' > boards.json
+            echo "$boards_json" | jq -c '.boards[]' > boards.json
 
             html="<ul class='radios'>"
             
