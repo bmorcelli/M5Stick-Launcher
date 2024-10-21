@@ -241,16 +241,10 @@
                   bootloader_addr: "0x0",
                 },
               }
-      outputs:
-        boards_json: ${{ steps.export_boards.outputs.boards_json }}
+
       steps:
           - uses: actions/checkout@v4
-          - id: export_boards
-            name: Export Boards as JSON
-            run: |
-              echo '{"boards": '$(echo '${{ toJson(matrix.board) }}')'}' > boards.json
-              echo "boards_json=$(cat boards.json)" >> $GITHUB_ENV
-          
+
           - id: build
             name: setup Python
             uses: actions/setup-python@v2
@@ -283,6 +277,12 @@
                 ${{ matrix.board.partitions.bootloader_addr }} .pio/build/${{ matrix.board.env }}/bootloader.bin \
                 0x8000 .pio/build/${{ matrix.board.env }}/partitions.bin \
                 0x10000 .pio/build/${{ matrix.board.env }}/firmware.bin
+              
+                js_content="{\"name\":\"${{ matrix.board.name }}\",\"builds\":[{\"chipFamily\":\"${{ matrix.board.family }}\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-${{ matrix.board.env }}.bin\",\"offset\":0}]}]}"
+                echo "$js_content" > "./Manifest-${{ matrix.board.name }}.json"
+
+                html="<li><label><input type='radio' name='type' value='${{ matrix.board.name }}' />${{ matrix.board.vendor }} - <a href='${{ matrix.board.link }}'>${{ matrix.board.name }}</a> ${{ matrix.board.description }}</label></li>\n"
+                echo "$html" > ./board.html
 
           - name: Upload ${{ matrix.board.name }}
             uses: actions/upload-artifact@v4
@@ -291,6 +291,23 @@
               path: Launcher-*.bin
               retention-days: 5
               if-no-files-found: error
+
+          - name: Upload Manifest
+            uses: actions/upload-artifact@v4
+            with:
+              name: Manifest-${{ matrix.board.name }}
+              path: Manifest-*.json
+              retention-days: 5
+              if-no-files-found: error
+
+          - name: Upload Html
+            uses: actions/upload-artifact@v4
+            with:
+              name: html-${{ matrix.board.name }}
+              path: board.html
+              retention-days: 5
+              if-no-files-found: error
+
 
     post_compile_steps:
       name: Post-compile steps
@@ -319,29 +336,16 @@
 
             html="<ul class='radios'>"
             
-            mkdir -p ./Release  # Garante que o diretório existe
-
-            while IFS= read -r board; do
-              name=$(echo "$board" | jq -r '.name')
-              vendor=$(echo "$board" | jq -r '.vendor')
-              desc=$(echo "$board" | jq -r '.description')
-              link=$(echo "$board" | jq -r '.link')
-              family=$(echo "$board" | jq -r '.family')
-              env=$(echo "$board" | jq -r '.env')
-
-              html+="<li><label><input type='radio' name='type' value='$name' />$vendor - <a href='$link'>$name</a> $desc</label></li>\n"
-
-              js_content="{\"name\":\"$name\",\"builds\":[{\"chipFamily\":\"$family\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-$env.bin\",\"offset\":0}]}]}"
-              echo "$js_content" > "./Release/Manifest-$name.json"
-
-              # Verifica se o arquivo foi criado com sucesso
-              if [[ -f "./Release/Manifest-$name.json" ]]; then
-                echo "Manifest $name.json created successfully."
-              else
-                echo "Failed to create Manifest-$name.json" >&2
-                exit 1
+            # Itera sobre cada arquivo HTML na pasta de artefatos e adiciona seu conteúdo à variável HTML
+            for file in ~/LauncherArtifacts/**/*.html; do
+              if [ -f "$file" ]; then
+                content=$(cat "$file")
+                html+="$content\n"
               fi
-            done < boards.json
+            done
+
+            html+="</ul>"
+            echo "$html" > ~/generated.html
 
             html+="</ul>"
             echo "$html" > ~/generated.html
@@ -357,6 +361,8 @@
             ls -all
             tree
             mv -f ~/LauncherArtifacts/*/*.bin ./Release/bins
+            mv -f ~/LauncherArtifacts/*/*.json ./Release
+
   
         - name: Commit and push changes
           run: |
