@@ -281,7 +281,7 @@
                 js_content="{\"name\":\"${{ matrix.board.name }}\",\"builds\":[{\"chipFamily\":\"${{ matrix.board.family }}\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-${{ matrix.board.env }}.bin\",\"offset\":0}]}]}"
                 echo "$js_content" > "./Manifest-${{ matrix.board.name }}.json"
 
-                html="<li><label><input type='radio' name='type' value='${{ matrix.board.name }}' />${{ matrix.board.vendor }} - <a href='${{ matrix.board.link }}'>${{ matrix.board.name }}</a> ${{ matrix.board.description }}</label></li>\n"
+                html="<li><label><input type='radio' name='type' value='${{ matrix.board.name }}' />${{ matrix.board.vendor }} - <a href='${{ matrix.board.link }}'>${{ matrix.board.name }}</a> ${{ matrix.board.description }}</label></li>"
                 echo "$html" > ./board.html
 
           - name: Upload ${{ matrix.board.name }}
@@ -332,8 +332,6 @@
 
         - name: Generate HTML and manifests from Boards
           run: |
-            echo "$boards_json" | jq -c '.boards[]' > boards.json
-
             html="<ul class='radios'>"
             
             # Itera sobre cada arquivo HTML na pasta de artefatos e adiciona seu conteúdo à variável HTML
@@ -345,13 +343,12 @@
             done
 
             html+="</ul>"
-            echo "$html" > ~/generated.html
 
-            html+="</ul>"
-            echo "$html" > ~/generated.html
+            echo $html
+            cat ~/generated.html
             rm ./index.html
             cp ./support_files/flasher ./index.html
-            sed -i '/<!-- BOARDS -->/r ~/generated.html' ./index.html
+            sed -i 's/<!-- BOARDS -->/'$html'/g' ./index.html
 
 
         - name: Move artifacts to the correct folders
