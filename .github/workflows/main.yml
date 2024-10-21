@@ -349,8 +349,8 @@
 
             rm ./index.html
             cp ./support_files/flasher ./index.html
-            sed -i 's/<!-- BOARDS -->/'$html'/g' ./index.html
-
+            python ./support_files/merge_html.py ./index.html ~/file.html
+            
 
         - name: Move artifacts to the correct folders
           run: |
