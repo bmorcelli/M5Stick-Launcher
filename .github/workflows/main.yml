@@ -242,9 +242,14 @@
                 },
               }
       outputs:
-        boards_json: ${{ toJson(matrix.board) }}
+        boards_json: ${{ steps.export_boards.outputs.boards_json }}
       steps:
           - uses: actions/checkout@v4
+          - id: export_boards
+            name: Export Boards as JSON
+            run: |
+              echo '{"boards": '$(echo '${{ toJson(matrix.board) }}')'}' > boards.json
+              echo "::set-output name=boards_json::$(cat boards.json)"
           
           - id: build
             name: setup Python
@@ -310,7 +315,7 @@
 
         - name: Generate HTML and manifests from Boards
           run: |
-            echo '${{ needs.compile_sketch.outputs.boards_json }}' | jq -c '.[]' > boards.json
+            echo '${{ needs.compile_sketch.outputs.boards_json }}' | jq -c '.boards[]' > boards.json
 
             html="<ul class='radios'>"
             
