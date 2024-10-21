@@ -1,0 +1,1 @@
+{"name":"ESP32-S3-4mb","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-headless-esp32s3-4mb.bin","offset":0}]}]}
