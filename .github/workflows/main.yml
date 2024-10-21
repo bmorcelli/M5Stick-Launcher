@@ -310,7 +310,7 @@
 
         - name: Generate HTML and manifests from Boards
           run: |
-            echo '${{ needs.compile_sketch.outputs.boards_json }}' | jq -c '.board[]' > boards.json
+            echo '${{ needs.compile_sketch.outputs.boards_json }}' | jq -c '.[]' > boards.json
             boards=$(cat boards.json)
 
             html="<ul class='radios'>"
