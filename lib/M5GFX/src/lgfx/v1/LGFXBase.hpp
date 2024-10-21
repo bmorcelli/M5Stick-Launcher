@@ -33,7 +33,12 @@ Contributors:
 #include "Touch.hpp"
 #include "panel/Panel_Device.hpp"
 #include "../boards.hpp"
-
+#ifndef	WIDTH
+  #define WIDTH 240
+#endif  
+#ifndef	HEIGHT
+  #define HEIGHT 135
+#endif  
 namespace lgfx
 {
  inline namespace v1

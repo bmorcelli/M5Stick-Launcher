@@ -8,6 +8,8 @@
 
 #if defined(M5STACK) && defined(CORE3)
 #define tft M5.Lcd
+#elif defined(HEADLESS)
+SerialDisplayClass tft;
 #else
 TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 #endif
@@ -128,7 +130,7 @@ void initDisplay(bool doAll) {
     tft.setTextSize(FONT_G);
     tft.setTextColor(FGCOLOR);
     #ifndef STICK_C
-    tft.drawCentreString("M5Launcher",WIDTH/2,HEIGHT/2-10,1); //SMOOTH_FONT
+    tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,1); //SMOOTH_FONT
     #else
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
     #endif
@@ -308,7 +310,7 @@ void progressHandler(int progress, size_t total) {
     tft.setTextSize(FONT_M);
     tft.setTextColor(ALCOLOR);
     tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-    tft.drawCentreString("-=M5Launcher=-",WIDTH/2,20,1);    
+    tft.drawCentreString("-=Launcher=-",WIDTH/2,20,1);    
     tft.drawRoundRect(5, 5, WIDTH - 10, HEIGHT - 10, 5, FGCOLOR);
     if (prog_handler == 1) { 
       tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
@@ -369,6 +371,7 @@ void progressHandler(int progress, size_t total) {
 ** Function name: drawOptions
 ** Description:   Função para desenhar e mostrar as opçoes de contexto
 ***************************************************************************************/
+#define MAX_MENU_SIZE (int)(HEIGHT/25)
 void drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
     int menuSize = options.size();
     if(options.size()>MAX_MENU_SIZE) { 
@@ -438,7 +441,7 @@ void drawMainMenu(int index) {
     tft.print("Launcher " + String(LAUNCHER));
     tft.setTextSize(FONT_M);
 #else
-    tft.print("M5Launcher " + String(LAUNCHER));
+    tft.print("Launcher " + String(LAUNCHER));
     tft.setTextSize(FONT_G);
 #endif
     for (int i = 0; i < 3; ++i) {
@@ -496,6 +499,7 @@ void drawBatteryStatus() {
 ** Function name: listFiles
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
+#define MAX_ITEMS (int)(HEIGHT-20)/(LH*2)
 void listFiles(int index, String fileList[][3]) {
     tft.setCursor(10,10);
     tft.setTextSize(FONT_M);
@@ -552,16 +556,26 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
         setBrightness(100*(numOpt-index)/numOpt,false);
       }
       redraw=false;
-      delay(200); 
+      delay(REDRAW_DELAY); 
     }
 
     if(checkPrevPress()) {
-    #ifdef CARDPUTER  
+    #if defined(CARDPUTER) || defined(T_DECK)
       if(index==0) index = options.size() - 1;
       else if(index>0) index--;
       redraw = true;
     #else
+    long _tmp=millis();
+    while(checkPrevPress()) { if(millis()-_tmp>200) tft.drawArc(WIDTH/2, HEIGHT/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
+    if(millis()-_tmp>700) { // longpress detected to exit
+      delay(200);
       break;
+    } 
+    else {
+      if(index==0) index = options.size() - 1;
+      else if(index>0) index--;
+      redraw = true;
+    }
     #endif
     }
     /* DW Btn to next item */
@@ -620,14 +634,14 @@ void loopVersions() {
       
       displayCurrentVersion(String(name), String(author), String(version), String(published_at), versionIndex, versions);
       redraw = false;
-      delay(200);
+      delay(REDRAW_DELAY);
     }
     /* DW Btn to next item */
     if(checkNextPress()) { 
       versionIndex++;
       if(versionIndex>versions.size()-1) versionIndex = 0;
       redraw = true;
-      delay(200);
+      delay(REDRAW_DELAY);
     }
 
     /* UP Btn go back to FW menu and ´<´ go to previous version item */
@@ -644,8 +658,17 @@ void loopVersions() {
     if(Keyboard.isKeyPressed('`'))
     #endif
     {
+    long _tmp=millis();
+    while(checkPrevPress()) { if(millis()-_tmp>200) tft.drawArc(WIDTH/2, HEIGHT/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
+    if(millis()-_tmp>700) { // longpress detected to exit
       delay(200);
       goto SAIR;
+    } 
+    else {
+      if(versionIndex==0) versionIndex = versions.size() - 1;
+      else if(versionIndex>0) versionIndex--;
+      redraw = true;
+    }
     }
 
     /* Select to install */
@@ -693,7 +716,7 @@ void loopFirmware(){
         if(currentIndex==0) currentIndex = doc.size() - 1;
         else if(currentIndex>0) currentIndex--;
         displayCurrentItem(doc, currentIndex);
-        delay(200);
+        delay(REDRAW_DELAY);
 
       }
       /* DW Btn to next item */
@@ -701,7 +724,7 @@ void loopFirmware(){
         currentIndex++;
         if((currentIndex+1)>doc.size()) currentIndex = 0;
         displayCurrentItem(doc, currentIndex);
-        delay(200);
+        delay(REDRAW_DELAY);
       }
 
       /* Select to install */

@@ -14,7 +14,7 @@ config.conf JSON structure
       "bright":100,
       "askSpiffs":1,
       "wui_usr":"admin",
-      "wui_pwd":"m5launcher",
+      "wui_pwd":"launcher",
       "dwn_path": "/downloads/",
       "FGCOLOR":2016,
       "BGCOLOR":0,

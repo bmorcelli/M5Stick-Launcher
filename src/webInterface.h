@@ -298,14 +298,16 @@ color: #ad007c65;
 <body>
 <div class="container">
 <div class="float-element"><a onclick="logoutButton()" href='javascript:void(0);'>[X]</a></div>
-<h1 align="center">-= M5 Launcher =-</h1>
+<h1 align="center">-= Launcher =-</h1>
 <p>Firmware version: %FIRMWARE%</p>
 <p>Free Storage: <span id="freeSD">%FREESD%</span> | Used: <span id="usedSD">%USEDSD%</span> | Total: <span id="totalSD">%TOTALSD%</span></p>
 <p><a href="https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html" target="_blank" rel="noopener noreferrer">Online Firmware list from M5Burner (Need Internet)</a></p>
 <p>
 <form id="save" enctype="multipart/form-data" method="post"><input type="hidden" id="actualFolder" name="actualFolder" value="/"></form>
 <button onclick="rebootButton()">Reboot</button>
-<button onclick="WifiConfig()">Usr/Pass</button>
+<button onclick="SDConfig()">SD pins</button>
+<button onclick="WifiConfig('ssid')">WiFi</button>
+<button onclick="WifiConfig('usr')">Usr/Pass</button>
 <button onclick="callOTA()">OTA Update</button>
 <button onclick="listFilesButton('/')">SD Files</button>
 
@@ -342,20 +344,43 @@ Most of the apps over the internet don't need SPIFFS to work, but there are some
 </div>
 
 <script>
-function WifiConfig() {
-let wifiSsid = prompt("Please enter the Username of your network", "admin");
-let wifiPwd = prompt("Please enter the Password of your network", "m5launcher");
+function WifiConfig(target) {
+let wifiSsid;
+let wifiPwd;
+if (target == "usr") {
+  wifiSsid = prompt("Please enter the Username of your network", "admin");
+  wifiPwd = prompt("Please enter the Password of your network", "launcher");
+  }
+if (target == "ssid") {
+  wifiSsid = prompt("Please enter the ssid of your network", "");
+  wifiPwd = prompt("Please enter the Password of your network", "");
+}
 
 if (wifiSsid == null || wifiSsid == "" || wifiPwd == null) { 
-window.alert("Invalid User or Password");
+window.alert("Invalid " + target + " or password");
 } else {
 xmlhttp=new XMLHttpRequest();
-xmlhttp.open("GET", "/wifi?usr=" + wifiSsid + "&pwd=" + wifiPwd, false);
+xmlhttp.open("GET", "/wifi?" + target + "=" + wifiSsid + "&pwd=" + wifiPwd, false);
 xmlhttp.send();
 document.getElementById("status").innerHTML = xmlhttp.responseText;
 }
 }
 
+function SDConfig() {
+let miso = prompt("MISO pin", "");
+let mosi = prompt("MOSI pin", "");
+let sck = prompt("SCK pin", "");
+let cs = prompt("CS pin", "");
+
+if (miso == "" || mosi == "" || sck == "" || cs == "" || miso == null || mosi == null || sck == null || cs == null) { 
+window.alert("Invalid pins");
+} else {
+xmlhttp=new XMLHttpRequest();
+xmlhttp.open("GET", "/sdpins?miso=" + miso + "&mosi=" + mosi + "&sck=" + sck + "&cs=" + cs, false);
+xmlhttp.send();
+document.getElementById("status").innerHTML = xmlhttp.responseText;
+}
+}
 
 function startUpdate(fileName) {
 const ajax4 = new XMLHttpRequest();

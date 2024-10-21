@@ -2,7 +2,11 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#ifdef HEADLESS
+#include "util/VectorDisplay.h"
+#else
 #include <TFT_eSPI.h>
+#endif
 #include <ArduinoJson.h>
 #include <functional>
 #include <vector>
@@ -10,6 +14,8 @@
 // Declaração dos objetos TFT
 #if defined(M5STACK) && defined(CORE3)
 #define tft M5.Lcd
+#elif defined(HEADLESS)
+extern SerialDisplayClass tft;
 #else
 extern TFT_eSPI tft; 
 #endif

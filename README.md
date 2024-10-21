@@ -1,4 +1,4 @@
-# M5Stick Launcher
+# Launcher
 Application Launcher for Cardputer, M5StickC, M5StickC Plus, M5StickC Plus 2, Core (16Mb), Core2 & Tough and CoreS3.
 
 
@@ -6,7 +6,7 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, M5StickC Plus 2, Co
     <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true">  <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New Launcher.jpg?raw=true" width="240" height="135"> 
 </p>
 
-## With M5Launcher you'll be able to:
+## With Launcher you'll be able to:
 ### *OTA* OTA Update
 - Install binaries from M5Burner repository (yes, online, without the need of a USB Cable)
 - Install binaries from a WebUI, that you can start from CFG option, installing binaries you have on your computer or smartphone
@@ -40,12 +40,12 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, M5StickC Plus 2, Co
 
 ## tips
 * Having an SD card is good for better experience, but not really needed. [SDCard Hat for M5StickCs](https://www.thingiverse.com/thing:6459069) 
-* You can learn more about how it works o [M5Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
+* You can learn more about how it works o [Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
 * Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Obtaining-binaries-to-launch)
 * Now you can download binaries from [HERE!](https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html)
 
 ## How to Install
-* Use the Flasher: [M5Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/flash0.html).
+* Use the Flasher: [Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/flash0.html).
 * Use M5Burner, or
 * Download the .bin file from Releases for your device and use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
 
@@ -59,9 +59,15 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, M5StickC Plus 2, Co
 Sourcecode will be released in the future..
 
 ## Known Issues
-* UiFlow 1 doesn´t work with M5Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
+* UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.3.0:
+     * [x] Ported to Lilygo T-Embed CC1101 
+     * [x] Ported to Lilygo T-Embed
+     * [x] Ported to Lilygo T-Deck
+     * [x] Headless version for ESP32 and ESP32-S3
+     * [x] StickCs Power Btn and Prev butn now act to go upwards on Menus... long press to exit menu
 * 2.2.5: 
      * [x] Changed framework to remove all Watchdog Timers https://github.com/bmorcelli/M5Stick-Launcher/issues/61 https://github.com/bmorcelli/M5Stick-Launcher/issues/63 and solve some SD related issues
      * [x] Set Grove pins to LOW state on StickCs and Cardputer to avoid 433Mhz jamming while RF433T is connected

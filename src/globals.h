@@ -1,6 +1,9 @@
+#pragma once
 // Globals.h
+// https://github.com/espressif/esp-idf/blob/master/components/soc/esp32/include/soc/reset_reasons.h for further refference
 #ifndef GLOBALS_H
 #define GLOBALS_H
+#include "pre_compiler.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <functional>
@@ -78,5 +81,12 @@ extern bool stopOta;
 
 //size o the file in the webInterface
 extern size_t file_size;
+
+#if defined(HEADLESS)
+extern uint8_t _miso;
+extern uint8_t _mosi;
+extern uint8_t _sck;
+extern uint8_t _cs;
+#endif
 
 #endif

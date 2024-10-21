@@ -29,7 +29,7 @@ IPAddress AP_GATEWAY(172, 0, 0, 1);  // Gateway
 Config config;                        // configuration
 
 AsyncWebServer *server;               // initialise webserver
-const char* host = "m5launcher";
+const char* host = "launcher";
 bool shouldReboot = false;            // schedule a reboot
 String uploadFolder="";
 
@@ -67,7 +67,7 @@ void loopOptionsWebUi() {
   // Definição da matriz "Options"
   std::vector<std::pair<std::string, std::function<void()>>> options = {
       {"my Network", [=]() { webUIMyNet(); }},
-      {"AP mode", [=]()    { startWebUi("M5Launcher", 0, true); }},
+      {"AP mode", [=]()    { startWebUi("Launcher", 0, true); }},
   };
   delay(200);
 
@@ -353,20 +353,64 @@ void configureWebServer() {
     }
   });
 
+  server->on("/sdpins", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if (checkUserWebAuth(request)) {
+      if (request->hasParam("miso") && request->hasParam("mosi") && request->hasParam("sck") && request->hasParam("cs")) {
+        #if defined(HEADLESS)
+        int miso = request->getParam("miso")->value().toInt();
+        int mosi = request->getParam("mosi")->value().toInt();
+        int sck = request->getParam("sck")->value().toInt();
+        int cs = request->getParam("cs")->value().toInt();
+
+        // Verifica se os pinos são válidos (entre 0 e 44)
+        if (miso > 44 || mosi > 44 || sck > 44 || cs > 44 ||  miso < 0 || mosi < 0 || sck < 0 || cs < 0) {
+            request->send(200, "text/plain", "Pins not configured.");
+            goto error;
+        }
+
+        // Grava os valores no EEPROM
+        EEPROM.begin(EEPROMSIZE + 32);
+        EEPROM.write(90, static_cast<uint8_t>(miso));
+        EEPROM.write(91, static_cast<uint8_t>(mosi));
+        EEPROM.write(92, static_cast<uint8_t>(sck));
+        EEPROM.write(93, static_cast<uint8_t>(cs));
+        EEPROM.commit();
+        EEPROM.end();
+        request->send(200, "text/plain", "Pins configured.");
+        error:
+        delay(1);
+        #else
+        request->send(200, "text/plain", "Functionality exclusive for Headless environment (devices with no screen)");
+        #endif
+      }
+    }
+    else {
+        return request->requestAuthentication();
+    }
+  });
+
   server->on("/wifi", HTTP_GET, [](AsyncWebServerRequest * request) {
     if (checkUserWebAuth(request)) {
       if (request->hasParam("usr") && request->hasParam("pwd")) {
         const char *usr = request->getParam("usr")->value().c_str();
-        const char *pwd = request->getParam("pwd")->value().c_str();
-        wui_pwd = pwd;
+        const char *pwdd = request->getParam("pwd")->value().c_str();
+        wui_pwd = pwdd;
         wui_usr = usr;
         saveConfigs();
         config.httpuser = usr;
-        config.httppassword = pwd;
+        config.httppassword = pwdd;
         
         request->send(200, "text/plain", "User: " + String(ssid) + " configured with password: " + String(pwd));
       }
-      } else {
+      else if(request->hasParam("ssid") && request->hasParam("pwd")) {
+        const char *ssidd = request->getParam("ssid")->value().c_str();
+        const char *pwdd = request->getParam("pwd")->value().c_str();
+        pwd = pwdd;
+        ssid = ssidd;
+        saveConfigs();
+      }
+    }
+       else {
         return request->requestAuthentication();
     }
   });
@@ -387,7 +431,7 @@ String readLineFromFile(File myFile) {
 }
 
 
-
+#ifndef HEADLESS
 void startWebUi(String ssid, int encryptation, bool mode_ap) {
   file_size = 0;
   //log_i("Recovering User info from config.conf");
@@ -415,16 +459,16 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,ALCOLOR);
   tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
   setTftDisplay(7,7,ALCOLOR,FONT_P,BGCOLOR);
-  tft.drawCentreString("-= M5Launcher WebUI =-",WIDTH/2,0,8);
+  tft.drawCentreString("-= Launcher WebUI =-",WIDTH/2,0,8);
   String txt;
   if(!mode_ap) txt = WiFi.localIP().toString();
   else txt = WiFi.softAPIP().toString();
   
 #ifndef STICK_C
-  tft.drawCentreString("http://m5launcher.local", WIDTH/2,22,1);
+  tft.drawCentreString("http://launcher.local", WIDTH/2,22,1);
   setTftDisplay(7,47,~BGCOLOR,FONT_P,BGCOLOR);
 #else
-  tft.drawCentreString("http://m5launcher.local", WIDTH/2,17,1);
+  tft.drawCentreString("http://launcher.local", WIDTH/2,17,1);
   setTftDisplay(7,26,~BGCOLOR,FONT_P,BGCOLOR);
 #endif
   tft.setTextSize(FONT_M);
@@ -463,4 +507,64 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   
   tft.fillScreen(BGCOLOR);
 }
+
+#else 
+
+void startWebUi(String ssid, int encryptation, bool mode_ap) {
+  file_size = 0;
+
+  config.httpuser     = wui_usr;
+  config.httppassword = wui_pwd;
+  config.webserverporthttp = default_webserverporthttp;
+
+  if (WiFi.status() != WL_CONNECTED) {
+    // Choose wifi access mode
+    wifiConnect(ssid, encryptation, mode_ap);
+  }
+  
+  // configure web server
+  //log_i("Configuring WebServer");
+  Serial.println("Configuring Webserver ...");
+  server = new AsyncWebServer(config.webserverporthttp);
+  configureWebServer();
+
+  // startup web server
+  server->begin();
+  delay(500);
+
+  String txt;
+  if(!mode_ap) txt = WiFi.localIP().toString();
+  else txt = WiFi.softAPIP().toString();
+  
+  Serial.println("Access: http://launcher.local");
+  Serial.print("IP ");   Serial.println(txt);
+  Serial.println("Usr: " + String(wui_usr));
+  Serial.println("Pwd: " + String(wui_pwd));
+
+  while (1)
+  {
+    if (shouldReboot) {
+      ESP.restart();
+    }    
+    //Perform installation from SD Card
+    if (updateFromSd_var) {
+        //log_i("Starting Update from SD");
+        updateFromSD(fileToCopy);
+        updateFromSd_var = false;
+        fileToCopy = "";
+        Serial.println("\n\n--------------------\nRestart your Device");
+    }
+  }
+
+  log_i("Closing Server and turning off WiFi, something went wrong?");
+  server->reset();
+  server->end();
+  delay(100);
+  delete server;
+  WiFi.softAPdisconnect(true);
+  WiFi.disconnect(true,true);
+  WiFi.mode(WIFI_OFF);
+}
+
+#endif
 

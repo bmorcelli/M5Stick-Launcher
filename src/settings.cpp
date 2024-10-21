@@ -19,10 +19,10 @@ EEPROM ADDRESSES MAP
 7	B-IrRx      23	Pass  	39	Pass  	55	Pass	71	Pass	87		    103		119	(L-odd)
 8	B-RfTX      24	Pass  	40	Pass  	56	Pass	72	Pass	88		    104		120	(L-even)
 9	B-RfRx      25	Pass  	41	Pass  	57	Pass	73	Pass	89		    105		121	(L-even)
-10 TimeZone	  26	Pass  	42	Pass  	58	Pass	74	Pass	90		    106		122	(L-BGCOLOR)
-11 FGCOLOR    27	Pass  	43	Pass  	59	Pass	75	Pass	91		    107		123	(L-BGCOLOR)
-12 FGCOLOR    28	Pass  	44	Pass  	60	Pass	76	Pass	92		    108		124	(L-FGCOLOR)
-13		        29	Pass  	45	Pass  	61	Pass	77	Pass	93		    109		125	(L-FGCOLOR)
+10 TimeZone	  26	Pass  	42	Pass  	58	Pass	74	Pass	90 miso   106		122	(L-BGCOLOR)
+11 FGCOLOR    27	Pass  	43	Pass  	59	Pass	75	Pass	91 mosi   107		123	(L-BGCOLOR)
+12 FGCOLOR    28	Pass  	44	Pass  	60	Pass	76	Pass	92 sck    108		124	(L-FGCOLOR)
+13		        29	Pass  	45	Pass  	61	Pass	77	Pass	93 cs	    109		125	(L-FGCOLOR)
 14		        30	Pass	  46	Pass  	62	Pass	78	Pass	94		    110		126	(L-AskSpiffs)
 15		        31	Pass  	47	Pass  	63	Pass	79	Pass	95		    111		127	(L-OnlyBins)
 
@@ -39,13 +39,15 @@ From 1 to 5: Nemo shared addresses
 void setBrightness(int brightval, bool save) {
   if(brightval>100) brightval=100;
 
-  #if defined(STICK_C_PLUS2) || defined(CARDPUTER)
+  #if defined(STICK_C_PLUS2) || defined(CARDPUTER) || defined(T_EMBED)  || defined(T_DECK)
   int bl = MINBRIGHT + round(((255 - MINBRIGHT) * brightval/100 )); ; // 4 is the number of options
   analogWrite(BACKLIGHT, bl);
   #elif defined(STICK_C) || defined(STICK_C_PLUS)
   axp192.ScreenBreath(brightval);
   #elif defined(M5STACK)
-  M5.Display.setBrightness(brightval);  
+  M5.Display.setBrightness(brightval);
+  #elif defined(HEADLESS)
+  //do Nothing
   #else
   int dutyCycle;
   if (brightval==100) dutyCycle=255;
@@ -55,7 +57,7 @@ void setBrightness(int brightval, bool save) {
   else if (brightval==0) dutyCycle=5;
   else dutyCycle = ((brightval*255)/100);
 
-  log_i("dutyCycle for bright 0-255: %d",dutyCycle);
+  Serial.printf("dutyCycle for bright 0-255: %d",dutyCycle);
   ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
   #endif
 
@@ -79,34 +81,15 @@ void getBrightness() {
   if(bright>100) { 
     bright = 100;
 
-#if defined(STICK_C_PLUS2) || defined(CARDPUTER)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
-  analogWrite(BACKLIGHT, bl);
-#elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(bright);
-#elif defined(M5STACK)
-  M5.Display.setBrightness(bright);  
-#else
-  int dutyCycle;
-  if (bright==100) dutyCycle=255;
-  else if (bright==75) dutyCycle=130;
-  else if (bright==50) dutyCycle=70;
-  else if (bright==25) dutyCycle=20;
-  else if (bright==0) dutyCycle=5;
-  else dutyCycle = ((bright*255)/100);
-  log_i("dutyCycle for bright 0-255: %d",dutyCycle);
-  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
-#endif
-    setBrightness(100);
-  }
-
-#if defined(STICK_C_PLUS2) || defined(CARDPUTER)
+#if defined(STICK_C_PLUS2) || defined(CARDPUTER) || defined(T_EMBED) || defined(T_DECK)
   int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
   analogWrite(BACKLIGHT, bl);
 #elif defined(STICK_C) || defined(STICK_C_PLUS)
   axp192.ScreenBreath(bright);
 #elif defined(M5STACK)
   M5.Display.setBrightness(bright);
+#elif defined(HEADLESS)
+//do Nothing
 #else
   int dutyCycle;
   if (bright==100) dutyCycle=255;
@@ -115,7 +98,30 @@ void getBrightness() {
   else if (bright==25) dutyCycle=20;
   else if (bright==0) dutyCycle=5;
   else dutyCycle = ((bright*255)/100);
-  log_i("dutyCycle for bright 0-255: %d",dutyCycle);
+  Serial.printf("dutyCycle for bright 0-255: %d",dutyCycle);
+  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
+#endif
+    setBrightness(100);
+  }
+
+#if defined(STICK_C_PLUS2) || defined(CARDPUTER) || defined(T_EMBED)  || defined(T_DECK)
+  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
+  analogWrite(BACKLIGHT, bl);
+#elif defined(STICK_C) || defined(STICK_C_PLUS)
+  axp192.ScreenBreath(bright);
+#elif defined(M5STACK)
+  M5.Display.setBrightness(bright);
+#elif defined(HEADLESS)
+//do Nothing
+#else
+  int dutyCycle;
+  if (bright==100) dutyCycle=255;
+  else if (bright==75) dutyCycle=130;
+  else if (bright==50) dutyCycle=70;
+  else if (bright==25) dutyCycle=20;
+  else if (bright==0) dutyCycle=5;
+  else dutyCycle = ((bright*255)/100);
+  Serial.printf("dutyCycle for bright 0-255: %d",dutyCycle);
   ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
 #endif
 
@@ -317,9 +323,9 @@ void getConfigs() {
       File conf = SDM.open(CONFIG_FILE, FILE_WRITE);
       if(conf) {
         #if ROTATION >1
-        conf.print("[{\"rot\":3,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"m5launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+        conf.print("[{\"rot\":3,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
         #else
-        conf.print("[{\"rot\":1,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"m5launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+        conf.print("[{\"rot\":1,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
         #endif
       }
       conf.close();
@@ -440,4 +446,9 @@ void saveConfigs() {
     // Close the file
     file.close();
   }
+  EEPROM.begin(EEPROMSIZE+32);
+  EEPROM.writeString(20,pwd);
+  EEPROM.writeString(EEPROMSIZE,ssid);
+  EEPROM.commit();
+  EEPROM.end();
 }

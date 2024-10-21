@@ -56,8 +56,18 @@ bool eraseFAT() {
 bool setupSdCard() {
   #if defined(T_DISPLAY_S3) // Core2 uses the same SPI bus as TFT
   if (!SD_MMC.begin("/sdcard",true)) 
+  #elif defined(CORE3)
+  if (!SDM.begin(SDCARD_CS))
   #elif (TFT_MOSI == SDCARD_MOSI)
-  if (!SDM.begin(SDCARD_CS)) 
+  if (!SDM.begin(SDCARD_CS,tft.getSPIinstance())) // https://github.com/Bodmer/TFT_eSPI/discussions/2420
+  #elif defined(HEADLESS)
+  if(_sck==0 && _miso==0 && _mosi==0 && _cs==0) { 
+    Serial.println("SdCard pins not set");
+    return false;
+  }
+  sdcardSPI.begin(_sck, _miso, _mosi, _cs); // start SPI communications
+  delay(10);
+  if (!SDM.begin(SDCARD_CS, sdcardSPI))  
   #else
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
   delay(10);
@@ -402,7 +412,7 @@ String loopSD(bool filePicker) {
       }
       listFiles(index, fileList);
 
-      delay(150);
+      delay(REDRAW_DELAY);
       redraw = false;
     }
 

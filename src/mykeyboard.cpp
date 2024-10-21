@@ -8,7 +8,7 @@
 #define FM FONT_M
 #define FG FONT_G
 
-#if defined(CARDPUTER) || defined(STICK_C_PLUS2)
+#if defined(CARDPUTER) || defined(STICK_C_PLUS2) || (defined(T_EMBED) && !defined(T_EMBED_1101)) || defined(T_DECK)
   #include <driver/adc.h>
   #include <esp_adc_cal.h>
   #include <soc/soc_caps.h>
@@ -24,6 +24,93 @@
   CYD28_TouchR touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
 #endif
 
+#if defined(T_DECK)
+
+bool trackball_interrupted = false;
+int8_t trackball_up_count = 0;
+int8_t trackball_down_count = 0;
+int8_t trackball_left_count = 0;
+int8_t trackball_right_count = 0;
+void IRAM_ATTR ISR_up()   { trackball_interrupted = true; trackball_up_count = 1;   }
+void IRAM_ATTR ISR_down() { trackball_interrupted = true; trackball_down_count = 1; }
+void IRAM_ATTR ISR_left() { trackball_interrupted = true; trackball_left_count = 1; }
+void IRAM_ATTR ISR_right(){ trackball_interrupted = true; trackball_right_count = 1;}
+
+void ISR_rst(){
+  trackball_up_count = 0;
+  trackball_down_count = 0;
+  trackball_left_count = 0;
+  trackball_right_count = 0;
+  trackball_interrupted = false;
+}
+bool menuPress(int bot){
+  // 0 - UP
+  // 1 - Down
+  // 2 - Left
+  // 3 - Right
+  if (trackball_interrupted)
+  {
+    uint8_t xx=1;
+    uint8_t yy=1;
+    xx += trackball_left_count;
+    xx -= trackball_right_count;
+    yy -= trackball_up_count;
+    yy += trackball_down_count;
+    if(xx==1 && yy==1) {
+      ISR_rst();
+      return false;
+    }
+    delay(50);
+    // Print "bot - xx - yy",  1 is normal value for xx and yy 0 and 2 means movement on the axis
+    //Serial.print(bot); Serial.print("-"); Serial.print(xx); Serial.print("-"); Serial.println(yy);
+    if (xx < 1 && bot==2)       { ISR_rst();   return true;  } // left
+    else if (xx > 1 && bot==3)  { ISR_rst();   return true;  } // right
+    else if (yy < 1 && bot==0)  { ISR_rst();   return true;  } // up
+    else if (yy > 1 && bot==1)  { ISR_rst();   return true;  } // down
+    else return false;
+  }
+  else return false;
+
+}
+#endif
+
+#if defined(T_EMBED)
+  #if defined(T_EMBED_1101)
+    // Power handler for battery detection
+    XPowersPPM PPM;
+  #endif
+  //RotaryEncoder encoder(ENCODER_INA, ENCODER_INB, RotaryEncoder::LatchMode::TWO03);
+  RotaryEncoder *encoder = nullptr;
+  int _new_pos = 0;
+  int _last_pos = 0;
+  int _last_dir = 0;
+  IRAM_ATTR void checkPosition()
+    {
+      encoder->tick(); // just call tick() to check the state.
+      _last_dir = (int)encoder->getDirection();
+      _last_pos = _new_pos;
+      _new_pos = encoder->getPosition();
+    }
+
+  bool menuPress(int bot){
+    //0 - prev
+    //1 - Sel
+    //2 - next
+    if(bot==0 && _last_dir>0) {
+      _last_dir=0;
+      return true;
+    }
+    if(bot==2 && _last_dir<0) {
+      _last_dir=0;
+      return true;
+    }
+    if(bot==1 && digitalRead(SEL_BTN)==BTN_ACT) {
+      _last_dir=0;
+      return true;
+    }
+    return false;
+  }
+#endif
 
 
 #if defined(CARDPUTER)
@@ -169,10 +256,16 @@ bool checkNextPress(){
     if(M5.BtnC.isHolding() || M5.BtnC.isPressed())               // read touchscreen
   #elif defined(T_DISPLAY_S3)
     if(digitalRead(DW_BTN)==BTN_ACT || menuPress(2)) 
-  #elif defined(CYD) || defined(MARAUDERV4)
+  #elif defined(CYD) || defined(MARAUDERV4) || defined(T_EMBED)  
     if(menuPress(2)) 
-  #elif defined(HAS_BTN)
+  #elif defined(T_DECK)
+    //if(digitalRead(UP_BTN)==BTN_ACT)// || digitalRead(R_BTN)==BTN_ACT)
+    if(menuPress(1) || menuPress(3))
+  //if(true==false) // returnes false
+  #elif defined(HAS_BTN) && DW_BTN>=0
     if(digitalRead(DW_BTN)==BTN_ACT)
+  #else
+    if(true==false) // returnes false
   #endif
     { 
       if(dimmer) {
@@ -198,10 +291,16 @@ bool checkPrevPress() {
   #elif defined(M5STACK)
     M5.update();
     if(M5.BtnA.isHolding() || M5.BtnA.isPressed())               // read touchscreen
-  #elif defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
-    if(menuPress(0)) 
-  #elif defined(HAS_BTN)
+  #elif defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4) || defined(T_EMBED)  
+    if(menuPress(0))  
+  #elif defined(T_DECK)
+    //if(true==false) // returnes false
+    //if(digitalRead(DW_BTN)==BTN_ACT)// || digitalRead(L_BTN)==BTN_ACT)    
+    if(menuPress(0) || menuPress(2))
+  #elif defined(HAS_BTN) && UP_BTN>=0
     if(digitalRead(UP_BTN)==BTN_ACT)     
+  #else
+    if(true==false) // returnes false
   #endif
   { 
     if(dimmer) {
@@ -236,10 +335,18 @@ bool checkSelPress(bool dimmOff){
   #elif defined(T_DISPLAY_S3)
     if(digitalRead(SEL_BTN)==BTN_ACT || menuPress(1)) 
 
-  #elif defined(CYD) || defined(MARAUDERV4)
+  #elif defined(CYD) || defined(MARAUDERV4) || defined(T_EMBED)  
     if(menuPress(1)) 
   
-  #elif defined(HAS_BTN)
+  #elif defined(T_DECK)
+    char keyValue = 0;
+    Wire.requestFrom(LILYGO_KB_SLAVE_ADDRESS, 1);
+    while (Wire.available() > 0) {
+        keyValue = Wire.read();
+    }
+    if(digitalRead(SEL_BTN)==BTN_ACT || keyValue==0x0D) //Enter Key
+
+  #elif defined(HAS_BTN) && SEL_BTN>=0
     if(digitalRead(SEL_BTN)==BTN_ACT) 
 
   #endif
@@ -304,6 +411,25 @@ int getBattery() {
 
     float mv = volt * 2;
     percent = (mv - 3300) * 100 / (float)(4150 - 3350);
+    #elif defined(T_EMBED_1101)
+    percent=(PPM.getSystemVoltage()-3300)*100/(float)(4150-3350);
+    
+    #elif defined(T_EMBED) || defined(T_DECK)
+    uint8_t _batAdcCh = ADC1_GPIO4_CHANNEL;
+    uint8_t _batAdcUnit = 1;
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc1_config_channel_atten((adc1_channel_t)_batAdcCh, ADC_ATTEN_DB_12);
+    static esp_adc_cal_characteristics_t* adc_chars = nullptr;
+    static constexpr int BASE_VOLATAGE = 3600;
+    adc_chars = (esp_adc_cal_characteristics_t*)calloc(1, sizeof(esp_adc_cal_characteristics_t));
+    esp_adc_cal_characterize((adc_unit_t)_batAdcUnit, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, BASE_VOLATAGE, adc_chars);
+    int raw;
+    raw = adc1_get_raw((adc1_channel_t)_batAdcCh);
+    uint32_t volt = esp_adc_cal_raw_to_voltage(raw, adc_chars);
+
+    float mv = volt * 2;
+    percent = (mv - 3300) * 100 / (float)(4150 - 3350);
+
 
   #else
     percent=0;
@@ -536,7 +662,7 @@ String keyboard(String mytext, int maxSize, String msg) {
       x2=x;
       y2=y;
       redraw = false;
-      resetDimmer();
+      dimmerTemp=millis(); // reset dimmer without delaying 200ms after each keypress
     #if defined(T_DISPLAY_S3)
       touch.read();
     #endif      
@@ -604,7 +730,56 @@ String keyboard(String mytext, int maxSize, String msg) {
     }
     if(checkSelPress()) break;
 
-    #else
+  #elif defined(T_DECK)
+
+    char keyValue = 0;
+    Wire.requestFrom(LILYGO_KB_SLAVE_ADDRESS, 1);
+    while (Wire.available() > 0) {
+        keyValue = Wire.read();
+    }
+    if (keyValue != (char)0x00) {
+        Serial.print("keyValue : ");
+        Serial.print(keyValue);
+        Serial.print(" -> Hex  0x");
+        Serial.println(keyValue,HEX);
+        resetDimmer();
+        tft.setCursor(cX,cY);
+
+        if(mytext.length()<maxSize && keyValue!=0x08 && keyValue!=0x0D) {
+          mytext += keyValue;
+          if(mytext.length()!=20 && mytext.length()!=20) tft.print(keyValue);
+          cX=tft.getCursorX();
+          cY=tft.getCursorY();
+          if(mytext.length()==20) redraw = true;
+          if(mytext.length()==39) redraw = true;
+        }
+        if (keyValue==0x08 && mytext.length() > 0) { // delete 0x08
+          // Handle backspace key
+          mytext.remove(mytext.length() - 1);
+          int fS=FM;
+          if(mytext.length()>19) { tft.setTextSize(FP); fS=FP; }
+          else tft.setTextSize(FM);
+          tft.setCursor((cX-fS*LW),cY);
+          tft.setTextColor(FGCOLOR,BGCOLOR);
+          tft.print(" "); 
+          tft.setTextColor(~BGCOLOR, 0x5AAB);
+          tft.setCursor(cX-fS*LW,cY);
+          cX=tft.getCursorX();
+          cY=tft.getCursorY();
+          if(mytext.length()==19) redraw = true;
+          if(mytext.length()==38) redraw = true;        
+        }
+        if (keyValue==0x0D) {
+          break;
+        }
+        //delay(200);
+    }
+    if(checkSelPress()) break;
+    
+    delay(5);
+
+
+  #else
 
     int z=0;
   #if defined(M5STACK) || defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
@@ -697,9 +872,19 @@ String keyboard(String mytext, int maxSize, String msg) {
     /* Down Btn to move in X axis (to the right) */  
     if(checkNextPress()) 
     { 
-      delay(200);  
+      #if defined(T_EMBED)
+      // To handle Encoder devices such as T-EMBED
+      if(digitalRead(BK_BTN) == BTN_ACT) { y++; }
+      else x++;
+
+      if(y>3) { y=-1; }
+      else if(y<-1) y=3;
+
+      #else
+      delay(250);
       if(checkNextPress()) { x--; delay(250); } // Long Press
       else x++; // Short Press
+      #endif// To handle Encoder devices such as T-EMBED
 
       if(y<0 && x>3) x=0;
       if(x>11) x=0;
@@ -708,11 +893,21 @@ String keyboard(String mytext, int maxSize, String msg) {
     }
     /* UP Btn to move in Y axis (Downwards) */
     if(checkPrevPress()) { 
-      delay(200);
+      #if defined(T_EMBED)
+      // To handle Encoder devices such as T-EMBED
+      if(digitalRead(BK_BTN) == BTN_ACT) { y--; }
+      else x--;
 
+      if(y<0 && x<0) x=3;
+      if(x>11) x=0;
+      else if (x<0) x=11;
+      
+      // To handle Encoder devices such as T-EMBED
+      #else 
+      delay(250);
       if(checkPrevPress()) { y--; delay(250);  }// Long press
       else y++; // short press
-      
+      #endif // To handle Encoder devices such as T-EMBED
       if(y>3) { y=-1; }
       else if(y<-1) y=3;
       redraw = true;

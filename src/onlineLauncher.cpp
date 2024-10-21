@@ -114,7 +114,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
     IPAddress AP_GATEWAY(172, 0, 0, 1);
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(AP_GATEWAY, AP_GATEWAY, IPAddress(255, 255, 255, 0));
-    WiFi.softAP("M5Launcher", "", 6, 0, 1, false);
+    WiFi.softAP("Launcher", "", 6, 0, 1, false);
     Serial.print("IP: ");
     Serial.println(WiFi.softAPIP());
   }
