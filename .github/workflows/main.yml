@@ -291,7 +291,7 @@
       name: Post-compile steps
       runs-on: ubuntu-latest
       needs: compile_sketch
-      if: github.ref_type == 'tag'
+      # if: github.ref_type == 'tag'
       steps:
         - uses: actions/checkout@v4
           with:
@@ -310,28 +310,29 @@
 
         - name: Generate HTML and manifests from Boards
           run: |
-            boards=$(jq -c '.[]' <<<'${{ needs.compile_sketch.outputs.boards_json }}')
+            echo '${{ needs.compile_sketch.outputs.boards_json }}' | jq -c '.board[]' > boards.json
+            boards=$(cat boards.json)
 
             html="<ul class='radios'>"
-            for board in $boards; do
+            while read -r board; do
               name=$(echo "$board" | jq -r '.name')
               vendor=$(echo "$board" | jq -r '.vendor')
               desc=$(echo "$board" | jq -r '.description')
               link=$(echo "$board" | jq -r '.link')
               family=$(echo "$board" | jq -r '.family')
               env=$(echo "$board" | jq -r '.env')
-              
-              html+="<li><label><input type='radio' name='type' value='$name' />$vendor - <a href='$link'>$name</a> $description</label></li>\n"
 
-              js_content='{"name":"$name","builds":[{"chipFamily":"$family","improv":false,"parts":[{"path":"bins/Launcher-$env.bin","offset":0}]}]}'
+              html+="<li><label><input type='radio' name='type' value='$name' />$vendor - <a href='$link'>$name</a> $desc</label></li>\n"
+
+              js_content="{\"name\":\"$name\",\"builds\":[{\"chipFamily\":\"$family\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-$env.bin\",\"offset\":0}]}]}"
               echo "$js_content" > ./Release/Manifest-$name.json
-            done
+            done < boards.json
 
             html+="</ul>"
             echo "$html" > ~/generated.html
             rm ./index.html
             cp ./support_files/flasher ./index.html
-            sed -i '/<!-- INSERT_BOARDS_HERE -->/r ~/generated.html' ./index.html
+            sed -i '/<!-- BOARDS -->/r ~/generated.html' ./index.html
 
 
         - name: Move artifacts to the correct folders
