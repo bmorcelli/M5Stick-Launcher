@@ -1,4 +1,4 @@
-# Defaul, , , , ,
+# Default, , , , ,
 # Name,   Type, SubType, Offset,   Size, Flags
 nvs,      data, nvs,     0x9000,   0x6000,
 app0,     app,  test,    0x10000,  0x180000,
@@ -18,6 +18,6 @@ coredump, data, coredump,0x7F0000, 0x10000,
 # Name,   Type, SubType, Offset,   Size, Flags
 #nvs,      data, nvs,     0x9000,   0x6000,
 #app0,     app,  test,    0x10000,  0x180000,
-#app1,     app,  ota_0,   0x190000, 0x450000,
-#sys,      data, fat,     0x5E0000, 0x100000,
-#vfs,      data, fat,     0x6E0000, 0x120000,
+#app1,     app,  ota_0,   0x190000, 0x470000,
+#sys,      data, fat,     0x600000, 0x100000,
+#vfs,      data, fat,     0x700000, 0x100000,

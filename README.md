@@ -62,6 +62,10 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.3.1:
+     * [x] Fox for https://github.com/bmorcelli/M5Stick-Launcher/issues/77
+     * [x] Fixed screen direction for T-Deck devices
+     * [x] Fixed Json handling and config.conf random fails
 * 2.3.0:
      * [x] Ported to Lilygo T-Embed CC1101 
      * [x] Ported to Lilygo T-Embed

@@ -263,6 +263,8 @@ void setup() {
   #elif defined(T_DECK)
   pinMode(PIN_POWER_ON, OUTPUT);
   digitalWrite(PIN_POWER_ON, HIGH);
+  pinMode(9, OUTPUT); // Radio CS Pin to HIGH (Inhibit the SPI Communication for this module)
+  digitalWrite(9, HIGH);
   pinMode(SEL_BTN, INPUT);
 
   // Setup for Trackball
@@ -274,13 +276,7 @@ void setup() {
   attachInterrupt(L_BTN, ISR_left, FALLING);
   pinMode(R_BTN, INPUT_PULLUP);
   attachInterrupt(R_BTN, ISR_right, FALLING);
-  //pinMode(BACKLIGHT, OUTPUT);
-  //digitalWrite(BACKLIGHT,HIGH);
 
-    // PWM backlight setup
-  // ledcSetup(TFT_BRIGHT_CHANNEL,TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits); //Channel 0, 10khz, 8bits
-  // ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
-  // ledcWrite(TFT_BRIGHT_CHANNEL,125);
 
   #elif defined(HEADLESS)
     #if SEL_BTN >= 0 // handle enter in launcher

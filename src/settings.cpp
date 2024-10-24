@@ -313,87 +313,99 @@ void chargeMode() {
   delay(200);
 }
 
+
+bool config_exists() {
+  if (!SDM.exists(CONFIG_FILE)) {
+    File conf = SDM.open(CONFIG_FILE, FILE_WRITE);
+    if (conf) {
+#if ROTATION > 1
+        conf.print("[{\"rot\":3,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+#else
+        conf.print("[{\"rot\":1,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+#endif
+    }
+    conf.close();
+    delay(50);
+    log_i("config_exists: config.conf created with default");
+    return false;
+  } else {
+      log_i("config_exists: config.conf exists");
+      return true;
+  }
+}
+
+
 /*********************************************************************
 **  Function: getConfigs                             
 **  getConfigurations from EEPROM or JSON
 **********************************************************************/
 void getConfigs() {
-  if(setupSdCard()) {
-    if(!SDM.exists(CONFIG_FILE)) {
-      File conf = SDM.open(CONFIG_FILE, FILE_WRITE);
-      if(conf) {
-        #if ROTATION >1
-        conf.print("[{\"rot\":3,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
-        #else
-        conf.print("[{\"rot\":1,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
-        #endif
-      }
-      conf.close();
-      delay(50);
-    } else log_i("getConfigs: config.conf exists");
-    File file = SDM.open(CONFIG_FILE, FILE_READ);
-      if(file) {
-        // Deserialize the JSON document
-        DeserializationError error = deserializeJson(settings, file);
-        if (error) { 
-          log_i("Failed to read file, using default configuration");
-          goto Default;
-        } else log_i("getConfigs: deserialized correctly");
+  if (setupSdCard()) {
+      // check if config file exists, otherwise create it with default values
+      config_exists();
+      File file = SDM.open(CONFIG_FILE, FILE_READ);
+      if (file) {
+          DeserializationError error = deserializeJson(settings, file);
+          if (error) {
+              log_i("Failed to read file, using default configuration");
+              goto Default;
+          } else {
+              log_i("getConfigs: deserialized correctly");
+          }
 
-        int count=0;
-        JsonObject setting = settings[0];
-        if(setting.containsKey("onlyBins"))  { onlyBins  = gsetOnlyBins(setting["onlyBins"].as<bool>()); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("askSpiffs")) { askSpiffs = gsetAskSpiffs(setting["askSpiffs"].as<bool>()); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("bright"))    { bright    = setting["bright"].as<int>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("dimmerSet")) { dimmerSet = setting["dimmerSet"].as<int>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("rot"))       { rotation  = setting["rot"].as<int>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("FGCOLOR"))   { FGCOLOR   = setting["FGCOLOR"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("BGCOLOR"))   { BGCOLOR   = setting["BGCOLOR"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("ALCOLOR"))   { ALCOLOR   = setting["ALCOLOR"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("odd"))       { odd_color = setting["odd"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("even"))      { even_color= setting["even"].as<uint16_t>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("wui_usr"))   { wui_usr   = setting["wui_usr"].as<String>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("wui_pwd"))   { wui_pwd   = setting["wui_pwd"].as<String>(); } else { count++; log_i("Fail"); }
-        if(setting.containsKey("dwn_path"))  { dwn_path  = setting["dwn_path"].as<String>(); } else { count++; log_i("Fail"); }
-        if(!setting.containsKey("wifi"))  { count++; log_i("Fail"); }
-        if(count>0) saveConfigs();
+          int count = 0;
+          JsonObject setting = settings[0];
+      if(setting["onlyBins"].is<bool>())      { onlyBins  = gsetOnlyBins(setting["onlyBins"].as<bool>()); }   else { count++; log_i("Fail"); }
+      if(setting["askSpiffs"].is<bool>())     { askSpiffs = gsetAskSpiffs(setting["askSpiffs"].as<bool>()); } else { count++; log_i("Fail"); }
+      if(setting["bright"].is<int>())         { bright    = setting["bright"].as<int>(); }                    else { count++; log_i("Fail"); }
+      if(setting["dimmerSet"].is<int>())      { dimmerSet = setting["dimmerSet"].as<int>(); }                 else { count++; log_i("Fail"); }
+      if(setting["rot"].is<int>())            { rotation  = setting["rot"].as<int>(); }                       else { count++; log_i("Fail"); }
+      if(setting["FGCOLOR"].is<uint16_t>())   { FGCOLOR   = setting["FGCOLOR"].as<uint16_t>(); }  else { count++; log_i("Fail"); }
+      if(setting["BGCOLOR"].is<uint16_t>())   { BGCOLOR   = setting["BGCOLOR"].as<uint16_t>(); }  else { count++; log_i("Fail"); }
+      if(setting["ALCOLOR"].is<uint16_t>())   { ALCOLOR   = setting["ALCOLOR"].as<uint16_t>(); }  else { count++; log_i("Fail"); }
+      if(setting["odd"].is<uint16_t>())       { odd_color = setting["odd"].as<uint16_t>(); }      else { count++; log_i("Fail"); }
+      if(setting["even"].is<uint16_t>())      { even_color= setting["even"].as<uint16_t>(); }     else { count++; log_i("Fail"); }
+      if(setting["wui_usr"].is<String>())     { wui_usr   = setting["wui_usr"].as<String>(); }    else { count++; log_i("Fail"); }
+      if(setting["wui_pwd"].is<String>())     { wui_pwd   = setting["wui_pwd"].as<String>(); }    else { count++; log_i("Fail"); }
+      if(setting["dwn_path"].is<String>())    { dwn_path  = setting["dwn_path"].as<String>(); }   else { count++; log_i("Fail"); }
+      if (!setting["wifi"].is<JsonArray>())   { ++count; log_i("Fail");  }
+      if(count>0) saveConfigs();
 
-        log_i("Brightness: %d", bright);
-        setBrightness(bright);
-        if(dimmerSet<10) dimmerSet=10;
-        file.close();
+      log_i("Brightness: %d", bright);
+      setBrightness(bright);
+      if (dimmerSet < 10) dimmerSet = 10;
 
-        
-        
-        EEPROM.begin(EEPROMSIZE); // open eeprom
-        EEPROM.write(EEPROMSIZE-13, rotation);
-        EEPROM.write(EEPROMSIZE-14, dimmerSet);
-        EEPROM.write(EEPROMSIZE-15, bright);
-        EEPROM.write(EEPROMSIZE-1, int(onlyBins));
-        EEPROM.write(EEPROMSIZE-2, int(askSpiffs));
+      file.close();
 
-        EEPROM.write(EEPROMSIZE-3, int((FGCOLOR >> 8) & 0x00FF));
-        EEPROM.write(EEPROMSIZE-4, int(FGCOLOR & 0x00FF));
+      EEPROM.begin(EEPROMSIZE);
+      EEPROM.write(EEPROMSIZE - 13, rotation);
+      EEPROM.write(EEPROMSIZE - 14, dimmerSet);
+      EEPROM.write(EEPROMSIZE - 15, bright);
+      EEPROM.write(EEPROMSIZE - 1, int(onlyBins));
+      EEPROM.write(EEPROMSIZE - 2, int(askSpiffs));
 
-        EEPROM.write(EEPROMSIZE-5, int((BGCOLOR >> 8) & 0x00FF));
-        EEPROM.write(EEPROMSIZE-6, int(BGCOLOR & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 3, int((FGCOLOR >> 8) & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 4, int(FGCOLOR & 0x00FF));
 
-        EEPROM.write(EEPROMSIZE-7, int((ALCOLOR >> 8) & 0x00FF));
-        EEPROM.write(EEPROMSIZE-8, int(ALCOLOR & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 5, int((BGCOLOR >> 8) & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 6, int(BGCOLOR & 0x00FF));
 
-        EEPROM.write(EEPROMSIZE-9, int((odd_color >> 8) & 0x00FF));
-        EEPROM.write(EEPROMSIZE-10, int(odd_color & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 7, int((ALCOLOR >> 8) & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 8, int(ALCOLOR & 0x00FF));
 
-        EEPROM.write(EEPROMSIZE-11, int((even_color >> 8) & 0x00FF));
-        EEPROM.write(EEPROMSIZE-12, int(even_color & 0x00FF));
-        if(!EEPROM.commit()) log_i("fail to write EEPROM");      // Store data to EEPROM
-        EEPROM.end();
-        log_i("Using config.conf setup file");
+      EEPROM.write(EEPROMSIZE - 9, int((odd_color >> 8) & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 10, int(odd_color & 0x00FF));
+
+      EEPROM.write(EEPROMSIZE - 11, int((even_color >> 8) & 0x00FF));
+      EEPROM.write(EEPROMSIZE - 12, int(even_color & 0x00FF));
+
+      if (!EEPROM.commit()) log_i("fail to write EEPROM");
+      EEPROM.end();
+      log_i("Using config.conf setup file");
     } else {
-Default:
+    Default:
         file.close();
         saveConfigs();
-        
         log_i("Using settings stored on EEPROM");
     }
   }
@@ -404,16 +416,19 @@ Default:
 **********************************************************************/
 void saveConfigs() {
   // Delete existing file, otherwise the configuration is appended to the file
+  bool retry=true;
+  Retry:
   if(setupSdCard()) {
     if(SDM.remove(CONFIG_FILE)) log_i("config.conf deleted");
     else log_i("fail deleting config.conf");
 
     JsonObject setting = settings[0];
-    //if(!settings[0].containsKey("onlyBins")) 
+
+    // Atribuindo as configurações ao objeto JSON
     setting["onlyBins"] = onlyBins;
     setting["askSpiffs"] = askSpiffs;
     setting["bright"] = bright;
-    setting["dimmerSet"] = dimmerSet;    
+    setting["dimmerSet"] = dimmerSet;
     setting["rot"] = rotation;
     setting["FGCOLOR"] = FGCOLOR;
     setting["BGCOLOR"] = BGCOLOR;
@@ -423,7 +438,7 @@ void saveConfigs() {
     setting["wui_usr"] = wui_usr;
     setting["wui_pwd"] = wui_pwd;
     setting["dwn_path"] = dwn_path;
-    if(!setting.containsKey("wifi")) {
+    if(!setting["wifi"].is<JsonArray>()) {
       JsonArray WifiList = setting["wifi"].to<JsonArray>();
       if(WifiList.size()<1) {
         JsonObject WifiObj = WifiList.add<JsonObject>();
@@ -439,9 +454,22 @@ void saveConfigs() {
       return;
     } else log_i("config.conf created");
     // Serialize JSON to file
-    if (serializeJsonPretty(settings, file) < 5) {
+    if (serializeJsonPretty(settings, file) < 5 && retry) {
       log_i("Failed to write to file");
-    } else log_i("config.conf written successfully");
+      file.close();
+      log_i("Deleting file");
+      SDM.remove(CONFIG_FILE);
+      log_i("Creating default file");
+      // check if config file exists, otherwise create it with default values
+      config_exists();
+      //Try to rewrite the configs
+      file = SDM.open(CONFIG_FILE, FILE_READ);
+      deserializeJson(settings, file);
+      retry=false;
+      goto Retry;
+
+    } else if (!retry) log_i("Create new file and Rewriting didn't work");
+     else log_i("config.conf written successfully");
 
     // Close the file
     file.close();
