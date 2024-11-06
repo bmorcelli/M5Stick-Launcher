@@ -220,23 +220,22 @@ void setup() {
   #ifdef T_EMBED_1101
     pinMode(PIN_POWER_ON, OUTPUT);
     digitalWrite(PIN_POWER_ON, HIGH);  // Power on CC1101 and LED
-    PPM.init(Wire,8,18,BQ25896_SLAVE_ADDRESS);
-    // Set the minimum operating voltage. Below this voltage, the PPM will protect
-    PPM.setSysPowerDownVoltage(3300);
-    // Set input current limit, default is 500mA
-    PPM.setInputCurrentLimit(3250);
-    // Disable current limit pin
-    PPM.disableCurrentLimitPin();
-    // Set the charging target voltage, Range:3840 ~ 4608mV ,step:16 mV
-    PPM.setChargeTargetVoltage(4208);
-    // Set the precharge current , Range: 64mA ~ 1024mA ,step:64mA
-    PPM.setPrechargeCurr(64);
-    // The premise is that Limit Pin is disabled, or it will only follow the maximum charging current set by Limi tPin.
-    // Set the charging current , Range:0~5056mA ,step:64mA
-    PPM.setChargerConstantCurr(832);
-    // Get the set charging current
-    PPM.getChargerConstantCurr();
-    Serial.printf("getChargerConstantCurr: %d mA\n",PPM.getChargerConstantCurr());
+    bool pmu_ret = false;
+    Wire.begin(8, 18);
+    pmu_ret = PPM.init(Wire, 8, 18, BQ25896_SLAVE_ADDRESS);
+    if(pmu_ret) {
+        PPM.setSysPowerDownVoltage(3300);
+        PPM.setInputCurrentLimit(3250);
+        Serial.printf("getInputCurrentLimit: %d mA\n",PPM.getInputCurrentLimit());
+        PPM.disableCurrentLimitPin();
+        PPM.setChargeTargetVoltage(4208);
+        PPM.setPrechargeCurr(64);
+        PPM.setChargerConstantCurr(832);
+        PPM.getChargerConstantCurr();
+        Serial.printf("getChargerConstantCurr: %d mA\n",PPM.getChargerConstantCurr());
+        PPM.enableADCMeasure();
+        PPM.enableCharge();
+    }
 
 
     // To obtain voltage data, the ADC must be enabled first
