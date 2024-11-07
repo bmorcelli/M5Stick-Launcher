@@ -236,14 +236,8 @@ void setup() {
         PPM.enableADCMeasure();
         PPM.enableCharge();
     }
-
-
-    // To obtain voltage data, the ADC must be enabled first
-    PPM.enableADCMeasure();
-    
-    // Turn on charging function
-    // If there is no battery connected, do not turn on the charging function
-    PPM.enableCharge();
+     PPM.enableOTG();
+     PPM.disableOTG();
     pinMode(12, OUTPUT);
     digitalWrite(12,HIGH);//CS pin for CC1101 pin
   #else
