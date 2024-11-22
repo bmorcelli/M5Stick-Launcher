@@ -42,12 +42,6 @@
   #define FONT_G 3
 #endif 
 
-#ifndef TFT_BRIGHT_CHANNEL
-    #define TFT_BRIGHT_CHANNEL 0
-    #define TFT_BRIGHT_Bits 8
-    #define TFT_BRIGHT_FREQ 5000	
-#endif
-
 #ifndef SDCARD_MOSI
   #define SDCARD_MOSI -1
 #endif

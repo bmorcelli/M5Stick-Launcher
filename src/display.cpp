@@ -6,9 +6,7 @@
 #include "sd_functions.h"
 #include "settings.h"
 
-#if defined(M5STACK) && defined(CORE3)
-#define tft M5.Lcd
-#elif defined(HEADLESS)
+#if defined(HEADLESS)
 SerialDisplayClass tft;
 #else
 TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
@@ -39,55 +37,28 @@ void setTftDisplay(int x, int y, uint16_t fc, int size, uint16_t bg) {
 }
 
 /***************************************************************************************
-** Function name: coreFooter
-** Description:   Draw Core2 footer
+** Function name: TouchFooter
+** Description:   Draw touch screen footer
 ***************************************************************************************/
-void coreFooter(uint16_t color) {
+void TouchFooter(uint16_t color) {
   tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
   tft.setTextColor(color);
-  tft.setTextSize(FONT_M);
-  tft.drawCentreString("PREV",WIDTH/6,HEIGHT+15,1);
-  tft.drawCentreString("SEL",WIDTH/2,HEIGHT+15,1);
-  tft.drawCentreString("NEXT",5*WIDTH/6,HEIGHT+15,1);
-}
-
-/***************************************************************************************
-** Function name: coreFooter2
-** Description:   Draw Core2 footer
-***************************************************************************************/
-void coreFooter2(uint16_t color) {
-  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
-  tft.setTextColor(color);
-  tft.setTextSize(FONT_M);
-  tft.drawCentreString("Skip",WIDTH/6,HEIGHT+15,1);
-  tft.drawCentreString("LAUNCHER",WIDTH/2,HEIGHT+15,1);
-  tft.drawCentreString("Skip",5*WIDTH/6,HEIGHT+15,1);
-}
-
-
-/***************************************************************************************
-** Function name: coreFooter
-** Description:   Draw Core2 footer
-***************************************************************************************/
-void TdisplayS3Footer(uint16_t color) {
-  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
-  tft.setTextColor(color);
-  tft.setTextSize(FONT_M);
+  tft.setTextSize(FM);
   tft.drawCentreString("PREV",WIDTH/6,HEIGHT+4,1);
   tft.drawCentreString("SEL",WIDTH/2,HEIGHT+4,1);
   tft.drawCentreString("NEXT",5*WIDTH/6,HEIGHT+4,1);
 }
 
 /***************************************************************************************
-** Function name: coreFooter2
-** Description:   Draw Core2 footer
+** Function name: TouchFooter
+** Description:   Draw touch screen footer
 ***************************************************************************************/
-void TdisplayS3Footer2(uint16_t color) {
-  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,17,5,color);
+void TouchFooter2(uint16_t color) {
+  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
   tft.setTextColor(color);
-  tft.setTextSize(FONT_M);
+  tft.setTextSize(FM);
   tft.drawCentreString("Skip",WIDTH/6,HEIGHT+4,1);
-  tft.drawCentreString("LAUNCHER",WIDTH/2,HEIGHT+5,1);
+  tft.drawCentreString("LAUNCHER",WIDTH/2,HEIGHT+4,1);
   tft.drawCentreString("Skip",5*WIDTH/6,HEIGHT+4,1);
 }
 
@@ -129,7 +100,7 @@ void initDisplay(bool doAll) {
     }
     tft.setTextSize(FONT_G);
     tft.setTextColor(FGCOLOR);
-    #ifndef STICK_C
+    #if WIDTH>200
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,1); //SMOOTH_FONT
     #else
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
@@ -174,7 +145,7 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   tft.drawChar('<', 10, HEIGHT-(10+FONT_M*9));
   tft.drawChar('>', WIDTH-(10+FONT_M*6), HEIGHT-(10+FONT_M*9));
   tft.setTextSize(FONT_P);
-  #ifndef STICK_C
+  #if WIDTH>200
   String texto = "More information";
   
   tft.setTextColor(FGCOLOR);
@@ -193,12 +164,10 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
 
   
 
-  #if defined(M5STACK)
-  coreFooter();
+  #if defined(HAS_TOUCH)
+  TouchFooter();
   #endif  
-  #if defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
-  TdisplayS3Footer();
-  #endif
+
   int bar = int(WIDTH/(doc.size()));
   if (bar<5) bar = 5;
   tft.fillRect((WIDTH*currentIndex)/doc.size(),HEIGHT-5,bar,5,FGCOLOR);
@@ -218,7 +187,7 @@ void displayCurrentVersion(String name, String author, String version, String pu
     setTftDisplay(10, 10, ~BGCOLOR,FONT_M,BGCOLOR);
     String name2 = String(name);
     tftprintln(name2,10,2);
-    #ifndef STICK_C
+    #if WIDTH>200
     setTftDisplay(10,50,ALCOLOR,FONT_M);
     #endif
     tft.print("by: ");
@@ -251,11 +220,8 @@ void displayCurrentVersion(String name, String author, String version, String pu
     int div = versions.size();
     if(div==0) div = 1;
 
-    #if defined(M5STACK)
-    coreFooter(ALCOLOR);
-    #endif
-    #if defined(T_DISPLAY_S3)  || defined(CYD) || defined(MARAUDERV4)
-    TdisplayS3Footer(ALCOLOR);
+    #if defined(HAS_TOUCH)
+    TouchFooter(ALCOLOR);
     #endif
 
     int bar = int(WIDTH/div);
@@ -304,7 +270,7 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
 ** Dependencia: prog_handler =>>    0 - Flash, 1 - SPIFFS
 ***************************************************************************************/
 void progressHandler(int progress, size_t total) {
-#ifndef STICK_C
+#if WIDTH>200
   int barWidth = map(progress, 0, total, 0, WIDTH-40);
   if(progress == 0) {
     tft.setTextSize(FONT_M);
@@ -423,7 +389,7 @@ void drawMainMenu(int index) {
   };
 
     const char* texts[4] = { "SD", "OTA", "WUI","CFG" };
-#if defined(STICK_C) || defined(MARAUDERMINI)
+#if WIDTH<200
     const char* messages[4] = { "Launch from SDCard", 
                                 "Online Installer", 
                                 "Start WebUI",
@@ -437,7 +403,7 @@ void drawMainMenu(int index) {
     tft.fillSmoothRoundRect(6,26,WIDTH-12,HEIGHT-12,5,BGCOLOR);
     setTftDisplay(12, 12, FGCOLOR, 1, BGCOLOR);
     
-#if defined(STICK_C) || defined(MARAUDERMINI)
+#if WIDTH<200
     tft.print("Launcher " + String(LAUNCHER));
     tft.setTextSize(FONT_M);
 #else
@@ -453,10 +419,11 @@ void drawMainMenu(int index) {
     }
 
     setTftDisplay(-1, -1, FGCOLOR, 1, BGCOLOR);
-#ifndef STICK_C
-    tft.drawCentreString(messages[index], WIDTH / 2, HEIGHT - 25, 1);
+
+#if WIDTH<200
+  tft.drawCentreString(messages[index], WIDTH / 2, 18, 1);
 #else
-    tft.drawCentreString(messages[index], WIDTH / 2, 18, 1);
+    tft.drawCentreString(messages[index], WIDTH / 2, HEIGHT - 25, 1);
 #endif
 
     drawDeviceBorder();
@@ -470,10 +437,10 @@ void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, b
         tft.fillRoundRect(x, y, w, h, 5, color);
     }
     tft.drawRoundRect(x, y, w, h, 5, color);
-#ifndef STICK_C
-    tft.drawCentreString(text, x + w/2, y + h/2 - 12, 1);
-#else
+#if WIDTH<200
     tft.drawCentreString(text,x + w/2, y + h/2 - 6, SMOOTH_FONT);
+  #else
+    tft.drawCentreString(text, x + w/2, y + h/2 - 12, 1);
 #endif
 }
 
@@ -529,11 +496,8 @@ void listFiles(int index, String fileList[][3]) {
         if (i==(start+MAX_ITEMS) || fileList[i][2]=="") break;
     }
 
-    #if defined(M5STACK)
-    coreFooter();
-    #endif    
-    #if defined(T_DISPLAY_S3)  || defined(CYD) || defined(MARAUDERV4)
-    TdisplayS3Footer();
+    #if defined(HAS_TOUCH)
+    TouchFooter();
     #endif    
 }
 
@@ -560,7 +524,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     }
 
     if(checkPrevPress()) {
-    #if defined(CARDPUTER) || defined(T_DECK)
+    #if defined(ESC_LOGIC)
       if(index==0) index = options.size() - 1;
       else if(index>0) index--;
       redraw = true;
@@ -591,9 +555,8 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
       break;
     }
 
-    #ifdef CARDPUTER
-    Keyboard.update();
-    if(Keyboard.isKeyPressed('`')) break;
+    #if defined(ESC_LOGIC)
+    if(checkEscPress()) break;
     #endif
   }
   delay(200);
@@ -645,34 +608,39 @@ void loopVersions() {
     }
 
     /* UP Btn go back to FW menu and ´<´ go to previous version item */
-    if(checkPrevPress()) 
-    #ifdef CARDPUTER
+    
+    #ifdef ESC_LOGIC
         /* UP Btn go to previous item */
-    { 
+    if(checkPrevPress()) { 
       versionIndex--;
       if(versionIndex<0) versionIndex = versions.size()-1;
       redraw = true;
       delay(200);
     }
-    Keyboard.update();
-    if(Keyboard.isKeyPressed('`'))
-    #endif
-    {
-    long _tmp=millis();
-    while(checkPrevPress()) { if(millis()-_tmp>200) tft.drawArc(WIDTH/2, HEIGHT/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
-    if(millis()-_tmp>700) { // longpress detected to exit
+
+    if(checkEscPress()) {
       delay(200);
       goto SAIR;
     } 
-    else {
-      if(versionIndex==0) versionIndex = versions.size() - 1;
-      else if(versionIndex>0) versionIndex--;
-      redraw = true;
+    #else // Esc logic is holding previous btn fot 1 second +-
+
+    if(checkPrevPress()) {
+      long _tmp=millis();
+      while(checkPrevPress()) { if(millis()-_tmp>200) tft.drawArc(WIDTH/2, HEIGHT/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
+      if(millis()-_tmp>700) { // longpress detected to exit
+        delay(200);
+        goto SAIR;
+      }
+      else {
+        if(versionIndex==0) versionIndex = versions.size() - 1;
+        else if(versionIndex>0) versionIndex--;
+        redraw = true;
+      }
     }
-    }
+    #endif
 
     /* Select to install */
-    if(checkSelPress(true)) { 
+    if(checkSelPress()) { 
 
       // Definição da matriz "Options"
       options = {
@@ -728,10 +696,10 @@ void loopFirmware(){
       }
 
       /* Select to install */
-      if(checkSelPress(true)) { 
+      if(checkSelPress()) { 
         
         //Checks for long press to get back to Main Menu, only for StickCs.. Cardputer uses Esc btn
-        #ifndef CARDPUTER
+        #ifndef ESC_LOGIC
           int time = millis();          // Saves the moment when the btn was pressed
           while(checkSelPress()) { 
 
@@ -746,9 +714,8 @@ void loopFirmware(){
         delay(200);
       }
 
-      #ifdef CARDPUTER
-      Keyboard.update();
-      if(Keyboard.isKeyPressed('`')) break; //  Esc btn to get back to Main Menu.
+      #ifdef ESC_LOGIC
+      if(checkEscPress()) break; //  Esc btn to get back to Main Menu.
       #endif
     } 
     else {

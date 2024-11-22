@@ -12,9 +12,7 @@
 #include <vector>
 #include "globals.h"
 // Declaração dos objetos TFT
-#if defined(M5STACK) && defined(CORE3)
-#define tft M5.Lcd
-#elif defined(HEADLESS)
+#if defined(HEADLESS)
 extern SerialDisplayClass tft;
 #else
 extern TFT_eSPI tft; 
@@ -47,13 +45,9 @@ void drawMainMenu(int index = 0);
 
 void listFiles(int index, String fileList[][3]);
 
-void coreFooter(uint16_t color = FGCOLOR);
+void TouchFooter(uint16_t color = FGCOLOR);
 
-void coreFooter2(uint16_t color = FGCOLOR);
-
-void TdisplayS3Footer(uint16_t color = FGCOLOR);
-
-void TdisplayS3Footer2(uint16_t color = FGCOLOR);
+void TouchFooter2(uint16_t color = FGCOLOR);
 
 void tftprintln(String txt, int margin, int numlines = 0);
 

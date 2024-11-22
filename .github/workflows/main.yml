@@ -358,8 +358,14 @@
             pwd
             ls -all
             tree
-            mv -f ~/LauncherArtifacts/*/*.bin ./Release/bins
-            mv -f ~/LauncherArtifacts/*/*.json ./Release
+            if [ "${{ github.ref_type }}" == "tag" ]; then
+              cp -f ~/LauncherArtifacts/*/*.bin ./Release/bins
+            elif [ "${{ github.ref_type }}" != "tag" ]; then
+              cp -f ~/LauncherArtifacts/*/*.bin ./Beta/bins
+            fi
+            
+            cp -f ~/LauncherArtifacts/*/*.json ./Release
+            cp -f ~/LauncherArtifacts/*/*.json ./Beta
 
   
         - name: Commit and push changes

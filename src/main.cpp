@@ -36,8 +36,10 @@ uint8_t _sck=0;
 uint8_t _cs=0;
 #endif
 
-unsigned long dimmerTemp=millis();
 int dimmerSet=20;
+unsigned long previousMillis;
+bool isSleeping;
+bool isScreenOff;
 int bright=100;
 bool dimmer=false;
 int prog_handler;    // 0 - Flash, 1 - SPIFFS
@@ -151,6 +153,12 @@ void get_partition_sizes() {
 
   #endif
 }
+/*********************************************************************
+**  Function: _setup_gpio()
+**  Sets up a weak (empty) function to be replaced by /ports/* /interface.h
+*********************************************************************/
+void _setup_gpio() __attribute__((weak));
+void _setup_gpio() { }
 
 /*********************************************************************
 **  Function: setup                                    
@@ -160,118 +168,7 @@ void setup() {
   Serial.begin(115200);
 
   // Setup GPIOs and stuff
-  #if defined(STICK_C_PLUS2)
-    pinMode(UP_BTN, INPUT);
-    pinMode(SEL_BTN, INPUT);
-    pinMode(DW_BTN, INPUT);
-    pinMode(4, OUTPUT);
-    digitalWrite(4,HIGH);
-    //Grove pins down
-    pinMode(32, OUTPUT);
-    pinMode(33, OUTPUT);
-    digitalWrite(32,LOW);
-    digitalWrite(33,HIGH); //CS pin for CC1101 bruce pin
-
-  #elif defined(STICK_C_PLUS)
-    axp192.begin();
-    pinMode(SEL_BTN, INPUT);
-    pinMode(DW_BTN, INPUT);
-    //Grove Pins down
-    pinMode(32, OUTPUT);
-    pinMode(33, OUTPUT);
-    digitalWrite(32,LOW);
-    digitalWrite(33,HIGH);//CS pin for CC1101 bruce pin
-  #elif defined(M5STACK) && defined(CORE3)
-    M5.begin(); // Begin after TFT, for SDCard to work
-  #elif defined(CARDPUTER)
-    Keyboard.begin();
-    pinMode(10, INPUT);
-    //Grove Pins down
-    pinMode(1, OUTPUT);
-    pinMode(2, OUTPUT);
-    digitalWrite(1,HIGH);//CS pin for CC1101 bruce pin
-    digitalWrite(2,LOW);
-  #elif defined(T_DISPLAY_S3)
-    SD_MMC.setPins(PIN_SD_CLK, PIN_SD_CMD, PIN_SD_D0);
-    gpio_hold_dis((gpio_num_t)21);//PIN_TOUCH_RES 
-    pinMode(15, OUTPUT);
-    digitalWrite(15, HIGH);//PIN_POWER_ON 
-    pinMode(21, OUTPUT); //PIN_TOUCH_RES 
-    digitalWrite(21, LOW);//PIN_TOUCH_RES 
-    delay(500);
-    digitalWrite(21, HIGH);//PIN_TOUCH_RES 
-    Wire.begin(18, 17);//SDA, SCL
-    if (!touch.init()) {
-        Serial.println("Touch IC not found");
-    }
-  #elif defined(CYD)
-  pinMode(XPT2046_CS, OUTPUT);
-  //touchSPI.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
-  if(!touch.begin()) {
-      Serial.println("Touch IC not Started");
-      log_i("Touch IC not Started");
-  } else log_i("Touch IC Started");
-  digitalWrite(XPT2046_CS, LOW);
-
-
-  #elif defined(T_EMBED)
-    pinMode(PIN_POWER_ON, OUTPUT);
-    digitalWrite(PIN_POWER_ON, HIGH);
-  #ifdef T_EMBED_1101
-    pinMode(PIN_POWER_ON, OUTPUT);
-    digitalWrite(PIN_POWER_ON, HIGH);  // Power on CC1101 and LED
-    bool pmu_ret = false;
-    Wire.begin(8, 18);
-    pmu_ret = PPM.init(Wire, 8, 18, BQ25896_SLAVE_ADDRESS);
-    if(pmu_ret) {
-        PPM.setSysPowerDownVoltage(3300);
-        PPM.setInputCurrentLimit(3250);
-        Serial.printf("getInputCurrentLimit: %d mA\n",PPM.getInputCurrentLimit());
-        PPM.disableCurrentLimitPin();
-        PPM.setChargeTargetVoltage(4208);
-        PPM.setPrechargeCurr(64);
-        PPM.setChargerConstantCurr(832);
-        PPM.getChargerConstantCurr();
-        Serial.printf("getChargerConstantCurr: %d mA\n",PPM.getChargerConstantCurr());
-        PPM.enableADCMeasure();
-        PPM.enableCharge();
-    }
-     PPM.enableOTG();
-     PPM.disableOTG();
-    pinMode(12, OUTPUT);
-    digitalWrite(12,HIGH);//CS pin for CC1101 pin
-  #else
-    pinMode(BAT_PIN,INPUT); // Battery value
-
-  #endif
-  pinMode(BK_BTN, INPUT);
-  pinMode(ENCODER_KEY, INPUT);
-  // use TWO03 mode when PIN_IN1, PIN_IN2 signals are both LOW or HIGH in latch position.
-  encoder = new RotaryEncoder(ENCODER_INA, ENCODER_INB, RotaryEncoder::LatchMode::TWO03);
-
-  // register interrupt routine
-  attachInterrupt(digitalPinToInterrupt(ENCODER_INA), checkPosition, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(ENCODER_INB), checkPosition, CHANGE);
-
-  #elif defined(T_DECK)
-  pinMode(PIN_POWER_ON, OUTPUT);
-  digitalWrite(PIN_POWER_ON, HIGH);
-  pinMode(9, OUTPUT); // Radio CS Pin to HIGH (Inhibit the SPI Communication for this module)
-  digitalWrite(9, HIGH);
-  pinMode(SEL_BTN, INPUT);
-
-  // Setup for Trackball
-  pinMode(UP_BTN, INPUT_PULLUP);
-  attachInterrupt(UP_BTN, ISR_up, FALLING);
-  pinMode(DW_BTN, INPUT_PULLUP);
-  attachInterrupt(DW_BTN, ISR_down, FALLING);
-  pinMode(L_BTN, INPUT_PULLUP);
-  attachInterrupt(L_BTN, ISR_left, FALLING);
-  pinMode(R_BTN, INPUT_PULLUP);
-  attachInterrupt(R_BTN, ISR_right, FALLING);
-
-
-  #elif defined(HEADLESS)
+  #if defined(HEADLESS)
     #if SEL_BTN >= 0 // handle enter in launcher
       pinMode(SEL_BTN, INPUT);
     #endif
@@ -280,29 +177,17 @@ void setup() {
       digitalWrite(LED, LED_ON); // keeps on until exit
     #endif
 
-  #elif HAS_BTN>0
-    #if UP_BTN >= 0
-    pinMode(UP_BTN, INPUT);
-    #endif
-    #if SEL_BTN >= 0
-    pinMode(SEL_BTN, INPUT);
-    #endif
-    #if DW_BTN >= 0
-    pinMode(DW_BTN, INPUT);
-    #endif
   #endif
   #if defined(BACKLIGHT)
   pinMode(BACKLIGHT, OUTPUT);
   #endif
 
+  _setup_gpio();
+
   EEPROM.begin(EEPROMSIZE+32); // open eeprom.... 32 is the size of the SSID string stored at the end of the memory, using this trick to not change all the addresses
   if(EEPROM.read(EEPROMSIZE-13) > 3 || EEPROM.read(EEPROMSIZE-14) > 240 || EEPROM.read(EEPROMSIZE-15) > 100 || EEPROM.read(EEPROMSIZE-1) > 1 || EEPROM.read(EEPROMSIZE-2) > 1 || (EEPROM.read(EEPROMSIZE-3)==0xFF && EEPROM.read(EEPROMSIZE-4) == 0xFF && EEPROM.read(EEPROMSIZE-5)==0xFF && EEPROM.read(EEPROMSIZE-6) == 0xFF)) {
     log_i("EEPROM back to default\n0=%d\n1=%d\n2=%d\n9=%d\nES-1=%d",EEPROM.read(EEPROMSIZE-13),EEPROM.read(EEPROMSIZE-14),EEPROM.read(EEPROMSIZE-15),EEPROM.read(EEPROMSIZE-1),EEPROM.read(EEPROMSIZE-2) );
-  #if defined(CARDPUTER) || defined(M5STACK)
-    EEPROM.write(EEPROMSIZE-13, 1);    // Right rotation for cardputer
-  #else
-    EEPROM.write(EEPROMSIZE-13, 3);    // Left rotation
-  #endif
+    EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
     EEPROM.write(EEPROMSIZE-14, 20);  // 20s Dimm time
     EEPROM.write(EEPROMSIZE-15, 100);  // 100% brightness
     EEPROM.write(EEPROMSIZE-1, 1);    // OnlyBins
@@ -376,44 +261,15 @@ void setup() {
   String fileToCopy;
 
   //Init Display
-  #if !defined(M5STACK)
     #ifndef HEADLESS
       tft.setAttribute(PSRAM_ENABLE,true);
       tft.init();
     #endif
-  #endif
   tft.setRotation(rotation);
   tft.fillScreen(BGCOLOR);
   //setBrightness(bright,false);
   initDisplay(true);  
 
-  #if defined(T_DECK)
-  delay(500); // time to ESP32C3 start and enable the keyboard
-  Wire.begin(KB_I2C_SDA, KB_I2C_SCL);
-  #endif
-
-
-  #if defined(MARAUDERV4)    
-
- //uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; //org portrait
-uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from maruader
-//uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY  from maruader
-
-    tft.setTouch(calData);
-  #endif
-
-#if defined(T_DISPLAY_S3) || defined(CYD)
-  touch.setRotation(1);
-    // PWM backlight setup
-  ledcSetup(TFT_BRIGHT_CHANNEL,TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits); //Channel 0, 10khz, 8bits
-  ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
-  ledcWrite(TFT_BRIGHT_CHANNEL,255);
-#endif
-
-
-#if defined(M5STACK) && !defined(CORE3)
-    M5.begin(); // Begin after TFT, for SDCard to work
-#endif
   // Performs the verification when Launcher is installed through OTA
   partitionCrawler(); 
   // Checks the size of partitions and take actions to find the best options (in HEADLESS environment)
@@ -424,12 +280,10 @@ uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from 
   esp_partition_read(ota_partition,0,&firstByte,1);
   //Gets the config.conf from SD Card and fill out the settings JSON
   getConfigs();
-  #if defined(M5STACK)
-  coreFooter2();
+  #if defined(HAS_TOUCH)
+  TouchFooter2();
   #endif    
-  #if defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
-  TdisplayS3Footer2();
-  #endif  
+
   //Start Bootscreen timer
   int i = millis();
   int j = 0;
@@ -447,9 +301,9 @@ uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from 
           goto Launcher;
         }
 
-    #if defined (CARDPUTER)
-      Keyboard.update();
-      if (Keyboard.isPressed() && !(Keyboard.isKeyPressed(KEY_ENTER)))
+    #if defined (HAS_KEYBOARD)
+      keyStroke key=_getKeyPress();
+      if (key.pressed && !key.enter)
     #elif defined(STICK_C_PLUS2) || defined(STICK_C_PLUS)
       if(checkNextPress()) 
     #else
@@ -496,12 +350,11 @@ void loop() {
   while(1){
     if (redraw) { 
       drawMainMenu(index); 
-      #if defined(M5STACK)
-      coreFooter();
-      #elif defined(T_DISPLAY_S3) || defined(CYD) || defined(MARAUDERV4)
-      TdisplayS3Footer();
+      #if defined(HAS_TOUCH)
+      TouchFooter();
       #endif      
       redraw = false; 
+      returnToMenu = false;
       delay(REDRAW_DELAY); 
     }
 
@@ -535,14 +388,15 @@ void loop() {
         if (!stopOta) {
           if (WiFi.status() != WL_CONNECTED) {
             int nets;
+            WiFi.disconnect(true);
             WiFi.mode(WIFI_MODE_STA);
             displayRedStripe("Scanning...");
             nets=WiFi.scanNetworks();
-            //delay(3000);
             options = { };
             for(int i=0; i<nets; i++){
               options.push_back({WiFi.SSID(i).c_str(), [=]() { wifiConnect(WiFi.SSID(i).c_str(),int(WiFi.encryptionType(i))); }});
             }
+            options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
             delay(200);
             loopOptions(options);
             if (WiFi.status() == WL_CONNECTED) {
@@ -588,7 +442,7 @@ void loop() {
         options.push_back({"Part Change",  [=]() { partitioner(); }});
         options.push_back({"Part List",  [=]() { partList(); }});
 
-      #ifndef STICK_C_PLUS
+      #ifndef PART_04MB
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
       #endif
 

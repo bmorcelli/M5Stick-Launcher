@@ -4,6 +4,7 @@
 #include "display.h"
 #include "mykeyboard.h"
 #include "settings.h"
+#include "powerSave.h"
 
 
 const char* root_ca3 = 
@@ -106,7 +107,14 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
       count++;
       if (count > 20) {
         wrongPass = true;
-        goto Retry;
+        options = {
+          {"Retry", [&](){ yield();}},
+          {"Main Menu", [&](){ returnToMenu=true;}},
+        };
+        loopOptions(options);
+        delay(200);
+        if(!returnToMenu) goto Retry;
+        else goto END;
       }
     }
 
@@ -118,7 +126,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
     Serial.print("IP: ");
     Serial.println(WiFi.softAPIP());
   }
-
+END:
   delay(200);
 }
 /***************************************************************************************
@@ -282,7 +290,7 @@ retry:
     http.end();
 
   } else { displayRedStripe("Couldn't Connect"); }
-  resetDimmer();
+  wakeUpScreen();
 }
 
 /***************************************************************************************
@@ -329,11 +337,6 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   httpUpdate.onProgress(progressHandler);
   httpUpdate.setLedPin(LED, LED_ON);
 
-#ifndef STICK_C_PLUS
-  //Erase FAT partition
-  //eraseFAT();
-#endif
-
   if(nb) app_offset = 0;
   if(!httpUpdate.updateFromOffset(*client, fileAddr, app_offset, app_size)) {
     displayRedStripe("Instalation Failed");
@@ -369,7 +372,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
     }
   }
 
-#if !defined(STICK_C_PLUS)
+#if !defined(PART_04MB)
   if(fat) {
     //eraseFAT();
     int FAT = U_FAT_vfs;

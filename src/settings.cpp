@@ -31,6 +31,8 @@ From 1 to 5: Nemo shared addresses
 
 ***************************************************************************************/
 
+// This function comes from interface.h
+void _setBrightness(uint8_t brightval) { }
 
 /*********************************************************************
 **  Function: setBrightness                             
@@ -39,26 +41,10 @@ From 1 to 5: Nemo shared addresses
 void setBrightness(int brightval, bool save) {
   if(brightval>100) brightval=100;
 
-  #if defined(STICK_C_PLUS2) || defined(CARDPUTER) || defined(T_EMBED)  || defined(T_DECK)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * brightval/100 )); ; // 4 is the number of options
-  analogWrite(BACKLIGHT, bl);
-  #elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(brightval);
-  #elif defined(M5STACK)
-  M5.Display.setBrightness(brightval);
-  #elif defined(HEADLESS)
+  #if defined(HEADLESS)
   //do Nothing
-  #else
-  int dutyCycle;
-  if (brightval==100) dutyCycle=255;
-  else if (brightval==75) dutyCycle=130;
-  else if (brightval==50) dutyCycle=70;
-  else if (brightval==25) dutyCycle=20;
-  else if (brightval==0) dutyCycle=5;
-  else dutyCycle = ((brightval*255)/100);
-
-  Serial.printf("dutyCycle for bright 0-255: %d",dutyCycle);
-  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
+  #else 
+  _setBrightness(brightval);
   #endif
 
  if (save) {
@@ -81,48 +67,18 @@ void getBrightness() {
   if(bright>100) { 
     bright = 100;
 
-#if defined(STICK_C_PLUS2) || defined(CARDPUTER) || defined(T_EMBED) || defined(T_DECK)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
-  analogWrite(BACKLIGHT, bl);
-#elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(bright);
-#elif defined(M5STACK)
-  M5.Display.setBrightness(bright);
-#elif defined(HEADLESS)
+#if defined(HEADLESS)
 //do Nothing
-#else
-  int dutyCycle;
-  if (bright==100) dutyCycle=255;
-  else if (bright==75) dutyCycle=130;
-  else if (bright==50) dutyCycle=70;
-  else if (bright==25) dutyCycle=20;
-  else if (bright==0) dutyCycle=5;
-  else dutyCycle = ((bright*255)/100);
-  Serial.printf("dutyCycle for bright 0-255: %d",dutyCycle);
-  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
+#else 
+  _setBrightness(bright);
 #endif
     setBrightness(100);
   }
 
-#if defined(STICK_C_PLUS2) || defined(CARDPUTER) || defined(T_EMBED)  || defined(T_DECK)
-  int bl = MINBRIGHT + round(((255 - MINBRIGHT) * bright/100 )); 
-  analogWrite(BACKLIGHT, bl);
-#elif defined(STICK_C) || defined(STICK_C_PLUS)
-  axp192.ScreenBreath(bright);
-#elif defined(M5STACK)
-  M5.Display.setBrightness(bright);
-#elif defined(HEADLESS)
+#if defined(HEADLESS)
 //do Nothing
-#else
-  int dutyCycle;
-  if (bright==100) dutyCycle=255;
-  else if (bright==75) dutyCycle=130;
-  else if (bright==50) dutyCycle=70;
-  else if (bright==25) dutyCycle=20;
-  else if (bright==0) dutyCycle=5;
-  else dutyCycle = ((bright*255)/100);
-  Serial.printf("dutyCycle for bright 0-255: %d",dutyCycle);
-  ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
+#else 
+  _setBrightness(bright);
 #endif
 
 }
@@ -302,7 +258,7 @@ void chargeMode() {
   delay(500);
   tft.fillScreen(BGCOLOR);
   unsigned long tmp=0;
-  while(!checkSelPress(true)) {
+  while(!checkSelPress()) {
     if(millis()-tmp>5000) {
       displayRedStripe(String(getBattery()) + " %");
       tmp=millis();

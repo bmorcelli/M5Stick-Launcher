@@ -4,17 +4,14 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 #include "pre_compiler.h"
+#include "interface.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <functional>
 #include <vector>
-#if defined(T_DISPLAY_S3)
-    #define SDM SD_MMC
-#else
+#if !defined(SDM)
     #define SDM SD
-#endif
-#if defined (M5STACK)
-  #include <util/Unified/M5Unified.h>
+    #define SDM_SD
 #endif
 
 #define U_FAT_vfs 300 
@@ -31,7 +28,11 @@ extern uint32_t MAX_SPIFFS;
 extern uint32_t MAX_FAT_vfs;
 extern uint32_t MAX_FAT_sys;
 
-extern unsigned long dimmerTemp;
+// Screen sleep control variables
+extern unsigned long previousMillis;
+extern bool isSleeping;
+extern bool isScreenOff;
+
 extern int dimmerSet;
 extern int bright;
 extern bool dimmer;

@@ -48,6 +48,7 @@ void webUIMyNet() {
     for(int i=0; i<nets; i++){
       options.push_back({WiFi.SSID(i).c_str(), [=]() { startWebUi(WiFi.SSID(i).c_str(),int(WiFi.encryptionType(i))); }});
     }
+    options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
     delay(200);
     loopOptions(options);
 
@@ -68,6 +69,7 @@ void loopOptionsWebUi() {
   std::vector<std::pair<std::string, std::function<void()>>> options = {
       {"my Network", [=]() { webUIMyNet(); }},
       {"AP mode", [=]()    { startWebUi("Launcher", 0, true); }},
+      {"Main Menu", [=]() { returnToMenu=true; }},
   };
   delay(200);
 
@@ -163,10 +165,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
         if(Update.begin(file_size,command)) {
           if(command == 0) prog_handler = 0;
           else prog_handler = 1;
-        #ifndef STICK_C_PLUS
-          //Erase FAT partition
-          //eraseFAT();
-        #endif
+
           progressHandler(0, 500);
           Update.onProgress(progressHandler);
         } else { displayRedStripe("FAIL 160: " + String(Update.getError())); delay(3000); }
@@ -464,12 +463,12 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   if(!mode_ap) txt = WiFi.localIP().toString();
   else txt = WiFi.softAPIP().toString();
   
-#ifndef STICK_C
-  tft.drawCentreString("http://launcher.local", WIDTH/2,22,1);
-  setTftDisplay(7,47,~BGCOLOR,FONT_P,BGCOLOR);
-#else
+#if WIDTH<200
   tft.drawCentreString("http://launcher.local", WIDTH/2,17,1);
   setTftDisplay(7,26,~BGCOLOR,FONT_P,BGCOLOR);
+#else
+  tft.drawCentreString("http://launcher.local", WIDTH/2,22,1);
+  setTftDisplay(7,47,~BGCOLOR,FONT_P,BGCOLOR);
 #endif
   tft.setTextSize(FONT_M);
   tft.print("IP ");   tftprintln(txt,10,1);
@@ -480,7 +479,7 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
 
   tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", WIDTH/2,HEIGHT-15,1);
 
-  while (!checkSelPress(true))
+  while (!checkSelPress())
   {
     if (shouldReboot) {
       ESP.restart();

@@ -10,7 +10,7 @@ String fileToCopy;
 // Protected global variables
 String fileList[MAXFILES][3];
 
-#ifndef STICK_C_PLUS
+#ifndef PART_04MB
 /***************************************************************************************
 ** Function name: eraseFAT
 ** Description:   erase FAT partition to micropython compatibilities
@@ -54,10 +54,8 @@ bool eraseFAT() {
 ** Description:   Start SD Card
 ***************************************************************************************/
 bool setupSdCard() {
-  #if defined(T_DISPLAY_S3) // Core2 uses the same SPI bus as TFT
+  #if !defined(SDM_SD) // fot Lilygo T-Display S3 with lilygo shield
   if (!SD_MMC.begin("/sdcard",true)) 
-  #elif defined(CORE3)
-  if (!SDM.begin(SDCARD_CS))
   #elif (TFT_MOSI == SDCARD_MOSI)
   if (!SDM.begin(SDCARD_CS,tft.getSPIinstance())) // https://github.com/Bodmer/TFT_eSPI/discussions/2420
   #elif defined(HEADLESS)
@@ -497,9 +495,8 @@ String loopSD(bool filePicker) {
       redraw = true;
     }
 
-    #ifdef CARDPUTER
-      Keyboard.update();
-      if(Keyboard.isKeyPressed('`')) break;
+    #ifdef ESC_LOGIC
+      if(checkEscPress()) break;
     #endif
   }
   //clear fileList memory
@@ -530,11 +527,6 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
     int written = 0;
     uint8_t buf[1024];
     int bytesRead;
-
-  #ifndef STICK_C_PLUS
-    //Erase FAT partition
-    //eraseFAT();
-  #endif
 
     prog_handler = 0; // Install flash update
     if (command==U_SPIFFS || command == U_FAT_vfs || command == U_FAT_sys) prog_handler = 1; // Install flash update
