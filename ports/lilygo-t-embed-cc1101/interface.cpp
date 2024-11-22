@@ -34,19 +34,19 @@ void _setup_gpio() {
     #ifdef T_EMBED_1101
       // T-Embed CC1101 has a antenna circuit optimized to each frequency band, controlled by SW0 and SW1
       //Set antenna frequency settings
-      pinMode(BOARD_LORA_SW1, OUTPUT);
-      pinMode(BOARD_LORA_SW0, OUTPUT);
+      pinMode(47, OUTPUT);
+      pinMode(48, OUTPUT);
 
       // Chip Select CC1101 to HIGH State
-      pinMode(CC1101_SS_PIN, OUTPUT);
-      digitalWrite(CC1101_SS_PIN,HIGH);
+      pinMode(12, OUTPUT);
+      digitalWrite(12,HIGH);
 
       // Power chip pin
       pinMode(PIN_POWER_ON, OUTPUT);
       digitalWrite(PIN_POWER_ON, HIGH);  // Power on CC1101 and LED
       bool pmu_ret = false;
-      Wire.begin(GROVE_SDA, GROVE_SCL);
-      pmu_ret = PPM.init(Wire, GROVE_SDA, GROVE_SCL, BQ25896_SLAVE_ADDRESS);
+      Wire.begin(8, 18);
+      pmu_ret = PPM.init(Wire, 8, 18, BQ25896_SLAVE_ADDRESS);
       if(pmu_ret) {
           PPM.setSysPowerDownVoltage(3300);
           PPM.setInputCurrentLimit(3250);

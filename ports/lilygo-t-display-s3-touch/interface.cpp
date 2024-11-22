@@ -491,7 +491,59 @@ String keyboard(String mytext, int maxSize, String msg) {
 
       redraw=true;
     }
+    if(checkSelPress())  { 
+      tft.setCursor(cX,cY);
+      if(caps) z=1;
+      else z=0;
+      if(x==0 && y==-1) break;
+      else if(x==1 && y==-1) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,BGCOLOR); }
+      else if(x==2 && y==-1 && mytext.length() > 0) {
+        DEL:
+        mytext.remove(mytext.length()-1);
+        int fS=FM;
+        if(mytext.length()>19) { tft.setTextSize(FP); fS=FP; }
+        else tft.setTextSize(FM);
+        tft.setCursor((cX-fS*LW),cY);
+        tft.setTextColor(FGCOLOR,BGCOLOR);
+        tft.print(" "); 
+        tft.setTextColor(~BGCOLOR, 0x5AAB);
+        tft.setCursor(cX-fS*LW,cY);
+        cX=tft.getCursorX();
+        cY=tft.getCursorY();         
+      }
+      else if(x>2 && y==-1 && mytext.length()<maxSize) mytext += " ";
+      else if(y>-1 && mytext.length()<maxSize) {
+        mytext += keys[y][x][z];
+        ADD:
+        if(mytext.length()!=20 && mytext.length()!=20) tft.print(keys[y][x][z]);
+        cX=tft.getCursorX();
+        cY=tft.getCursorY();
+      } 
+      redraw = true;
+      delay(200);
+    }
 
+    /* Down Btn to move in X axis (to the right) */  
+    if(checkNextPress()) 
+    { 
+      delay(250);
+      if(checkNextPress()) { x--; delay(250); } // Long Press
+      else x++; // Short Press
+
+      if(y<0 && x>3) x=0;
+      if(x>11) x=0;
+      else if (x<0) x=11;
+      redraw = true;
+    }
+    /* UP Btn to move in Y axis (Downwards) */
+    if(checkPrevPress()) { 
+      delay(250);
+      if(checkPrevPress()) { y--; delay(250);  }// Long press
+      else y++; // short press
+      if(y>3) { y=-1; }
+      else if(y<-1) y=3;
+      redraw = true;
+    }
   }
   
   //Resets screen when finished writing

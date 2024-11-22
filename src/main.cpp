@@ -455,14 +455,8 @@ void loop() {
 
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
 
-        #if defined(STICK_C_PLUS2)
-        options.push_back({"Turn-off",  [=]() { digitalWrite(4,LOW); }});
-        #elif defined(T_EMBED_1101)
-        options.push_back({"Turn-off",  [=]() { digitalWrite(PIN_POWER_ON,LOW); esp_sleep_enable_ext0_wakeup(GPIO_NUM_6,LOW); esp_deep_sleep_start(); }});
-        #elif defined(T_EMBED)
-        options.push_back({"Turn-off",  [=]() { digitalWrite(PIN_POWER_ON,LOW); }});
-        #elif defined(STICK_C_PLUS)
-        options.push_back({"Turn-off",  [=]() { axp192.PowerOff(); }});
+        #if defined(STICK_C_PLUS2) || defined(T_EMBED) || defined(STICK_C_PLUS)
+        options.push_back({"Turn-off",  [=]() { powerOff(); }});
         #endif
         options.push_back({"Main Menu",  [=]() { returnToMenu=true; }});
         delay(200);
