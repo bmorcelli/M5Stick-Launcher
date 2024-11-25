@@ -1,0 +1,1 @@
+{"name":"Mini","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-Marauder-Mini.bin","offset":0}]}]}

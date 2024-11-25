@@ -1,0 +1,1 @@
+{"name":"StickC","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-m5stack-c.bin","offset":0}]}]}
