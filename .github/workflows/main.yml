@@ -177,7 +177,7 @@
               }
             - {
                 vendor: "CYD",
-                name: "CYD-2432S028C",
+                name: "CYD-2432W328C",
                 description: "Inverted Colors and 2.4in",
                 link: "",
                 family: "ESP32",
@@ -188,11 +188,11 @@
               } 
             - {
                 vendor: "CYD",
-                name: "CYD-2432S028C",
+                name: "CYD-2432W328C",
                 description: "",
                 link: "",
                 family: "ESP32",
-                env: "CYD-2432S028C",
+                env: "CYD-2432W328C",
                 partitions: {
                   bootloader_addr: "0x1000",
                 },
@@ -303,7 +303,7 @@
                 js_content="{\"name\":\"${{ matrix.board.name }}\",\"builds\":[{\"chipFamily\":\"${{ matrix.board.family }}\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-${{ matrix.board.env }}.bin\",\"offset\":0}]}]}"
                 echo "$js_content" > "./Manifest-${{ matrix.board.name }}.json"
 
-                html="<li><label><input type='radio' name='type' value='${{ matrix.board.name }}' />${{ matrix.board.vendor }} - <a href='${{ matrix.board.link }}'>${{ matrix.board.name }}</a> ${{ matrix.board.description }}</label></li>"
+                html="<input type='radio' name='type' value='${{ matrix.board.env }}' id='${{ matrix.board.env }}' /><a href='${{ matrix.board.link }}'>${{ matrix.board.name }}</a> ${{ matrix.board.description }}</label>"
                 echo "$html" > ./Launcher-${{ matrix.board.vendor }}.html
 
           - name: Upload Artifacts
