@@ -156,7 +156,7 @@
             - {
                 vendor: "CYD",
                 name: "CYD-2432S028",
-                description: "",
+                description: "(Resistive)",
                 link: "",
                 family: "ESP32",
                 env: "CYD-2432S028",
@@ -166,8 +166,8 @@
               } 
             - {
                 vendor: "CYD",
-                name: "CYD-2432S028",
-                description: "Inverted Colors",
+                name: "CYD-2432S028_inv",
+                description: "(Resistive) Inverted Colors",
                 link: "",
                 family: "ESP32",
                 env: "CYD-2-USB",
@@ -177,8 +177,8 @@
               }
             - {
                 vendor: "CYD",
-                name: "CYD-2432W328C",
-                description: "Inverted Colors and 2.4in",
+                name: "CYD-2432W328C_inv",
+                description: "(Capacitive) Inverted Colors and 2.4in",
                 link: "",
                 family: "ESP32",
                 env: "CYD-2432W328C_2",
@@ -189,7 +189,7 @@
             - {
                 vendor: "CYD",
                 name: "CYD-2432W328C",
-                description: "",
+                description: "(Capacitive)",
                 link: "",
                 family: "ESP32",
                 env: "CYD-2432W328C",
@@ -223,7 +223,7 @@
                 vendor: "Lilygo",
                 name: "T-Display_S3_Touch",
                 description: "",
-                link: "",
+                link: "https://lilygo.cc/products/t-display-s3?_pos=1&_sid=d7b2ebc22&_ss=r&variant=42589373268149",
                 family: "ESP32-S3",
                 env: "lilygo-t-display-S3",
                 partitions: {
@@ -234,7 +234,7 @@
                 vendor: "Lilygo",
                 name: "T-Embed",
                 description: "",
-                link: "",
+                link: "https://lilygo.cc/products/t-embed",
                 family: "ESP32-S3",
                 env: "lilygo-t-embed",
                 partitions: {
@@ -244,8 +244,8 @@
             - {
                 vendor: "Lilygo",
                 name: "T-Embed_CC1101",
-                description: "",
-                link: "",
+                description: "(Transparent version)",
+                link: "https://lilygo.cc/products/t-embed-cc1101",
                 family: "ESP32-S3",
                 env: "lilygo-t-embed-cc1101",
                 partitions: {
@@ -255,8 +255,8 @@
             - {
                 vendor: "Lilygo",
                 name: "T-Deck",
-                description: "",
-                link: "",
+                description: "(Normal and Plus)",
+                link: "https://lilygo.cc/products/t-deck",
                 family: "ESP32-S3",
                 env: "lilygo-t-deck",
                 partitions: {
