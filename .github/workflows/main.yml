@@ -323,6 +323,7 @@
       name: Post-compile steps
       runs-on: ubuntu-latest
       needs: compile_sketch
+      if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') || github.ref_type == 'tag'
       steps:
         - uses: actions/checkout@v4
           with:
