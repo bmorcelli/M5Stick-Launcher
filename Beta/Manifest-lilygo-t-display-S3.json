@@ -1,0 +1,1 @@
+{"name":"T-Display_S3_Touch","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-lilygo-t-display-S3.bin","offset":0}]}]}

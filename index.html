@@ -318,7 +318,7 @@
       const version = document.querySelector('input[name="version"]:checked').value;
       const type = document.querySelector('input[name="type"]:checked').value;
       const button = document.querySelector('esp-web-install-button');
-      button.manifest = `${version}/Manifest-${type}.json`;
+      button.manifest = `${version}/Launcher-${type}.json`;
       button.classList.remove('invisible');
     }
 
