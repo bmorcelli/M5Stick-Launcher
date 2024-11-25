@@ -362,7 +362,7 @@
                   "Launcher-Lilygo.html")
                     lilygo+="$content\n"
                     ;;
-                  "Launcher-ESP32.html")
+                  "Launcher-Espressif.html")
                     esp32+="$content\n"
                     ;;
                   "Launcher-CYD.html")
