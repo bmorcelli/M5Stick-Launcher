@@ -302,7 +302,7 @@
               
                 js_content="{\"name\":\"${{ matrix.board.name }}\",\"builds\":[{\"chipFamily\":\"${{ matrix.board.family }}\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-${{ matrix.board.env }}.bin\",\"offset\":0}]}]}"
                 echo "$js_content" > "./Manifest-${{ matrix.board.env }}.json"
-                if [[ "${{ matrix.board.link }}" == ""; then
+                if [[ "${{ matrix.board.link }}" == "" ]]; then
                   html="<input type='radio' name='type' value='${{ matrix.board.env }}' id='${{ matrix.board.env }}' /><label for='${{ matrix.board.env}}'>${{ matrix.board.name }} ${{ matrix.board.description }}</label>"
                 else
                   html="<input type='radio' name='type' value='${{ matrix.board.env }}' id='${{ matrix.board.env }}' /><label for='${{ matrix.board.env}}'>${{ matrix.board.name }} <a href='${{ matrix.board.link }}' target='_blank' rel='noopener noreferrer'>(link)</a> ${{ matrix.board.description }}</label>"
