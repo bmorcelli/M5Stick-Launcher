@@ -12,96 +12,212 @@
     <meta name="color-scheme" content="dark light" />
     <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      padding: 20px;
-      color: #00dd00;
-      background-color: #202124;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		margin: 0;
+		padding: 20px;
+		color: #00dd00;
+		background-color: #202124;
+		--esp-tools-button-color: #008000;
     }
-      .content {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 12px;
-      }
-      h2 {
-        margin-top: 2em;
-      }
-      h3 {
-        margin-top: 1.5em;
-      }
+	.content {
+		max-width: 600px;
+		margin: 0 auto;
+		padding: 12px;
+	}
+	h2 {
+		margin-top: 2em;
+	}
+	h3 {
+		margin-top: 1.5em;
+	}
     a {
-      color: #e0d204;
-      text-decoration: none;
+		color: #e0d204;
+		text-decoration: none;
     }
- 
     a:hover {
-      text-decoration: underline;
+		text-decoration: underline;
     }
-      .invisible {
-        visibility: hidden;
-      }
-      .hidden {
-        display: none;
-      }
-      esp-web-install-button[install-unsupported] {
-        visibility: inherit;
-      }
-      .content pre {
-        max-width: 100%;
-        overflow-y: scroll;
-      }
-      .footer {
-        margin-top: 24px;
-        border-top: 1px solid #ccc;
-        padding-top: 24px;
-        text-align: center;
-      }
-      .footer .initiative {
-        font-style: italic;
-        margin-top: 16px;
-      }
-      table {
-        border-spacing: 0;
-      }
-      td {
-        padding: 8px;
-        border-bottom: 1px solid #ccc;
-      }
-      .radios li {
-        list-style: none;
-        line-height: 2em;
-      }
-	  .logo {
-        max-width: 400px;
+	.invisible {
+		visibility: hidden;
+	}
+	.hidden {
+		display: none;
+	}
+	esp-web-install-button[install-unsupported] {
+		visibility: inherit;
+	}
+	.content pre {
+		max-width: 100%;
+		overflow-y: scroll;
+	}
+	.footer {
+		margin-top: 24px;
+		border-top: 1px solid #ccc;
+		padding-top: 24px;
+		text-align: center;
+	}
+	.footer .initiative {
+		font-style: italic;
+		margin-top: 16px;
+	}
+	table {
+		border-spacing: 0;
+	}
+	td {
+		padding: 8px;
+		border-bottom: 1px solid #ccc;
+	}
+	.radios li {
+		list-style: none;
+		line-height: 2em;
+	}
+	.logo {
+		max-width: 400px;
 		display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-	  .wrapper {
-        display: flex;
-        justify-content: center;
-      }
-	  .back1usb {
-        height: 18%;
-        width: 20%;
-        padding: 10px;
-        text-align: center;
-	   }
-	   .back2usb {
-        height: 18%;
-        width: 20%;
-        padding: 10px;
-        text-align: center;
-	   }
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #333;
-          color: #fff;
-        }
-        a {
-          color: #58a6ff;
-        }
-      }
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.wrapper {
+		display: flex;
+		justify-content: center;
+	}
+	.back1usb {
+		height: 18%;
+		width: 20%;
+		padding: 10px;
+		text-align: center;
+	}
+	.back2usb {
+		height: 18%;
+		width: 20%;
+		padding: 10px;
+		text-align: center;
+	}
+    .info-box {
+		border: 2px solid #008000;
+		background-color: transparent;
+		color: white;
+		border-radius: 8px;
+		margin: 20px 10%;
+     }
+
+    .switch {
+		display: flex;
+		justify-content: center;
+		margin: 20px 0;
+    }
+
+    .switch label {
+		cursor: pointer;
+		background-color: #333;
+		color: #fff;
+		border-radius: 20px;
+		padding: 10px 20px;
+		margin: 0 5px;
+		transition: background-color 0.3s;
+    }
+
+    .switch input[type="radio"] {
+		display: none;
+    }
+
+    .switch input[type="radio"]:checked + label {
+		background-color: #008000;
+		color: #fff;
+    }
+
+	.device-selection {
+		margin: 20px 0;
+	}
+
+	.device-selection h3 {
+		text-align: center;
+	}
+
+	.device-category {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 20px;
+	}
+
+	.device-button {
+		background-color: #333;
+		color: white;
+		border: none;
+		border-radius: 20px;
+		padding: 10px 20px;
+		font-size: 16px;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
+
+	.device-button:focus {
+		outline: none;
+	}
+
+	.device-list {
+		display: none;
+	}
+
+	.device-selection input[type="radio"] {
+		display: none;
+	}
+
+	.device-selection label {
+		display: block;
+		background-color: #333;
+		color: #fff;
+		border-radius: 6px;
+		padding: 10px;
+		margin: 5px 0;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
+
+	.device-selection input[type="radio"]:checked + label {
+		background-color: #008000;
+		color: #fff;
+	}
+
+	.device-selection input[type="radio"]:focus + label {
+		outline: none;
+	}
+
+	.device-selection .device-category button.active {
+		background-color: #008000;
+	}
+
+	.device-list.m5stack {
+		display: none;
+	}
+	.device-list.lilygo {
+		display: none;
+	}
+	.device-list.cyd {
+		display: none;
+	}
+	.device-list.marauder {
+		display: none;
+	}
+	.device-list.esp32 {
+		display: none;
+	}	
+
+	@media (prefers-color-scheme: dark) {
+		body {
+			background-color: #333;
+			color: #fff;
+		}
+		a {
+			color: #58a6ff;
+		}
+	}
+
+
+	input[type='radio'] {
+		accent-color: #008000;
+	}
+	
     </style>
     <script type="module" src="https://unpkg.com/esp-web-tools@8.0.1/dist/web/install-button.js?module"></script>
   </head>
@@ -116,7 +232,30 @@
       <p><b>Cardputer: </b> Turn off and unplug from USB, Hold the btn G0 (upper right corner) and connect into the USB. Screen will be back but the computer will reconize</p>
       <p><b>StickCs: </b>Turn off, Connect  one side of a jumper cable into GND and the other side in G0 (in the header pin), connect the USB Cable and remove the jumper cable</p>
 
-      <!-- BOARDS -->
+  <h3>Select the version:</h3>
+    <div class="switch">
+      <input type="radio" name="version" id="latest" value="Release" checked />
+      <label for="latest">Latest Release</label>
+      <input type="radio" name="version" id="beta" value="Beta" />
+      <label for="beta">Beta Release</label>
+    </div>
+
+	<div class="device-selection">
+	  <div class="device-category">
+		<button class="device-button" id="m5stack" onclick="toggleDeviceCategory('m5stack')">M5Stack</button>
+		<button class="device-button" id="lilygo" onclick="toggleDeviceCategory('lilygo')">Lilygo</button>
+		<button class="device-button" id="cyd" onclick="toggleDeviceCategory('cyd')"> CYD </button>
+		<button class="device-button" id="marauder" onclick="toggleDeviceCategory('marauder')"> Marauder </button>
+		<button class="device-button" id="esp32" onclick="toggleDeviceCategory('esp32')">ESP32</button>
+	  </div>
+
+<!-- Information added by workflow -->
+
+<!-- BOARDS -->
+
+<!-- Information added by workflow -->
+
+	</div>
 
       <p class="button-row" align="center">
         <esp-web-install-button class="invisible"></esp-web-install-button>
@@ -131,15 +270,35 @@
 		<br>
 
     </div>
-    <script>
-      document.querySelectorAll('input[name="type"]').forEach(radio =>
-        radio.addEventListener("change", () => {
-          const button = document.querySelector('esp-web-install-button');
-          button.manifest = `Release/Manifest-${radio.value}.json`;
-          button.classList.remove('invisible');
-        }
-      ));
-	    
-    </script>
+  <script>
+	function toggleDeviceCategory(category) {
+	  document.querySelectorAll('.device-list').forEach(function(list) {
+		list.style.display = 'none';
+	  });
+
+	  const selectedList = document.querySelector('.' + category);
+	  selectedList.style.display = 'block';
+
+	  document.querySelectorAll('.device-button').forEach(function(button) {
+		button.classList.remove('active');
+	  });
+	  document.getElementById(category).classList.add('active');
+	}
+
+
+    function updateManifest() {
+      const version = document.querySelector('input[name="version"]:checked').value;
+      const type = document.querySelector('input[name="type"]:checked').value;
+      const button = document.querySelector('esp-web-install-button');
+      button.manifest = `${version}/Launcher-${type}.json`;
+      button.classList.remove('invisible');
+    }
+
+    document.querySelectorAll('input[name="version"], input[name="type"]').forEach(radio => 
+      radio.addEventListener("change", updateManifest)
+    );
+
+    updateManifest();
+  </script>
   </body>
 </html>
