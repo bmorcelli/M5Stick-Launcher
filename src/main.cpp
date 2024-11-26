@@ -161,6 +161,13 @@ void _setup_gpio() __attribute__((weak));
 void _setup_gpio() { }
 
 /*********************************************************************
+**  Function: _post_setup_gpio()
+**  Sets up a weak (empty) function to be replaced by /ports/* /interface.h
+*********************************************************************/
+void _post_setup_gpio() __attribute__((weak));
+void _post_setup_gpio() { }
+
+/*********************************************************************
 **  Function: setup                                    
 **  Where the devices are started and variables set    
 *********************************************************************/
@@ -283,6 +290,9 @@ void setup() {
   #if defined(HAS_TOUCH)
   TouchFooter2();
   #endif    
+
+
+  _post_setup_gpio();
 
   //Start Bootscreen timer
   int i = millis();
