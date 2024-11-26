@@ -413,10 +413,10 @@ String keyboard(String mytext, int maxSize, String msg) {
     /* When Select a key in keyboard */
 
     int z=0;
-
+    
     M5.update();
     auto t = M5.Touch.getDetail();
-    if (t.wasClicked()) 
+    if (t.isPressed() || t.isHolding())
      {
       if (box_list[48].contain(t.x, t.y)) { break; }      // Ok
       if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,BGCOLOR); goto THIS_END; } // CAP
