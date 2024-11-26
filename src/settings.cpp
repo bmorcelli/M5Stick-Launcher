@@ -181,7 +181,6 @@ void setBrightnessMenu() {
   };
   delay(200);
   loopOptions(options, true);
-  saveConfigs();
   delay(200);
 }
 /*********************************************************************
@@ -221,7 +220,6 @@ void setUiColor() {
   EEPROM.commit();       // Store data to EEPROM
   EEPROM.end();
 
-  saveConfigs();
   delay(200);
 }
 /*********************************************************************
@@ -244,7 +242,6 @@ void setdimmerSet() {
   EEPROM.write(EEPROMSIZE-14, dimmerSet);  // 20s Dimm time
   EEPROM.commit();
   EEPROM.end();
-  saveConfigs();
   delay(200);
 }
 

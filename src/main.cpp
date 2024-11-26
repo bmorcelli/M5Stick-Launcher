@@ -268,13 +268,13 @@ void setup() {
   String fileToCopy;
 
   //Init Display
-    #ifndef HEADLESS
-      tft.setAttribute(PSRAM_ENABLE,true);
-      tft.init();
-    #endif
+  #ifndef HEADLESS
+    tft.setAttribute(PSRAM_ENABLE,true);
+    tft.init();
+  #endif
   tft.setRotation(rotation);
   tft.fillScreen(BGCOLOR);
-  //setBrightness(bright,false);
+  setBrightness(bright,false);
   initDisplay(true);  
 
   // Performs the verification when Launcher is installed through OTA
@@ -437,20 +437,20 @@ void loop() {
         options = {
           
           {"Charge Mode", [=](){ chargeMode(); }},
-          {"Brightness", [=]() { setBrightnessMenu(); }},
-          {"Dim time", [=]()   { setdimmerSet();}},
-          {"UI Color", [=]()   { setUiColor();}},
+          {"Brightness", [=]() { setBrightnessMenu();    saveConfigs();}},
+          {"Dim time", [=]()   { setdimmerSet();         saveConfigs();}},
+          {"UI Color", [=]()   { setUiColor();           saveConfigs();}},
         };
         if(sdcardMounted) {
-          if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false); saveConfigs();}});
-          else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true); saveConfigs();}});
+          if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false);  saveConfigs();}});
+          else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true);   saveConfigs();}});
         }
         
         if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
-        else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true); saveConfigs();}});
-        options.push_back({"Rotate 180",  [=]() { gsetRotation(true); }});
-        options.push_back({"Part Change",  [=]() { partitioner(); }});
-        options.push_back({"Part List",  [=]() { partList(); }});
+        else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true);  saveConfigs();}});
+        options.push_back(              {"Rotate 180",    [=]() { gsetRotation(true);         saveConfigs(); }});
+        options.push_back(              {"Part Change",   [=]() { partitioner(); }});
+        options.push_back(              {"Part List",     [=]() { partList(); }});
 
       #ifndef PART_04MB
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
