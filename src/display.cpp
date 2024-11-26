@@ -646,7 +646,7 @@ void loopVersions() {
       options = {
           {"OTA Install", [=]() { installFirmware(String(file), app_size, spiffs, spiffs_offset, spiffs_size, nb, fat, (uint32_t*)FAT_offset, (uint32_t*)FAT_size); }},
           {"Download->SD", [=]() { downloadFirmware(String(file), String(name) + "." + String(version).substring(0,10), dwn_path); }},
-          {"Main Menu", [=]() { returnToMenu=true; }},
+          {"Back to List", [=]() { returnToMenu=true; }},
       };
       delay(200);
 
@@ -706,9 +706,14 @@ void loopFirmware(){
             if((millis()-time)>150) tft.drawArc(WIDTH/2,HEIGHT/2,25,15,0,360*(millis()-time)/1000,ALCOLOR,BGCOLOR,false);
           }  // while pressed the btn, hold the code to count the time
           if((millis()-time)>1000) break;// check how many ms it was kept held on and stop the loop if more than 250ms
-          else loopVersions();          // goes to the Version information
+          else { 
+            loopVersions();          // goes to the Version information
+            returnToMenu=false;
+          }
         #else
         loopVersions();
+        returnToMenu=false;
+
         #endif
 
         delay(200);

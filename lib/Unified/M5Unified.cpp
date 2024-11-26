@@ -1193,7 +1193,7 @@ for (int i = 0; i < 0x50; ++i)
           while (--i >= 0)
           {
             auto raw = Touch.getTouchPointRaw(i);
-            if (raw.y > 220) //240 - 20 para a margem inferior onde estão os botoes
+            if (raw.y > 220) //240 - 20 to bottom margin where buttons are placed
             {
               auto det = Touch.getDetail(i);
               if (det.state & touch_state_t::touch)

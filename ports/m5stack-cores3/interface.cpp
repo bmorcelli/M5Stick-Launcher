@@ -127,7 +127,6 @@ bool checkEscPress(){
             delay(200);
             return false;
         }
-        returnToMenu=true;
         return true;
     }
     else { return false; }

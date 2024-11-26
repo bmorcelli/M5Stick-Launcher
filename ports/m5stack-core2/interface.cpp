@@ -109,7 +109,6 @@ bool checkEscPress(){
           delay(200);
           return false;
         }
-        returnToMenu=true;
         return true;
     }
     else { return false; }
@@ -417,6 +416,7 @@ String keyboard(String mytext, int maxSize, String msg) {
 
     M5.update();
     auto t = M5.Touch.getDetail();
+    if (t.wasClicked()) 
      {
       if (box_list[48].contain(t.x, t.y)) { break; }      // Ok
       if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,BGCOLOR); goto THIS_END; } // CAP
