@@ -17,10 +17,10 @@ TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 ** Function name: displayScrollingText
 ** Description:   Scroll large texts into screen
 ***************************************************************************************/
-void displayScrollingText(const String& text, Opt_Coord coord) {
+void displayScrollingText(const String& text, Opt_Coord& coord) {
   int len = text.length();
-  String displayText = text + "   "; // Add spaces for smooth looping
-  int scrollLen = len + 3; // Full text plus space buffer
+  String displayText = text + "        "; // Add spaces for smooth looping
+  int scrollLen = len + 8; // Full text plus space buffer
   static int i=0;
   static long _lastmillis=0;
   if (len < coord.size) {
@@ -29,6 +29,7 @@ void displayScrollingText(const String& text, Opt_Coord coord) {
   } else if(millis()>_lastmillis+200) {
     String scrollingPart = displayText.substring(i, i + (coord.size - 1)); // Display charLimit characters at a time
     tft.fillRect(coord.x, coord.y, (coord.size-1) * LW * tft.textsize, LH * tft.textsize, BGCOLOR); // Clear display area
+    tft.setCursor(coord.x, coord.y);
     tft.setCursor(coord.x, coord.y);
     tft.print(scrollingPart);
     if (i >= scrollLen - coord.size) i = -1; // Loop back
@@ -389,8 +390,8 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
         String text="";
         if(i==index) { 
           text+=">";
-          coord.x=tft.getCursorX();
-          coord.y=tft.getCursorY();
+          coord.x=WIDTH*0.10+5+FM*LW;
+          coord.y=tft.getCursorY()+4;
           coord.size=(WIDTH*0.8 - 10)/(LW*FONT_M) - 1;
         }
         else text +=" ";
@@ -526,7 +527,7 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
             if (index==i) { 
               txt=">";
               coord.x=10+FM*LW;
-              coord.y=tft.getCursorY() + j*FM*LH;
+              coord.y=tft.getCursorY();
               coord.size=nchars;
             }
             else txt=" ";
@@ -540,7 +541,7 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
 
     #if defined(HAS_TOUCH)
     TouchFooter();
-    #endif    
+    #endif
     return coord;
 }
 
@@ -554,8 +555,9 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   int index = 0;
   log_i("Number of options: %d", options.size());
   int numOpt = options.size()-1;
-  drawOptions(0,options, ALCOLOR, BGCOLOR);
   Opt_Coord coord;
+  coord=drawOptions(0,options, ALCOLOR, BGCOLOR);
+  
   while(1){
     if (redraw) { 
       coord=drawOptions(index,options, ALCOLOR, BGCOLOR);
@@ -565,8 +567,8 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
       redraw=false;
       delay(REDRAW_DELAY); 
     }
-
-    displayScrollingText(options[index].first.c_str(), coord);
+    String txt=options[index].first.c_str();
+    displayScrollingText(txt, coord);
 
     if(checkPrevPress()) {
     #if defined(ESC_LOGIC)

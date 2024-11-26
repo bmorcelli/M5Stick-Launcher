@@ -39,7 +39,7 @@ struct Opt_Coord {
   uint16_t y=0;
   uint16_t size=10;
 };
-void displayScrollingText(const String& text, Opt_Coord coord);
+void displayScrollingText(const String& text, Opt_Coord& coord);
 
 Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor);
 

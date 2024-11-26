@@ -409,7 +409,7 @@ String loopSD(bool filePicker) {
         tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
         tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
       }
-      listFiles(index, fileList);
+      coord=listFiles(index, fileList);
 
       delay(REDRAW_DELAY);
       redraw = false;
