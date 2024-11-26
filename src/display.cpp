@@ -14,6 +14,31 @@ TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 
 
 /***************************************************************************************
+** Function name: displayScrollingText
+** Description:   Scroll large texts into screen
+***************************************************************************************/
+void displayScrollingText(const String& text, Opt_Coord coord) {
+  int len = text.length();
+  String displayText = text + "   "; // Add spaces for smooth looping
+  int scrollLen = len + 3; // Full text plus space buffer
+  static int i=0;
+  static long _lastmillis=0;
+  if (len < coord.size) {
+    // Text fits within limit, no scrolling needed
+    return;
+  } else if(millis()>_lastmillis+200) {
+    String scrollingPart = displayText.substring(i, i + (coord.size - 1)); // Display charLimit characters at a time
+    tft.fillRect(coord.x, coord.y, (coord.size-1) * LW * tft.textsize, LH * tft.textsize, BGCOLOR); // Clear display area
+    tft.setCursor(coord.x, coord.y);
+    tft.print(scrollingPart);
+    if (i >= scrollLen - coord.size) i = -1; // Loop back
+    _lastmillis=millis();
+    i++;
+    if(i==1) _lastmillis=millis()+1000;
+  }
+}
+
+/***************************************************************************************
 ** Function name: resetTftDisplay
 ** Description:   set cursor to 0,0, screen and text to default color
 ***************************************************************************************/
@@ -333,12 +358,15 @@ void progressHandler(int progress, size_t total) {
 
 }
 
+
+
 /***************************************************************************************
 ** Function name: drawOptions
 ** Description:   Função para desenhar e mostrar as opçoes de contexto
 ***************************************************************************************/
 #define MAX_MENU_SIZE (int)(HEIGHT/25)
-void drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
+Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
+    Opt_Coord coord;
     int menuSize = options.size();
     if(options.size()>MAX_MENU_SIZE) { 
       menuSize = MAX_MENU_SIZE; 
@@ -359,7 +387,12 @@ void drawOptions(int index,const std::vector<std::pair<std::string, std::functio
     for(i=0;i<menuSize;i++) {
       if(i>=init) {
         String text="";
-        if(i==index) text+=">";
+        if(i==index) { 
+          text+=">";
+          coord.x=tft.getCursorX();
+          coord.y=tft.getCursorY();
+          coord.size=(WIDTH*0.8 - 10)/(LW*FONT_M) - 1;
+        }
         else text +=" ";
         text += String(options[i].first.c_str()) + "              ";
         tft.setCursor(WIDTH*0.10+5,tft.getCursorY()+4);
@@ -371,6 +404,7 @@ void drawOptions(int index,const std::vector<std::pair<std::string, std::functio
     Exit:
     if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
     tft.drawRoundRect(WIDTH*0.10,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.8,(FONT_M*8+4)*menuSize+10,5,fgcolor);
+    return coord;
 }
 
 /***************************************************************************************
@@ -467,7 +501,8 @@ void drawBatteryStatus() {
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
 #define MAX_ITEMS (int)(HEIGHT-20)/(LH*2)
-void listFiles(int index, String fileList[][3]) {
+Opt_Coord listFiles(int index, String fileList[][3]) {
+    Opt_Coord coord;
     tft.setCursor(10,10);
     tft.setTextSize(FONT_M);
     int i=0;
@@ -480,6 +515,7 @@ void listFiles(int index, String fileList[][3]) {
     }
     int nchars = (WIDTH-20)/(6*tft.textsize);
     String txt=">";
+    int j=0;
     while(i<arraySize) {
         if(i>=start && fileList[i][2]!="") {
             tft.setCursor(10,tft.getCursorY());
@@ -487,10 +523,16 @@ void listFiles(int index, String fileList[][3]) {
             else if(fileList[i][2]=="operator") tft.setTextColor(ALCOLOR, BGCOLOR);
             else { tft.setTextColor(FGCOLOR,BGCOLOR); }
 
-            if (index==i) txt=">";
+            if (index==i) { 
+              txt=">";
+              coord.x=10+FM*LW;
+              coord.y=tft.getCursorY() + j*FM*LH;
+              coord.size=nchars;
+            }
             else txt=" ";
             txt+=fileList[i][0] + "                       ";
             tft.println(txt.substring(0,nchars));
+            j++;
         }
         i++;
         if (i==(start+MAX_ITEMS) || fileList[i][2]=="") break;
@@ -499,8 +541,8 @@ void listFiles(int index, String fileList[][3]) {
     #if defined(HAS_TOUCH)
     TouchFooter();
     #endif    
+    return coord;
 }
-
 
 
 /*********************************************************************
@@ -513,15 +555,18 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   log_i("Number of options: %d", options.size());
   int numOpt = options.size()-1;
   drawOptions(0,options, ALCOLOR, BGCOLOR);
+  Opt_Coord coord;
   while(1){
     if (redraw) { 
-      drawOptions(index,options, ALCOLOR, BGCOLOR);
+      coord=drawOptions(index,options, ALCOLOR, BGCOLOR);
       if(bright){
         setBrightness(100*(numOpt-index)/numOpt,false);
       }
       redraw=false;
       delay(REDRAW_DELAY); 
     }
+
+    displayScrollingText(options[index].first.c_str(), coord);
 
     if(checkPrevPress()) {
     #if defined(ESC_LOGIC)

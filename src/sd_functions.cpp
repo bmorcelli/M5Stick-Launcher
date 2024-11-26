@@ -379,6 +379,7 @@ void readFs(String folder, String result[][3]) {
 **  Where you choose what to do wuth your SD Files   
 **********************************************************************/
 String loopSD(bool filePicker) {
+  Opt_Coord coord;
   prog_handler = 0;
   String result = "";
   bool reload=false;
@@ -391,7 +392,7 @@ String loopSD(bool filePicker) {
   tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
 
   readFs(Folder, fileList);
-  listFiles(0, fileList);
+  coord=listFiles(0, fileList);
 
   for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
   while(1){
@@ -413,6 +414,8 @@ String loopSD(bool filePicker) {
       delay(REDRAW_DELAY);
       redraw = false;
     }
+
+    displayScrollingText(fileList[index][0], coord);
 
     if(checkPrevPress()) {
       if(index==0) index = maxFiles - 1;

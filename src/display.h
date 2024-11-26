@@ -1,3 +1,4 @@
+#pragma once
 // display.h
 #ifndef DISPLAY_H
 #define DISPLAY_H
@@ -33,7 +34,14 @@ void displayRedStripe(String text, uint16_t fgcolor = TFT_WHITE, uint16_t bgcolo
 
 void progressHandler(int progress, size_t total);
 
-void drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor);
+struct Opt_Coord {
+  uint16_t x=0;
+  uint16_t y=0;
+  uint16_t size=10;
+};
+void displayScrollingText(const String& text, Opt_Coord coord);
+
+Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor);
 
 void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, bool isSelected);
 
@@ -43,7 +51,7 @@ void drawBatteryStatus();
 
 void drawMainMenu(int index = 0);
 
-void listFiles(int index, String fileList[][3]);
+Opt_Coord listFiles(int index, String fileList[][3]);
 
 void TouchFooter(uint16_t color = FGCOLOR);
 
