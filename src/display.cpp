@@ -132,7 +132,7 @@ void initDisplay(bool doAll) {
         }
     }
     tft.setTextSize(FONT_G);
-    tft.setTextColor(FGCOLOR, BGCOLOR, true);
+    tft.setTextColor(FGCOLOR);
     #if WIDTH>200
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,1); //SMOOTH_FONT
     #else
