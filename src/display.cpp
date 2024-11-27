@@ -116,21 +116,22 @@ void initDisplay(bool doAll) {
         else if(_x<10) { _x = 10; }
         if(_y>=(HEIGHT-12)) break;
         tft.setCursor(_x,_y);
-        if(_y>(HEIGHT-20) && _x>(WIDTH-(10+LW*7))) {
+        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*7))) {
           tft.setTextColor(FGCOLOR);
           tft.print("@Pirata");
           _x+=42;
         }
-        else if(_y>(HEIGHT-20) && _x>(WIDTH-(10+LW*8))) _x+=42;
         else {
           tft.print(txt);
           _x+=6;
         }
       } else { 
-        _x+=6;
+        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*7))) _x+=42;
+        else _x+=6;
+        
         if(_x>=(WIDTH-10)) { _x=10; _y+=8; }
-        tft.setCursor(_x,_y); 
         }
+        tft.setCursor(_x,_y); 
     }
     tft.setTextSize(FONT_G);
     tft.setTextColor(FGCOLOR);
