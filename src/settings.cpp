@@ -318,7 +318,7 @@ void getConfigs() {
       if(setting["ALCOLOR"].is<uint16_t>())   { ALCOLOR   = setting["ALCOLOR"].as<uint16_t>(); }  else { count++; log_i("Fail"); }
       if(setting["odd"].is<uint16_t>())       { odd_color = setting["odd"].as<uint16_t>(); }      else { count++; log_i("Fail"); }
       if(setting["even"].is<uint16_t>())      { even_color= setting["even"].as<uint16_t>(); }     else { count++; log_i("Fail"); }
-      if(setting["dev"].is<uint16_t>())       { dev_mode  = setting["dev"].as<bool>(); }          else { count++; log_i("Fail"); }
+      if(setting["dev"].is<bool>())       { dev_mode  = setting["dev"].as<bool>(); }          else { count++; log_i("Fail"); }
       if(setting["wui_usr"].is<String>())     { wui_usr   = setting["wui_usr"].as<String>(); }    else { count++; log_i("Fail"); }
       if(setting["wui_pwd"].is<String>())     { wui_pwd   = setting["wui_pwd"].as<String>(); }    else { count++; log_i("Fail"); }
       if(setting["dwn_path"].is<String>())    { dwn_path  = setting["dwn_path"].as<String>(); }   else { count++; log_i("Fail"); }
