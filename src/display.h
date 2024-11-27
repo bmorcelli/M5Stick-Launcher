@@ -38,6 +38,8 @@ struct Opt_Coord {
   uint16_t x=0;
   uint16_t y=0;
   uint16_t size=10;
+  uint16_t fgcolor=FGCOLOR;
+  uint16_t bgcolor=BGCOLOR;
 };
 void displayScrollingText(const String& text, Opt_Coord& coord);
 

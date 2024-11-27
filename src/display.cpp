@@ -23,6 +23,7 @@ void displayScrollingText(const String& text, Opt_Coord& coord) {
   int scrollLen = len + 8; // Full text plus space buffer
   static int i=0;
   static long _lastmillis=0;
+  tft.setTextColor(coord.fgcolor,coord.bgcolor);
   if (len < coord.size) {
     // Text fits within limit, no scrolling needed
     return;
@@ -393,6 +394,8 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
           coord.x=WIDTH*0.10+5+FM*LW;
           coord.y=tft.getCursorY()+4;
           coord.size=(WIDTH*0.8 - 10)/(LW*FONT_M) - 1;
+          coord.fgcolor=fgcolor;
+          coord.bgcolor=bgcolor;
         }
         else text +=" ";
         text += String(options[i].first.c_str()) + "              ";
@@ -529,6 +532,8 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
               coord.x=10+FM*LW;
               coord.y=tft.getCursorY();
               coord.size=nchars;
+              coord.fgcolor=fileList[i][2]=="folder"? FGCOLOR-0x1111:FGCOLOR;
+              coord.bgcolor=BGCOLOR;
             }
             else txt=" ";
             txt+=fileList[i][0] + "                       ";
