@@ -40,6 +40,7 @@ int dimmerSet=20;
 unsigned long previousMillis;
 bool isSleeping;
 bool isScreenOff;
+bool dev_mode=false;
 int bright=100;
 bool dimmer=false;
 int prog_handler;    // 0 - Flash, 1 - SPIFFS
@@ -457,11 +458,13 @@ void loop() {
       #endif
 
         if(MAX_SPIFFS>0) options.push_back({"Save SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
-        //if(MAX_FAT_sys>0) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
-        if(MAX_FAT_vfs>0) options.push_back({"Save FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
+        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
+        if(MAX_FAT_vfs>0) options.push_back({"Bkp FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
         if(MAX_SPIFFS>0) options.push_back({ "Rest SPIFFS",  [=]() { restorePartition("spiffs"); }});
-        //if(MAX_FAT_sys>0) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
+        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
         if(MAX_FAT_vfs>0) options.push_back({"Rest FAT Vfs",  [=]() { restorePartition("vfs"); }});
+
+        if(dev_mode) options.push_back({"Boot Animation",  [=]() { initDisplayLoop(); }});
 
         options.push_back({"Restart",  [=]() { ESP.restart(); }});
 

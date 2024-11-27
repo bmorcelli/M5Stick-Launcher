@@ -32,6 +32,7 @@ extern uint32_t MAX_FAT_sys;
 extern unsigned long previousMillis;
 extern bool isSleeping;
 extern bool isScreenOff;
+extern bool dev_mode;
 
 extern int dimmerSet;
 extern int bright;

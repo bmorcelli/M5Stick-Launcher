@@ -22,6 +22,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
 void loopVersions();
 void loopFirmware();
 void initDisplay(bool doAll = false); // Início da função e mostra bootscreen
+void initDisplayLoop();
 
 //Funções para economizar linhas nas outras funções
 void resetTftDisplay(int x = 0, int y = 0, uint16_t fc = FGCOLOR, int size = FONT_M, uint16_t bg = BGCOLOR, uint16_t screen = BGCOLOR);

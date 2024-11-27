@@ -146,6 +146,20 @@ void initDisplay(bool doAll) {
     delay(50);
     
 }
+/***************************************************************************************
+** Function name: initDisplayLoop
+** Description:   Start Display functions and display bootscreen
+***************************************************************************************/
+void initDisplayLoop() {
+  tft.fillScreen(BGCOLOR);
+  initDisplay(true);
+  delay(250);
+  while(!checkAnyKeyPress()){
+    initDisplay();
+    delay(50);
+  }
+  returnToMenu=true;
+}
 
 /***************************************************************************************
 ** Function name: displayCurrentItem

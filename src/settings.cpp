@@ -272,9 +272,9 @@ bool config_exists() {
     File conf = SDM.open(CONFIG_FILE, FILE_WRITE);
     if (conf) {
 #if ROTATION > 1
-        conf.print("[{\"rot\":3,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+        conf.print("[{\"rot\":3,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\",\"dev\":0,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
 #else
-        conf.print("[{\"rot\":1,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
+        conf.print("[{\"rot\":1,\"dimmerSet\":10,\"onlyBins\":1,\"bright\":100,\"askSpiffs\":1,\"wui_usr\":\"admin\",\"wui_pwd\":\"launcher\",\"dwn_path\":\"/downloads/\",\"FGCOLOR\":2016,\"BGCOLOR\":0,\"ALCOLOR\":63488,\"even\":13029,\"odd\":12485,\",\"dev\":0,\"wifi\":[{\"ssid\":\"myNetSSID\",\"pwd\":\"myNetPassword\"}]}]");
 #endif
     }
     conf.close();
@@ -318,6 +318,7 @@ void getConfigs() {
       if(setting["ALCOLOR"].is<uint16_t>())   { ALCOLOR   = setting["ALCOLOR"].as<uint16_t>(); }  else { count++; log_i("Fail"); }
       if(setting["odd"].is<uint16_t>())       { odd_color = setting["odd"].as<uint16_t>(); }      else { count++; log_i("Fail"); }
       if(setting["even"].is<uint16_t>())      { even_color= setting["even"].as<uint16_t>(); }     else { count++; log_i("Fail"); }
+      if(setting["dev"].is<uint16_t>())       { dev_mode  = setting["dev"].as<bool>(); }          else { count++; log_i("Fail"); }
       if(setting["wui_usr"].is<String>())     { wui_usr   = setting["wui_usr"].as<String>(); }    else { count++; log_i("Fail"); }
       if(setting["wui_pwd"].is<String>())     { wui_pwd   = setting["wui_pwd"].as<String>(); }    else { count++; log_i("Fail"); }
       if(setting["dwn_path"].is<String>())    { dwn_path  = setting["dwn_path"].as<String>(); }   else { count++; log_i("Fail"); }
@@ -388,6 +389,7 @@ void saveConfigs() {
     setting["ALCOLOR"] = ALCOLOR;
     setting["odd"] = odd_color;
     setting["even"] = even_color;
+    setting["dev"] = dev_mode;
     setting["wui_usr"] = wui_usr;
     setting["wui_pwd"] = wui_pwd;
     setting["dwn_path"] = dwn_path;
