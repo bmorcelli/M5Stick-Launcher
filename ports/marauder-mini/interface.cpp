@@ -72,7 +72,7 @@ void _setBrightness(uint8_t brightval) {
 ** Verifies Upper Btn to go to previous item
 **********************************************************************/
 bool checkNextPress(){ 
-    if(digitalRead(DW_BTN)==LOW) {
+    if(digitalRead(R_BTN)==LOW) {
         if(wakeUpScreen()){
             delay(200);
             return false;
@@ -89,7 +89,7 @@ bool checkNextPress(){
 ** Verifies Down Btn to go to next item
 **********************************************************************/
 bool checkPrevPress() { 
-    if(digitalRead(UP_BTN)==LOW) {
+    if(digitalRead(L_BTN)==LOW) {
         if(wakeUpScreen()){
             delay(200);
             return false;
@@ -314,9 +314,8 @@ String keyboard(String mytext, int maxSize, String msg) {
       x2=x;
       y2=y;
       redraw = false;
-      #if defined(HAS_TOUCH)
-      TouchFooter();
-      #endif
+      
+      delay(250);
     }
 
     //cursor handler
@@ -367,29 +366,38 @@ String keyboard(String mytext, int maxSize, String msg) {
         cY=tft.getCursorY();
       }
       redraw = true;
-      delay(200);
     }
 
-    /* Down Btn to move in X axis (to the right) */
-    if(checkNextPress())
-    {
-      delay(200);
-      if(checkNextPress()) { x--; delay(250); } // Long Press
-      else x++; // Short Press
+    /* move in X axis */
+    if(digitalRead(R_BTN)==BTN_ACT) {
+      x++;
       if(y<0 && x>3) x=0;
       if(x>11) x=0;
       else if (x<0) x=11;
       redraw = true;
     }
-    /* UP Btn to move in Y axis (Downwards) */
-    if(checkPrevPress()) {    
-      delay(200);
-      if(checkPrevPress()) { y--; delay(250);  }// Long press
-      else y++; // short press
+    if(digitalRead(L_BTN)==BTN_ACT) { 
+      x--;
+      if(y<0 && x>3) x=0;
+      if(x>11) x=0;
+      else if (x<0) x=11;
+      redraw = true;
+    }
+
+    /* move in Y axis */
+    if(digitalRead(UP_BTN)==BTN_ACT) {    
+      y--;
       if(y>3) { y=-1; }
       else if(y<-1) y=3;
       redraw = true;
     }
+    if(digitalRead(DW_BTN)==BTN_ACT) {    
+      y++; // short press
+      if(y>3) { y=-1; }
+      else if(y<-1) y=3;
+      redraw = true;
+    }
+
   }
 
   //Resets screen when finished writing
