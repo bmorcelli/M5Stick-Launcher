@@ -1,5 +1,5 @@
 # Launcher
-Application Launcher for Cardputer, M5StickC, M5StickC Plus, M5StickC Plus 2, Core (16Mb), Core2 & Tough and CoreS3.
+Application Launcher for M5Stack, Lilygo, CYDs, Marauder and ESP32 devices.
 
 
 <p align="center" width="100%">
@@ -45,7 +45,7 @@ Application Launcher for Cardputer, M5StickC, M5StickC Plus, M5StickC Plus 2, Co
 * Now you can download binaries from [HERE!](https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html)
 
 ## How to Install
-* Use the Flasher: [Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/flash0.html).
+* Use the Flasher: [Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/).
 * Use M5Burner, or
 * Download the .bin file from Releases for your device and use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
 
@@ -62,6 +62,14 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.4.0:
+     * [x] CYD-2432W328C port https://github.com/bmorcelli/M5Stick-Launcher/issues/80
+     * [x] Rolling texts for large SSIDs and large filenames
+     * [x] Added ways to return from menu after wrong WIFI passwords and other menus (Exit from keyboard itself won't be available) https://github.com/bmorcelli/M5Stick-Launcher/issues/82 https://github.com/bmorcelli/M5Stick-Launcher/issues/81
+     * [x] Fixed Orientation issues (not saving in the SD Card) https://github.com/bmorcelli/M5Stick-Launcher/issues/84
+     * [x] Dim Screen now turns the screen off
+     * [x] Renamed project to "Launcher" and add my nickname in the boot animation
+     * [x] Changed interfacing code, preparing for new ports https://github.com/bmorcelli/M5Stick-Launcher/issues/83
 * 2.3.2: 
      * [x] T-Embed CC1101 power chip management fix
 * 2.3.1:

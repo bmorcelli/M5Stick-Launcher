@@ -116,9 +116,15 @@ void initDisplay(bool doAll) {
         else if(_x<10) { _x = 10; }
         if(_y>=(HEIGHT-12)) break;
         tft.setCursor(_x,_y);
-        _x+=6;
-        
-        tft.print(txt);
+        if(_y>(HEIGHT-22) && _x>(WIDTH-(10+LW*7))) {
+          tft.setTextColor(FGCOLOR);
+          tft.print("@Pirata");
+          _x+=42;
+        }
+        else {
+          tft.print(txt);
+          _x+=6;
+        }
       } else { 
         _x+=6;
         if(_x>=(WIDTH-10)) { _x=10; _y+=8; }
@@ -126,7 +132,7 @@ void initDisplay(bool doAll) {
         }
     }
     tft.setTextSize(FONT_G);
-    tft.setTextColor(FGCOLOR);
+    tft.setTextColor(FGCOLOR, BGCOLOR, true);
     #if WIDTH>200
     tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,1); //SMOOTH_FONT
     #else
