@@ -94,6 +94,10 @@ void TouchFooter2(uint16_t color) {
 ** Description:   Start Display functions and display bootscreen
 ***************************************************************************************/
 void initDisplay(bool doAll) {
+    static uint8_t _name=random(0,3);
+    String name="@Pirata";
+    if(_name == 1) name="u/bmorcelli";
+    else if(_name == 2) name="gh/bmorcelli";
     tft.drawRoundRect(3,3,WIDTH-6,HEIGHT-6,5,FGCOLOR);
     tft.setTextSize(FONT_P);
     tft.setCursor(10,10);
@@ -116,17 +120,17 @@ void initDisplay(bool doAll) {
         else if(_x<10) { _x = 10; }
         if(_y>=(HEIGHT-12)) break;
         tft.setCursor(_x,_y);
-        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*7))) {
+        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*name.length()))) {
           tft.setTextColor(FGCOLOR);
-          tft.print("@Pirata");
-          _x+=42;
+          tft.print(name);
+          _x+=LW*name.length();
         }
         else {
           tft.print(txt);
           _x+=6;
         }
       } else { 
-        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*7))) _x+=42;
+        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*name.length()))) _x+=LW*name.length();
         else _x+=6;
         
         if(_x>=(WIDTH-10)) { _x=10; _y+=8; }
