@@ -8,7 +8,9 @@
 ** Location: main.cpp
 ** Description:   initial setup for the device
 ***************************************************************************************/
-void _setup_gpio() { }
+void _setup_gpio() { 
+    pinMode(SEL_BTN,INPUT);
+}
 
 
 /***************************************************************************************
@@ -48,7 +50,16 @@ bool checkPrevPress() { return false; }
 ** location: mykeyboard.cpp
 ** Verifies if Select or OK was pressed
 **********************************************************************/
-bool checkSelPress(){ return false; }
+bool checkSelPress(){ 
+    if(digitalRead(SEL_BTN)==LOW) {
+        if(wakeUpScreen()){
+            delay(200);
+            return false;
+        }
+        return true;
+    }
+    else return false;
+}
 
 
 /*********************************************************************
