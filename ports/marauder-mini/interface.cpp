@@ -235,7 +235,7 @@ String keyboard(String mytext, int maxSize, String msg) {
       tft.setTextSize(FM);
 
       //Draw the rectangles
-      if(y<0) {
+      if(y<0 || y2<0) {
         tft.fillRect(0,1,WIDTH,22,BGCOLOR);
         tft.drawRect(7,2,46,20,TFT_WHITE);       // Ok Rectangle
         tft.drawRect(55,2,50,20,TFT_WHITE);      // CAP Rectangle
@@ -244,24 +244,24 @@ String keyboard(String mytext, int maxSize, String msg) {
         tft.drawRect(3,32,WIDTH-3,20,FGCOLOR); // mystring Rectangle
 
 
-        if(x==0 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(7,2,50,20,TFT_WHITE); }
+        if(x==0 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(7,2,24,20,TFT_WHITE); }
+        else tft.setTextColor(TFT_WHITE, BGCOLOR); 
+        tft.drawString("OK", 9, 4);
+
+
+        if(x==1 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(33,2,24,20,TFT_WHITE); }
+        else if(caps) { tft.fillRect(33,2,24,20,TFT_DARKGREY); tft.setTextColor(TFT_WHITE, TFT_DARKGREY); }
         else tft.setTextColor(TFT_WHITE, BGCOLOR);
-        tft.drawString("OK", 18, 4);
+        tft.drawString("CAP", 35, 4);
 
 
-        if(x==1 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(55,2,50,20,TFT_WHITE); }
-        else if(caps) { tft.fillRect(55,2,50,20,TFT_DARKGREY); tft.setTextColor(TFT_WHITE, TFT_DARKGREY); }
+        if(x==2 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(59,2,24,20,TFT_WHITE); }
         else tft.setTextColor(TFT_WHITE, BGCOLOR);
-        tft.drawString("CAP", 64, 4);
+        tft.drawString("DEL", 61, 4);
 
-
-        if(x==2 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(107,2,50,20,TFT_WHITE); }
+        if(x>2 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(85,2,36,20,TFT_WHITE); }
         else tft.setTextColor(TFT_WHITE, BGCOLOR);
-        tft.drawString("DEL", 115, 4);
-
-        if(x>2 && y==-1) { tft.setTextColor(BGCOLOR, TFT_WHITE); tft.fillRect(159,2,74,20,TFT_WHITE); }
-        else tft.setTextColor(TFT_WHITE, BGCOLOR);
-        tft.drawString("SPACE", 168, 4);
+        tft.drawString("SPACE", 87, 4);
       }
 
       tft.setTextSize(FP);

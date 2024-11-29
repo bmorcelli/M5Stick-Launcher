@@ -484,8 +484,8 @@ void drawMainMenu(int index) {
 
     setTftDisplay(-1, -1, FGCOLOR, 1, BGCOLOR);
 
-#if WIDTH<200
-  tft.drawCentreString(messages[index], WIDTH / 2, 18, 1);
+#if WIDTH<125
+    tft.drawCentreString(messages[index], WIDTH / 2, 26, 1);
 #else
     tft.drawCentreString(messages[index], WIDTH / 2, HEIGHT - 25, 1);
 #endif
@@ -517,8 +517,10 @@ void drawBatteryStatus() {
     tft.drawRoundRect(WIDTH - 42, 7, 34, 17, 2, FGCOLOR);
     int bat = getBattery();
     tft.setTextSize(FONT_P);
-    tft.setTextColor(FGCOLOR, BGCOLOR);
+    tft.setTextColor(FGCOLOR, BGCOLOR); 
+  #if WIDTH>140 // Excludes Marauder Mini
     tft.drawRightString("  " + String(bat) + "%", WIDTH - 45, 12, 1);
+  #endif
     tft.fillRoundRect(WIDTH - 40, 9, 30, 13, 2, BGCOLOR);
     tft.fillRoundRect(WIDTH - 40, 9, 30 * bat / 100, 13, 2, FGCOLOR);
     tft.drawLine(WIDTH - 30, 9, WIDTH - 30, 9 + 13, BGCOLOR);
