@@ -5,13 +5,22 @@
 //#define HAS_KEYBOARD     //has keyboard to use 
 //#define HAS_KEYBOARD_HID //has keyboard to use 
 //#define KB_HID_EXIT_MSG "Mid Btn + Space to exit"
-#define SDM SD_MMC
+#if defined(LAUNCHER)
+    #define _BGCOLOR BGCOLOR
+    #define _FGCOLOR FGCOLOR
+#elif defined(BRUCE_VERSION)
+    #define _BGCOLOR bruceConfig.bgcolor
+    #define _FGCOLOR bruceConfig.pricolor
+#endif
+
+
 /***************************************************************************************
 ** Function name: _setup_gpio()
 ** Location: main.cpp
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio();
+
 
 /***************************************************************************************
 ** Function name: _post_setup_gpio()

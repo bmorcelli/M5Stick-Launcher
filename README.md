@@ -63,7 +63,9 @@ Sourcecode will be released in the future..
 
 ## Changelog
 * 2.4.1: 
-     * [x] T-Deck SD Card fix (Disable LoRa Chip, CS pin to High state, to avoid conflicts)
+     * [x] T-Deck SD Card fix (Disable LoRa Chip, CS pin to High state, to avoid conflicts) https://github.com/bmorcelli/M5Stick-Launcher/issues/86
+     * [x] Lilygo T-Display-S3-Pro port https://github.com/bmorcelli/M5Stick-Launcher/issues/73
+
 * 2.4.0:
      * [x] CYD-2432W328C port https://github.com/bmorcelli/M5Stick-Launcher/issues/80
      * [x] Rolling texts for large SSIDs and large filenames

@@ -2,15 +2,34 @@
 #include "powerSave.h"
 #include <SD_MMC.h>
 #include <Wire.h>
-
+#include <XPowersLib.h>
+static PowersSY6970 PMU;
 #define TOUCH_MODULES_CST_SELF
-#include <TouchLib.h>
+#include <TouchDrvCSTXXX.hpp>
 #include <Wire.h>
 #define LCD_MODULE_CMD_1
 
 #include <esp_adc_cal.h>
-TouchLib touch(Wire, 18, 17, CTS820_SLAVE_ADDRESS, 21);
 
+#define BOARD_I2C_SDA       5
+#define BOARD_I2C_SCL       6
+#define BOARD_SENSOR_IRQ    21
+#define BOARD_TOUCH_RST     13
+TouchDrvCSTXXX  touch;
+
+void touchHomeKeyCallback(void *user_data)
+{
+    Serial.println("Home key pressed!");
+    static uint32_t checkMs = 0;
+    if (millis() > checkMs) {
+        if (digitalRead(TFT_BL)) {
+            digitalWrite(TFT_BL, LOW);
+        } else {
+            digitalWrite(TFT_BL, HIGH);
+        }
+    }
+    checkMs = millis() + 200;
+}
 
 /***************************************************************************************
 ** Function name: _setup_gpio()
@@ -18,24 +37,37 @@ TouchLib touch(Wire, 18, 17, CTS820_SLAVE_ADDRESS, 21);
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio() { 
-    SD_MMC.setPins(PIN_SD_CLK, PIN_SD_CMD, PIN_SD_D0);
-    gpio_hold_dis((gpio_num_t)21);//PIN_TOUCH_RES 
-    pinMode(15, OUTPUT);
-    digitalWrite(15, HIGH);//PIN_POWER_ON 
-    pinMode(21, OUTPUT); //PIN_TOUCH_RES 
-    digitalWrite(21, LOW);//PIN_TOUCH_RES 
+    gpio_hold_dis((gpio_num_t)BOARD_TOUCH_RST);//PIN_TOUCH_RES 
+    pinMode(SEL_BTN, INPUT);
+    pinMode(UP_BTN, INPUT);
+    pinMode(DW_BTN, INPUT);
+
+
+    pinMode(BOARD_TOUCH_RST, OUTPUT); //PIN_TOUCH_RES 
+    digitalWrite(BOARD_TOUCH_RST, LOW);//PIN_TOUCH_RES 
     delay(500);
-    digitalWrite(21, HIGH);//PIN_TOUCH_RES 
-    Wire.begin(18, 17);//SDA, SCL
-    if (!touch.init()) {
-        Serial.println("Touch IC not found");
-    }
+    digitalWrite(BOARD_TOUCH_RST, HIGH);//PIN_TOUCH_RES 
+    Wire.begin(BOARD_I2C_SDA, BOARD_I2C_SCL);//SDA, SCL
+
+// Initialize capacitive touch
+    touch.setPins(BOARD_TOUCH_RST, BOARD_SENSOR_IRQ);
+    touch.begin(Wire, CST226SE_SLAVE_ADDRESS, BOARD_I2C_SDA, BOARD_I2C_SCL);
+    touch.setMaxCoordinates(TFT_HEIGHT, TFT_WIDTH);
+    touch.setSwapXY(true);
+    touch.setMirrorXY(false, false);
+    //Set the screen to turn on or off after pressing the screen Home touch button
+    touch.setHomeButtonCallback(touchHomeKeyCallback);
     
-    touch.setRotation(1);
-    // PWM backlight setup
-    ledcSetup(TFT_BRIGHT_CHANNEL,TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits); //Channel 0, 10khz, 8bits
-    ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
-    ledcWrite(TFT_BRIGHT_CHANNEL,255);
+
+    bool hasPMU =  PMU.init(Wire, BOARD_I2C_SDA, BOARD_I2C_SCL, SY6970_SLAVE_ADDRESS);
+    if (!hasPMU) {
+        Serial.println("PMU is not online...");
+    } else {
+        PMU.disableOTG();
+        PMU.enableADCMeasure();
+        PMU.enableCharge();
+    }
+
 }
 
 /***************************************************************************************
@@ -50,6 +82,7 @@ void _post_setup_gpio() {
     ledcWrite(TFT_BRIGHT_CHANNEL,255);
 }
 
+
 /***************************************************************************************
 ** Function name: getBattery()
 ** location: display.cpp
@@ -57,16 +90,7 @@ void _post_setup_gpio() {
 ***************************************************************************************/
 int getBattery() { 
   int percent=0;
-  esp_adc_cal_characteristics_t adc_chars;
-
-  // Get the internal calibration value of the chip
-  esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, 1100, &adc_chars);
-  uint32_t raw = analogRead(BAT_PIN);
-  uint32_t v1 = esp_adc_cal_raw_to_voltage(raw, &adc_chars) * 2; //The partial pressure is one-half
-  if(v1<4300) {
-    float mv = v1 * 2;
-    percent = (mv - 3300) * 100 / (float)(4150 - 3350);
-  } else  { percent = 0; } 
+  percent=(PMU.getSystemVoltage()-3300)*100/(float)(4150-3350);
 
   return  (percent < 0) ? 0
         : (percent >= 100) ? 100
@@ -108,7 +132,7 @@ struct box_t
   {
     for (int i = 0; i < 8; ++i)
     {
-      tft.fillRect(x, y, w, h,BGCOLOR);
+      tft.fillRect(x, y, w, h,_BGCOLOR);
     }
   }
   void draw(void)
@@ -131,6 +155,10 @@ struct box_t
 static constexpr std::size_t box_count = 52;
 static box_t box_list[box_count];
 
+struct TouchPoint {
+  int16_t x[5];
+  int16_t y[5];
+};
 
 bool menuPress(int bot) {
   //0 - prev
@@ -138,14 +166,14 @@ bool menuPress(int bot) {
   //2 - next
   //3 - all
   int terco=WIDTH/3;
-  if (touch.read()) {
-    auto t = touch.getPoint(0);
-    if(rotation==3) t.x = WIDTH-t.x;
-    else if (rotation==1) t.y = (HEIGHT+20)-t.y;
+  TouchPoint t;
+  if (touch.getPoint(t.x, t.y, touch.getSupportTouchPoint()) && touch.isPressed()) {
+    if(rotation==3) t.x[0] = WIDTH-t.x[0];
+    else if (rotation==1) t.y[0] = (HEIGHT+20)-t.y[0];
 
-    if(t.y>(HEIGHT) && ((t.x>terco*bot && t.x<terco*(1+bot)) || bot==3)) { 
-      t.x=WIDTH+1;
-      t.y=HEIGHT+11;
+    if(t.y[0]>(HEIGHT) && ((t.x[0]>terco*bot && t.x[0]<terco*(1+bot)) || bot==3)) { 
+      t.x[0]=WIDTH+1;
+      t.y[0]=HEIGHT+11;
       return true;
     } else return false;
   } else return false;
@@ -157,7 +185,7 @@ bool menuPress(int bot) {
 ** Verifies Upper Btn to go to previous item
 **********************************************************************/
 bool checkNextPress(){ 
-  if(digitalRead(DW_BTN)==BTN_ACT || menuPress(2)) 
+  if(digitalRead(UP_BTN)==BTN_ACT || menuPress(2)) 
   {
     if(wakeUpScreen()){
       delay(200);
@@ -176,7 +204,7 @@ bool checkNextPress(){
 ** Verifies Down Btn to go to next item
 **********************************************************************/
 bool checkPrevPress() {
-  if(menuPress(0))
+  if(digitalRead(DW_BTN)==BTN_ACT || menuPress(0))
   {
     if(wakeUpScreen()){
       delay(200);
@@ -214,7 +242,7 @@ bool checkSelPress(){
 ** Verifies if Escape btn was pressed
 **********************************************************************/
 bool checkEscPress(){
-    if(menuPress(0) && digitalRead(DW_BTN)==BTN_ACT)
+    if(touch.getSupportTouchPoint() && touch.isPressed())
     {
         if(wakeUpScreen()){
           delay(200);
@@ -232,7 +260,7 @@ bool checkEscPress(){
 ** Verifies id any of the keys was pressed
 **********************************************************************/
 bool checkAnyKeyPress() {
-    if(menuPress(0) || digitalRead(DW_BTN)==BTN_ACT || digitalRead(SEL_BTN)==BTN_ACT) return true;
+    if(menuPress(3) || digitalRead(UP_BTN)==BTN_ACT || digitalRead(DW_BTN)==BTN_ACT || digitalRead(SEL_BTN)==BTN_ACT) return true;
 
     return false;
 }
@@ -317,7 +345,7 @@ String keyboard(String mytext, int maxSize, String msg) {
     for(y2=0; y2<4; y2++) {
       box_list[k].key=keys[y2][x2][0];
       box_list[k].key_sh=keys[y2][x2][1];
-      box_list[k].color = ~BGCOLOR;
+      box_list[k].color = ~_BGCOLOR;
       box_list[k].x=x2*_x;
       box_list[k].y=y2*_y+54;
       box_list[k].w=_x;
@@ -328,7 +356,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   // OK
   box_list[k].key=' ';
   box_list[k].key_sh=' ';
-  box_list[k].color = ~BGCOLOR;
+  box_list[k].color = ~_BGCOLOR;
   box_list[k].x=0;
   box_list[k].y=0;
   box_list[k].w=53;
@@ -337,7 +365,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   // CAP
   box_list[k].key=' ';
   box_list[k].key_sh=' ';
-  box_list[k].color = ~BGCOLOR;
+  box_list[k].color = ~_BGCOLOR;
   box_list[k].x=55;
   box_list[k].y=0;
   box_list[k].w=50;
@@ -346,7 +374,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   // DEL
   box_list[k].key=' ';
   box_list[k].key_sh=' ';
-  box_list[k].color = ~BGCOLOR;
+  box_list[k].color = ~_BGCOLOR;
   box_list[k].x=107;
   box_list[k].y=0;
   box_list[k].w=50;
@@ -355,7 +383,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   // SPACE
   box_list[k].key=' ';
   box_list[k].key_sh=' ';
-  box_list[k].color = ~BGCOLOR;
+  box_list[k].color = ~_BGCOLOR;
   box_list[k].x=159;
   box_list[k].y=0;
   box_list[k].w=WIDTH-164;
@@ -372,53 +400,54 @@ String keyboard(String mytext, int maxSize, String msg) {
   delay(200);
   int cX =0;
   int cY =0;
-  tft.fillScreen(BGCOLOR);
+  tft.fillScreen(_BGCOLOR);
+  TouchPoint t;
   while(1) {
     if(redraw) {
       tft.setCursor(0,0);
-      tft.setTextColor(~BGCOLOR, BGCOLOR);
+      tft.setTextColor(~_BGCOLOR, _BGCOLOR);
       tft.setTextSize(FM);
 
       //Draw the rectangles
       if(y<0 || y2<0) {
-        tft.fillRect(0,1,WIDTH,22,BGCOLOR);
-        tft.drawRect(7,2,46,20,~BGCOLOR);       // Ok Rectangle
-        tft.drawRect(55,2,50,20,~BGCOLOR);      // CAP Rectangle
-        tft.drawRect(107,2,50,20,~BGCOLOR);     // DEL Rectangle
-        tft.drawRect(159,2,74,20,~BGCOLOR);     // SPACE Rectangle
-        tft.drawRect(3,32,WIDTH-3,20,FGCOLOR); // mystring Rectangle
+        tft.fillRect(0,1,WIDTH,22,_BGCOLOR);
+        tft.drawRect(7,2,46,20,~_BGCOLOR);       // Ok Rectangle
+        tft.drawRect(55,2,50,20,~_BGCOLOR);      // CAP Rectangle
+        tft.drawRect(107,2,50,20,~_BGCOLOR);     // DEL Rectangle
+        tft.drawRect(159,2,74,20,~_BGCOLOR);     // SPACE Rectangle
+        tft.drawRect(3,32,WIDTH-3,20,_FGCOLOR); // mystring Rectangle
 
 
-        if(x==0 && y==-1) { tft.setTextColor(BGCOLOR, ~BGCOLOR); tft.fillRect(7,2,50,20,~BGCOLOR); }
-        else tft.setTextColor(~BGCOLOR, BGCOLOR);
+        if(x==0 && y==-1) { tft.setTextColor(_BGCOLOR, ~_BGCOLOR); tft.fillRect(7,2,50,20,~_BGCOLOR); }
+        else tft.setTextColor(~_BGCOLOR, _BGCOLOR);
         tft.drawString("OK", 18, 4);
 
         
-        if(x==1 && y==-1) { tft.setTextColor(BGCOLOR, ~BGCOLOR); tft.fillRect(55,2,50,20,~BGCOLOR); }
-        else if(caps) { tft.fillRect(55,2,50,20,TFT_DARKGREY); tft.setTextColor(~BGCOLOR, TFT_DARKGREY); }
-        else tft.setTextColor(~BGCOLOR, BGCOLOR);
+        if(x==1 && y==-1) { tft.setTextColor(_BGCOLOR, ~_BGCOLOR); tft.fillRect(55,2,50,20,~_BGCOLOR); }
+        else if(caps) { tft.fillRect(55,2,50,20,TFT_DARKGREY); tft.setTextColor(~_BGCOLOR, TFT_DARKGREY); }
+        else tft.setTextColor(~_BGCOLOR, _BGCOLOR);
         tft.drawString("CAP", 64, 4);
       
 
-        if(x==2 && y==-1) { tft.setTextColor(BGCOLOR, ~BGCOLOR); tft.fillRect(107,2,50,20,~BGCOLOR); }
-        else tft.setTextColor(~BGCOLOR, BGCOLOR);
+        if(x==2 && y==-1) { tft.setTextColor(_BGCOLOR, ~_BGCOLOR); tft.fillRect(107,2,50,20,~_BGCOLOR); }
+        else tft.setTextColor(~_BGCOLOR, _BGCOLOR);
         tft.drawString("DEL", 115, 4);
 
-        if(x>2 && y==-1) { tft.setTextColor(BGCOLOR, ~BGCOLOR); tft.fillRect(159,2,74,20,~BGCOLOR); }
-        else tft.setTextColor(~BGCOLOR, BGCOLOR);
+        if(x>2 && y==-1) { tft.setTextColor(_BGCOLOR, ~_BGCOLOR); tft.fillRect(159,2,74,20,~_BGCOLOR); }
+        else tft.setTextColor(~_BGCOLOR, _BGCOLOR);
         tft.drawString("SPACE", 168, 4);
       }
 
       tft.setTextSize(FP);
-      tft.setTextColor(~BGCOLOR, 0x5AAB);
+      tft.setTextColor(~_BGCOLOR, 0x5AAB);
       tft.drawString(msg.substring(0,38), 3, 24);
       
       tft.setTextSize(FM);
 
       // reseta o quadrado do texto
-      if (mytext.length() == 19 || mytext.length() == 20 || mytext.length() == 38 || mytext.length() == 39) tft.fillRect(3,32,WIDTH-3,20,BGCOLOR); // mystring Rectangle
+      if (mytext.length() == 19 || mytext.length() == 20 || mytext.length() == 38 || mytext.length() == 39) tft.fillRect(3,32,WIDTH-3,20,_BGCOLOR); // mystring Rectangle
       // escreve o texto
-      tft.setTextColor(~BGCOLOR);    
+      tft.setTextColor(~_BGCOLOR);    
       if(mytext.length()>19) { 
         tft.setTextSize(FP);
         if(mytext.length()>38) { 
@@ -432,18 +461,18 @@ String keyboard(String mytext, int maxSize, String msg) {
         tft.drawString(mytext, 5, 34);
       }
       //desenha o retangulo colorido
-      tft.drawRect(3,32,WIDTH-3,20,FGCOLOR); // mystring Rectangle
+      tft.drawRect(3,32,WIDTH-3,20,_FGCOLOR); // mystring Rectangle
       
 
-      tft.setTextColor(~BGCOLOR, BGCOLOR);    
+      tft.setTextColor(~_BGCOLOR, _BGCOLOR);    
       tft.setTextSize(FM);
  
       for(i=0;i<4;i++) {
         for(j=0;j<12;j++) {
           //use last coordenate to paint only this letter
-          if(x2==j && y2==i) { tft.setTextColor(~BGCOLOR, BGCOLOR); tft.fillRect(j*_x,i*_y+54,_x,_y,BGCOLOR);}
+          if(x2==j && y2==i) { tft.setTextColor(~_BGCOLOR, _BGCOLOR); tft.fillRect(j*_x,i*_y+54,_x,_y,_BGCOLOR);}
           /* If selected, change font color and draw Rectangle*/
-          if(x==j && y==i) { tft.setTextColor(BGCOLOR, ~BGCOLOR); tft.fillRect(j*_x,i*_y+54,_x,_y,~BGCOLOR);}
+          if(x==j && y==i) { tft.setTextColor(_BGCOLOR, ~_BGCOLOR); tft.fillRect(j*_x,i*_y+54,_x,_y,~_BGCOLOR);}
           
                     
           /* Print the letters */
@@ -451,7 +480,7 @@ String keyboard(String mytext, int maxSize, String msg) {
           else tft.drawChar(keys[i][j][1], (j*_x+_xo), (i*_y+56));
 
           /* Return colors to normal to print the other letters */
-          if(x==j && y==i) { tft.setTextColor(~BGCOLOR, BGCOLOR); }
+          if(x==j && y==i) { tft.setTextColor(~_BGCOLOR, _BGCOLOR); }
         }
       }
       // save actual key coordenate
@@ -460,7 +489,8 @@ String keyboard(String mytext, int maxSize, String msg) {
       redraw = false;
       previousMillis=millis(); // reset dimmer without delaying 200ms after each keypress
 
-      touch.read();
+      touch.getPoint(t.x, t.y, touch.getSupportTouchPoint());
+      
       TouchFooter();
     }
 
@@ -484,31 +514,29 @@ String keyboard(String mytext, int maxSize, String msg) {
 
     int z=0;
 
-    if (touch.read())
+    if (touch.getPoint(t.x, t.y, touch.getSupportTouchPoint()) && touch.isPressed())
      {
-
-        auto t = touch.getPoint(0);
         if(rotation==3) {
           //t.y = HEIGHT-t.y;
-          t.x = WIDTH-t.x;
+          t.x[0] = WIDTH-t.x[0];
         } else if (rotation==1) {
-          t.y = (HEIGHT+20)-t.y;
+          t.y[0] = (HEIGHT+20)-t.y[0];
         }
 
-      if (box_list[48].contain(t.x, t.y)) { break;      goto THIS_END; }      // Ok
-      if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,BGCOLOR); goto THIS_END; } // CAP
-      if (box_list[50].contain(t.x, t.y)) goto DEL;               // DEL
-      if (box_list[51].contain(t.x, t.y)) { mytext += box_list[51].key; goto ADD; } // SPACE
+      if (box_list[48].contain(t.x[0], t.y[0])) { break;      goto THIS_END; }      // Ok
+      if (box_list[49].contain(t.x[0], t.y[0])) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,_BGCOLOR); goto THIS_END; } // CAP
+      if (box_list[50].contain(t.x[0], t.y[0])) goto DEL;               // DEL
+      if (box_list[51].contain(t.x[0], t.y[0])) { mytext += box_list[51].key; goto ADD; } // SPACE
       for(k=0;k<48;k++){
-        if (box_list[k].contain(t.x, t.y)) {
+        if (box_list[k].contain(t.x[0], t.y[0])) {
           if(caps) mytext += box_list[k].key_sh;
           else mytext += box_list[k].key;
         }
       }
       THIS_END:
 
-      t.x=WIDTH+1;
-      t.y=HEIGHT+11;
+      t.x[0]=WIDTH+1;
+      t.y[0]=HEIGHT+11;
       delay(250);
       redraw=true;
     }
@@ -517,7 +545,7 @@ String keyboard(String mytext, int maxSize, String msg) {
       if(caps) z=1;
       else z=0;
       if(x==0 && y==-1) break;
-      else if(x==1 && y==-1) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,BGCOLOR); }
+      else if(x==1 && y==-1) { caps=!caps; tft.fillRect(0,54,WIDTH,HEIGHT-54,_BGCOLOR); }
       else if(x==2 && y==-1 && mytext.length() > 0) {
         DEL:
         mytext.remove(mytext.length()-1);
@@ -525,9 +553,9 @@ String keyboard(String mytext, int maxSize, String msg) {
         if(mytext.length()>19) { tft.setTextSize(FP); fS=FP; }
         else tft.setTextSize(FM);
         tft.setCursor((cX-fS*LW),cY);
-        tft.setTextColor(FGCOLOR,BGCOLOR);
+        tft.setTextColor(_FGCOLOR,_BGCOLOR);
         tft.print(" "); 
-        tft.setTextColor(~BGCOLOR, 0x5AAB);
+        tft.setTextColor(~_BGCOLOR, 0x5AAB);
         tft.setCursor(cX-fS*LW,cY);
         cX=tft.getCursorX();
         cY=tft.getCursorY();         
@@ -540,8 +568,8 @@ String keyboard(String mytext, int maxSize, String msg) {
         cX=tft.getCursorX();
         cY=tft.getCursorY();
       } 
-      redraw = true;
       delay(250);
+      redraw = true;
     }
 
     /* Down Btn to move in X axis (to the right) */  
@@ -568,7 +596,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   }
   
   //Resets screen when finished writing
-  tft.fillRect(0,0,tft.width(),tft.height(),BGCOLOR);
+  tft.fillRect(0,0,tft.width(),tft.height(),_BGCOLOR);
   resetTftDisplay();
 
   return mytext;

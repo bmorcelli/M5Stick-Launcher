@@ -225,7 +225,18 @@
                 description: "",
                 link: "https://lilygo.cc/products/t-display-s3?_pos=1&_sid=d7b2ebc22&_ss=r&variant=42589373268149",
                 family: "ESP32-S3",
-                env: "lilygo-t-display-S3",
+                env: "lilygo-t-display-S3-touch",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              } 
+            - {
+                vendor: "Lilygo",
+                name: "T-Display_S3_PRO",
+                description: "",
+                link: "https://lilygo.cc/products/t-display-s3?_pos=1&_sid=d7b2ebc22&_ss=r&variant=42589373268149",
+                family: "ESP32-S3",
+                env: "lilygo-t-display-S3-pro",
                 partitions: {
                   bootloader_addr: "0x0",
                 },
