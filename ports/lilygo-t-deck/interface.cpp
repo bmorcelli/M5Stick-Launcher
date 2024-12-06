@@ -75,12 +75,14 @@ bool menuPress(int bot){
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio() {
-    delay(500); // time to ESP32C3 start and enable the keyboard
-    if(!Wire.begin(KB_I2C_SDA, KB_I2C_SCL)) Serial.println("Fail starting ESP32-C3 keyboard");
 
     pinMode(PIN_POWER_ON, OUTPUT);
     digitalWrite(PIN_POWER_ON, HIGH);
     pinMode(SEL_BTN, INPUT);
+
+    // Chip Select LoRa module to HIGH State (Disable module)
+    pinMode(9, OUTPUT);
+    digitalWrite(9,HIGH);
 
     // Setup for Trackball
     pinMode(UP_BTN, INPUT_PULLUP);
@@ -93,6 +95,15 @@ void _setup_gpio() {
     attachInterrupt(R_BTN, ISR_right, FALLING);
 }
 
+/***************************************************************************************
+** Function name: _post_setup_gpio()
+** Location: main.cpp
+** Description:   second stage gpio setup to make a few functions work
+***************************************************************************************/
+void _post_setup_gpio() { 
+    delay(750); // time to ESP32C3 start and enable the keyboard
+    if(!Wire.begin(KB_I2C_SDA, KB_I2C_SCL)) Serial.println("Fail starting ESP32-C3 keyboard");
+}
 
 /***************************************************************************************
 ** Function name: getBattery()

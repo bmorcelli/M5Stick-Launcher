@@ -62,6 +62,8 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.4.1: 
+     * [x] T-Deck SD Card fix (Disable LoRa Chip, CS pin to High state, to avoid conflicts)
 * 2.4.0:
      * [x] CYD-2432W328C port https://github.com/bmorcelli/M5Stick-Launcher/issues/80
      * [x] Rolling texts for large SSIDs and large filenames
