@@ -3,7 +3,7 @@ Application Launcher for M5Stack, Lilygo, CYDs, Marauder and ESP32 devices.
 
 
 <p align="center" width="100%">
-    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true">  <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New Launcher.jpg?raw=true" width="240" height="135"> 
+    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New Launcher.jpg?raw=true" width="240" height="135"> <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/Launcher_anim.webp?raw=true" width="auto" height="135">
 </p>
 
 ## With Launcher you'll be able to:
