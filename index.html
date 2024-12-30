@@ -217,14 +217,14 @@
 	input[type='radio'] {
 		accent-color: #008000;
 	}
-
+	
 	.instructions {
 		display: none;
 		margin-top: 5px;
 		padding: 5px;
 		border: 1px solid #008000;
 		background-color: #202124;
-		border-radius: 10px;
+		border-radius: 5px;
 	}
 	.btn {
 		margin: 2px;
@@ -233,7 +233,7 @@
 		background-color: #202124;
 		color: white;
 		cursor: pointer;
-		border-radius: 10px;
+		border-radius: 5px;
 	}
 	.btn:hover {
 		background-color: #0056b3;
@@ -243,34 +243,34 @@
     <script type="module" src="https://unpkg.com/esp-web-tools@8.0.1/dist/web/install-button.js?module"></script>
   </head>
   <body>
-    <img src="Launcher_anim.webp" alt="Logo" class="logo">   
+	<img src="Launcher_anim.webp" alt="Logo" class="logo">   
     
       <center>
     <div class="content">
       <p><b>Connect your device then select the "Flash" option and push connect.</b><br></p>
       <p>If asked to put your device into <b>download mode</b> do as follows:</p>
 
-		<button class="btn" onclick="showInstructions('cardputer')">Cardputer</button>
-		<button class="btn" onclick="showInstructions('stickcs')">StickCs</button>
-		<button class="btn" onclick="showInstructions('t-embed')">T-Embed</button>
-		<button class="btn" onclick="showInstructions('t-deck')">T-Deck</button>
-		<button class="btn" onclick="showInstructions('others')">Others</button>
-		
-		<div id="cardputer" class="instructions">
-			<b>Cardputer:</b> Hold the btn G0 (upper right corner) and press RST (upper left corner).
-		</div>
-		<div id="stickcs" class="instructions">
-			<b>StickCs:</b> Turn off, connect a jumper cable between GND and G0 (in the header pin), connect the USB Cable and remove the jumper cable.
-    	</div>
-		<div id="t-embed" class="instructions">
-			<b>T-Embed:</b> Keep encoder center button pressed and press RST button (CC1101 this btn is on the board, beside ESP32-S3 chip).
-		</div>
-		<div id="t-deck" class="instructions">
-			<b>T-Deck:</b> Keep the trackpad button pressed and press RST (in the left side).
-    	</div>
-		<div id="others" class="instructions">
-			<b>Others:</b> Turn off, keep BOOT button pressed and plug the USB Cable (or press RST Button).
-    	</div>
+	  <button class="btn" onclick="showInstructions('cardputer')">Cardputer</button>
+	  <button class="btn" onclick="showInstructions('stickcs')">StickCs</button>
+	  <button class="btn" onclick="showInstructions('t-embed')">T-Embed</button>
+	  <button class="btn" onclick="showInstructions('t-deck')">T-Deck</button>
+	  <button class="btn" onclick="showInstructions('others')">Others</button>
+	  
+	  <div id="cardputer" class="instructions">
+		  <b>Cardputer:</b> Hold the btn G0 (upper right corner) and press RST (upper left corner).
+	  </div>
+	  <div id="stickcs" class="instructions">
+		  <b>StickCs:</b> Turn off, connect a jumper cable between GND and G0 (in the header pin), connect the USB Cable and remove the jumper cable.
+	  </div>
+	  <div id="t-embed" class="instructions">
+		  <b>T-Embed:</b> Keep encoder center button pressed and press RST button (CC1101 this btn is on the board, beside ESP32-S3 chip).
+	  </div>
+	  <div id="t-deck" class="instructions">
+		  <b>T-Deck:</b> Keep the trackpad button pressed and press RST (in the left side).
+	  </div>
+	  <div id="others" class="instructions">
+		  <b>Others:</b> Turn off, keep BOOT button pressed and plug the USB Cable (or press RST Button).
+	  </div>
   <h3>Select the version:</h3>
     <div class="switch">
       <input type="radio" name="version" id="latest" value="Release" checked />
@@ -367,12 +367,6 @@
     );
 
     updateManifest();
-	function showInstructions(device) {
-		// Hide all instructions
-		document.querySelectorAll('.instructions').forEach(el => el.style.display = 'none');
-		// Show the selected instruction
-		document.getElementById(device).style.display = 'block';
-	}	
   </script>
   </body>
 </html>
