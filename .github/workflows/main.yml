@@ -306,10 +306,18 @@
 
           - name: Merge files
             run: | 
+              if [[ "${{ matrix.board.vendor }}" == "M5Stack" ]]; then
               esptool.py --chip esp32s3 merge_bin -o Launcher-${{ matrix.board.env }}.bin \
                 ${{ matrix.board.partitions.bootloader_addr }} .pio/build/${{ matrix.board.env }}/bootloader.bin \
                 0x8000 .pio/build/${{ matrix.board.env }}/partitions.bin \
+                0x9000 support_files/UiFlow2_nvs.bin \
                 0x10000 .pio/build/${{ matrix.board.env }}/firmware.bin
+              else
+                esptool.py --chip esp32s3 merge_bin -o Launcher-${{ matrix.board.env }}.bin \
+                ${{ matrix.board.partitions.bootloader_addr }} .pio/build/${{ matrix.board.env }}/bootloader.bin \
+                0x8000 .pio/build/${{ matrix.board.env }}/partitions.bin \
+                0x10000 .pio/build/${{ matrix.board.env }}/firmware.bin
+              fi
               
                 js_content="{\"name\":\"${{ matrix.board.name }}\",\"builds\":[{\"chipFamily\":\"${{ matrix.board.family }}\",\"improv\":false,\"parts\":[{\"path\":\"bins/Launcher-${{ matrix.board.env }}.bin\",\"offset\":0}]}]}"
                 echo "$js_content" > "./Manifest-${{ matrix.board.env }}.json"
