@@ -48,6 +48,7 @@ void webUIMyNet() {
     for(int i=0; i<nets; i++){
       options.push_back({WiFi.SSID(i).c_str(), [=]() { startWebUi(WiFi.SSID(i).c_str(),int(WiFi.encryptionType(i))); }});
     }
+    options.push_back({"Hidden SSID", [=]() { String __ssid=keyboard("", 32, "Your SSID"); wifiConnect(__ssid.c_str(),8); }});
     options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
     delay(200);
     loopOptions(options);

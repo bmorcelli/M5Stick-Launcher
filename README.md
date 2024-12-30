@@ -62,6 +62,11 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.4.2:
+     * [x] UiFlow2 v2.2.0 compatibility https://github.com/bmorcelli/M5Stick-Launcher/issues/92
+     * [x] Fix for https://github.com/bmorcelli/M5Stick-Launcher/issues/93
+     * [x] Possibility to connect to Hidden Networks https://github.com/bmorcelli/M5Stick-Launcher/issues/89 by typing the SSID and Pwd
+     
 * 2.4.1: 
      * [x] T-Deck SD Card fix (Disable LoRa Chip, CS pin to High state, to avoid conflicts) https://github.com/bmorcelli/M5Stick-Launcher/issues/86
      * [x] Lilygo T-Display-S3-Pro port https://github.com/bmorcelli/M5Stick-Launcher/issues/73

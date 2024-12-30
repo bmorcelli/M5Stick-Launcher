@@ -407,6 +407,7 @@ void loop() {
             for(int i=0; i<nets; i++){
               options.push_back({WiFi.SSID(i).c_str(), [=]() { wifiConnect(WiFi.SSID(i).c_str(),int(WiFi.encryptionType(i))); }});
             }
+            options.push_back({"Hidden SSID", [=]() { String __ssid=keyboard("", 32, "Your SSID"); wifiConnect(__ssid.c_str(),8); }});
             options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
             delay(200);
             loopOptions(options);
@@ -450,8 +451,8 @@ void loop() {
         if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
         else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true);  saveConfigs();}});
         options.push_back(              {"Rotate 180",    [=]() { gsetRotation(true);         saveConfigs(); }});
-        options.push_back(              {"Part Change",   [=]() { partitioner(); }});
-        options.push_back(              {"Part List",     [=]() { partList(); }});
+        options.push_back(              {"Partition Change",   [=]() { partitioner(); }});
+        options.push_back(              {"List of Partitions",     [=]() { partList(); }});
 
       #ifndef PART_04MB
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
