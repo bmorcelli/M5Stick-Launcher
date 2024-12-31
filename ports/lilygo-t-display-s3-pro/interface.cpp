@@ -42,6 +42,14 @@ void _setup_gpio() {
     pinMode(UP_BTN, INPUT);
     pinMode(DW_BTN, INPUT);
 
+    // CS pins of SPI devices to HIGH
+    pinMode(15, OUTPUT);
+    digitalWrite(15,HIGH);
+    pinMode(9, OUTPUT);
+    digitalWrite(9,HIGH);
+    pinMode(6, OUTPUT);
+    digitalWrite(6,HIGH);
+
 
     pinMode(BOARD_TOUCH_RST, OUTPUT); //PIN_TOUCH_RES 
     digitalWrite(BOARD_TOUCH_RST, LOW);//PIN_TOUCH_RES 
