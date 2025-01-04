@@ -11,6 +11,45 @@
 int getBattery() { return 0; }
 
 
+struct box_t
+{
+  int x;
+  int y;
+  int w;
+  int h;
+  std::uint16_t color;
+  int touch_id = -1;
+  char key;
+  char key_sh;
+
+  void clear(void)
+  {
+    for (int i = 0; i < 8; ++i)
+    {
+      tft.fillRect(x, y, w, h,BGCOLOR);
+    }
+  }
+  void draw(void)
+  {
+    int ie = touch_id < 0 ? 4 : 8;
+    for (int i = 0; i < ie; ++i)
+    {
+      tft.drawRect(x, y, w, h,color);
+      tft.setTextColor(color);
+      tft.drawChar(key,x+w/2-FM*LW/2,y+h/2-FM*LH/2);
+    }
+  }
+  bool contain(int x, int y)
+  {
+    return this->x <= x && x < (this->x + this->w)
+        && this->y <= y && y < (this->y + this->h);
+  }
+};
+
+static constexpr std::size_t box_count = 52;
+static box_t box_list[box_count];
+
+
 String keyboard(String mytext, int maxSize, String msg) {
   resetTftDisplay();
   
@@ -168,7 +207,7 @@ String keyboard(String mytext, int maxSize, String msg) {
           };
         #else // small keyboard size, for small letters (smaller screen)
           #define KBLH 10
-          int ofs[4][2] = {
+          int ofs[4][3] = {
             {7 , 20, 10},
             {27, 25, 30},
             {52, 25, 55},

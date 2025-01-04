@@ -48,7 +48,7 @@ TouchPoint touchPoint;
 keyStroke KeyStroke;
 
 #if defined(HAS_TOUCH)
-uint16_t tftHeight = TFT_WIDTH-20;
+volatile uint16_t tftHeight = TFT_WIDTH-20;
 #else
 volatile uint16_t tftHeight = TFT_WIDTH;
 #endif

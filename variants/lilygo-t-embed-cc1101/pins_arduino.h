@@ -58,6 +58,33 @@ static const uint8_t SCL = GROVE_SCL;
 #define SDCARD_MOSI SPI_MOSI_PIN
 #define SDCARD_SCK  SPI_SCK_PIN
 
+// NRF24 - Over QWIIC Port #2
+#define USE_NRF24_VIA_SPI
+#define NRF24_CE_PIN    43
+#define NRF24_SS_PIN    44
+#define NRF24_MOSI_PIN  SDCARD_MOSI
+#define NRF24_SCK_PIN   SDCARD_SCK
+#define NRF24_MISO_PIN  SDCARD_MISO
+
+// CC1101
+#define USE_CC1101_VIA_SPI
+#define CC1101_GDO0_PIN 3 
+#define CC1101_GDO2_PIN 38
+#define CC1101_SW1_PIN  47
+#define CC1101_SW0_PIN  48
+#define CC1101_SS_PIN   12
+#define CC1101_MISO_PIN SPI_MISO_PIN
+#define CC1101_MOSI_PIN SPI_MOSI_PIN
+#define CC1101_SCK_PIN  SPI_SCK_PIN
+
+//PN532
+#define PN532_RF_REST   45
+#define PN532_IRQ       17
+
+// Mic
+#define PIN_CLK         39
+#define PIN_DATA        42
+
 // Speaker
 #define HAS_NS4168_SPKR
 #define BCLK    46
@@ -113,7 +140,6 @@ static const uint8_t RX = SERIAL_RX;
 
 // BadUSB 
 #define USB_as_HID 1
-
 #else
 // Lite Version
 // #define LITE_VERSION 1

@@ -124,6 +124,10 @@ void _setBrightness(uint8_t brightval) {
   ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
 }
 
+struct TouchPointPro {
+  int16_t x[5];
+  int16_t y[5];
+};
 /*********************************************************************
 ** Function: InputHandler
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress

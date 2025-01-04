@@ -1,7 +1,5 @@
 #include "interface.h"
 #include "powerSave.h"
-#include "core/utils.h"
-
 #include <M5Unified.h>
 
 /***************************************************************************************

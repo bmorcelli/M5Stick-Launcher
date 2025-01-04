@@ -1,6 +1,6 @@
 #include "interface.h"
 #include "powerSave.h"
-#include "core/utils.h"
+
 
 #if defined(HAS_CAPACITIVE_TOUCH)
     #include "CYD28_TouchscreenC.h"
