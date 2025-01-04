@@ -1,9 +1,5 @@
-#if defined(STICK_C_PLUS) || defined(STICK_C)
-
-#ifndef __AXP192_Stick_H__
-#define __AXP192_Stick_H__
-
-
+#ifndef __AXP192_H__
+#define __AXP192_H__
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -58,7 +54,7 @@ class AXP192 {
     float GetVinCurrent();
     float GetVBusVoltage();
     float GetVBusCurrent();
-    float GetTempInAXP192_Stick();
+    float GetTempInAXP192();
     float GetBatPower();
     float GetBatChargeCurrent();
     float GetAPSVoltage();
@@ -83,5 +79,4 @@ class AXP192 {
     void ReadBuff(uint8_t Addr, uint8_t Size, uint8_t *Buff);
 };
 
-#endif
 #endif

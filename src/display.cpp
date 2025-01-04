@@ -612,9 +612,9 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     if(longPrevPress || PrevPress) {
       if(!longPrevPress) {
         longPrevPress = true;
-        longSelTmp = millis();
+        longPrevTmp = millis();
       }
-      if(longPrevPress && millis()-longSelTmp<700) { 
+      if(longPrevPress && millis()-longPrevTmp<700) { 
         if(!PrevPress) {
           AnyKeyPress=false;
           if(index==0) index = options.size() - 1;
@@ -622,16 +622,16 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
           longPrevPress=false;
           redraw = true;
         }
-        if(millis()-longSelTmp>200) tft.drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longSelTmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true);
-        if(millis()-longSelTmp>700) { // longpress detected to exit
+        if(millis()-longPrevTmp>200) tft.drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true);
+        if(millis()-longPrevTmp>700) { // longpress detected to exit
           delay(200);
           break;
         } else goto WAITING;
-      }
-      WAITING:
 
+      }
     #endif
     }
+    WAITING:
     /* DW Btn to next item */
     if(check(NextPress) || check(DownPress)) { 
       index++;
