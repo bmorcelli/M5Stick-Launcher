@@ -1,3 +1,6 @@
+#ifndef __SETTINGS_H
+#define __SETTINGS_H
+
 #include <EEPROM.h>
 #include <FS.h>
 #include <SD_MMC.h>
@@ -43,3 +46,4 @@ void saveConfigs();
 void setdimmerSet();
 void setUiColor();
 void chargeMode();
+#endif

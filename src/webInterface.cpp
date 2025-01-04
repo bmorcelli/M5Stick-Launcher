@@ -1,6 +1,6 @@
 
 #include "webInterface.h"
-#include "globals.h"
+#include <globals.h>
 #include "sd_functions.h"
 #include "onlineLauncher.h"
 #include "display.h"
@@ -456,31 +456,31 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   server->begin();
   delay(500);
 
-  tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,ALCOLOR);
-  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-  setTftDisplay(7,7,ALCOLOR,FONT_P,BGCOLOR);
-  tft.drawCentreString("-= Launcher WebUI =-",WIDTH/2,0,8);
+  tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,ALCOLOR);
+  tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+  setTftDisplay(7,7,ALCOLOR,FP,BGCOLOR);
+  tft.drawCentreString("-= Launcher WebUI =-",tftWidth/2,0,8);
   String txt;
   if(!mode_ap) txt = WiFi.localIP().toString();
   else txt = WiFi.softAPIP().toString();
   
-#if WIDTH<200
-  tft.drawCentreString("http://launcher.local", WIDTH/2,17,1);
-  setTftDisplay(7,26,~BGCOLOR,FONT_P,BGCOLOR);
+#if TFT_HEIGHT<200
+  tft.drawCentreString("http://launcher.local", tftWidth/2,17,1);
+  setTftDisplay(7,26,~BGCOLOR,FP,BGCOLOR);
 #else
-  tft.drawCentreString("http://launcher.local", WIDTH/2,22,1);
-  setTftDisplay(7,47,~BGCOLOR,FONT_P,BGCOLOR);
+  tft.drawCentreString("http://launcher.local", tftWidth/2,22,1);
+  setTftDisplay(7,47,~BGCOLOR,FP,BGCOLOR);
 #endif
-  tft.setTextSize(FONT_M);
+  tft.setTextSize(FM);
   tft.print("IP ");   tftprintln(txt,10,1);
   tftprintln("Usr: " + String(wui_usr),10,1);
   tftprintln("Pwd: " + String(wui_pwd),10,1);
 
-  setTftDisplay(7,HEIGHT-39,ALCOLOR,FONT_P);
+  setTftDisplay(7,tftHeight-39,ALCOLOR,FP);
 
-  tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", WIDTH/2,HEIGHT-15,1);
+  tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", tftWidth/2,tftHeight-15,1);
 
-  while (!checkSelPress())
+  while (!check(SelPress))
   {
     if (shouldReboot) {
       ESP.restart();

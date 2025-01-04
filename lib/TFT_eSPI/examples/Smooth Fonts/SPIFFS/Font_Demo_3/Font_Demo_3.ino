@@ -32,7 +32,7 @@
 
 #define AA_FONT_SMALL "NotoSansBold15"
 #define AA_FONT_LARGE "NotoSansBold36"
-#define AA_FONT_MONO  "NotoSansMonoSCB20" // NotoSansMono-SemiCondensedBold 20pt
+#define AA_FMONO  "NotoSansMonoSCB20" // NotoSansMono-SemiCondensedBold 20pt
 // Font files are stored in SPIFFS, so load the library
 #include <FS.h>
 
@@ -163,7 +163,7 @@ void loop() {
   // Mono spaced font
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   
-  spr.loadFont(AA_FONT_MONO); // Mono spaced fonts have fixed inter-character gaps to
+  spr.loadFont(AA_FMONO); // Mono spaced fonts have fixed inter-character gaps to
                               // aid formatting
   int bnum = 1;
 

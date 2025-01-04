@@ -1,3 +1,6 @@
+#ifndef __ONLINELAUNCHER_H
+#define __ONLINELAUNCHER_H
+
 #include <WiFi.h>
 #include <M5-HTTPUpdate.h>
 #include <HTTPClient.h>
@@ -15,3 +18,5 @@ void wifiConnect(String ssid, int encryptation, bool isAP = false);
 bool GetJsonFromM5();
 
 bool installFAT_OTA( WiFiClientSecure *client, String fileAddr, uint32_t offset, uint32_t size, const char *label);
+
+#endif

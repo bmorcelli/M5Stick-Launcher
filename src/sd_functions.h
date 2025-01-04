@@ -1,3 +1,6 @@
+#ifndef __SD_FUNCTIONS_H
+#define __SD_FUNCTIONS_H
+
 #include <FS.h>
 #include <SD_MMC.h>
 #include <SD.h>
@@ -36,3 +39,4 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command);
 void updateFromSD(String path);
 
 bool performFATUpdate(Stream &updateSource, size_t updateSize,  const char *label = "vfs");
+#endif

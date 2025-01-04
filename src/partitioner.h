@@ -1,3 +1,6 @@
+#ifndef __PARTITIONER_H
+#define __PARTITIONER_H
+
 #include <esp_partition.h>
 #include <esp_ota_ops.h>
 #include <esp_flash.h>
@@ -66,3 +69,4 @@ const uint8_t def_part16[288] PROGMEM = {
   };
 bool partitionSetter(const uint8_t* scheme, size_t scheme_size);
 #endif
+#endif /*__PARTITIONER_H*/

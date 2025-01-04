@@ -34,7 +34,7 @@
 // The font names are arrays references, thus must NOT be in quotes ""
 #define AA_FONT_SMALL NotoSansBold15
 #define AA_FONT_LARGE NotoSansBold36
-#define AA_FONT_MONO  NotoSansMonoSCB20 // NotoSansMono-SemiCondensedBold 20pt
+#define AA_FMONO  NotoSansMonoSCB20 // NotoSansMono-SemiCondensedBold 20pt
 
 #include <SPI.h>
 #include <TFT_eSPI.h>       // Hardware-specific library
@@ -144,7 +144,7 @@ void loop() {
   // Mono spaced font
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   
-  spr.loadFont(AA_FONT_MONO); // Mono spaced fonts have fixed inter-character gaps to
+  spr.loadFont(AA_FMONO); // Mono spaced fonts have fixed inter-character gaps to
                               // aid formatting
   int bnum = 1;
 

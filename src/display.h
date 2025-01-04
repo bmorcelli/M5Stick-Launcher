@@ -1,17 +1,16 @@
-#pragma once
 // display.h
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef __DISPLAY_H
+#define __DISPLAY_H
 
 #ifdef HEADLESS
-#include "util/VectorDisplay.h"
+#include <VectorDisplay.h>
 #else
 #include <TFT_eSPI.h>
 #endif
 #include <ArduinoJson.h>
 #include <functional>
 #include <vector>
-#include "globals.h"
+#include <globals.h>
 // Declaração dos objetos TFT
 #if defined(HEADLESS)
 extern SerialDisplayClass tft;
@@ -25,7 +24,7 @@ void initDisplay(bool doAll = false); // Início da função e mostra bootscreen
 void initDisplayLoop();
 
 //Funções para economizar linhas nas outras funções
-void resetTftDisplay(int x = 0, int y = 0, uint16_t fc = FGCOLOR, int size = FONT_M, uint16_t bg = BGCOLOR, uint16_t screen = BGCOLOR);
+void resetTftDisplay(int x = 0, int y = 0, uint16_t fc = FGCOLOR, int size = FM, uint16_t bg = BGCOLOR, uint16_t screen = BGCOLOR);
 void setTftDisplay(int x = 0, int y = 0, uint16_t fc = tft.textcolor, int size = tft.textsize, uint16_t bg = tft.textbgcolor);
 
 void displayCurrentItem(JsonDocument doc, int currentIndex);
@@ -63,5 +62,7 @@ void TouchFooter2(uint16_t color = FGCOLOR);
 void tftprintln(String txt, int margin, int numlines = 0);
 
 void tftprint(String txt, int margin, int numlines = 0);
+
+uint16_t getComplementaryColor(uint16_t color);
 
 #endif

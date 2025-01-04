@@ -1,4 +1,4 @@
-#include "globals.h"
+#include <globals.h>
 #include "partitioner.h"
 #include "display.h"
 #include "mykeyboard.h"
@@ -223,13 +223,13 @@ void partitioner() {
     if (!partitionSetter(data, data_size)) {
         Serial.println("Error when running partitionSetter function");
         displayRedStripe("Partitioning Error");
-        while (!checkSelPress()) yield();
+        while (!check(SelPress)) yield();
     }
 
     displayRedStripe("Restart needed");
 
-    while (!checkSelPress()) yield();
-    while (checkSelPress()) yield();
+    while (!check(SelPress)) yield();
+    while (check(SelPress)) yield();
     ESP.restart();
 Exit:
     Serial.print("Desistiu");
@@ -271,8 +271,8 @@ void partList() {
     esp_partition_iterator_release(it);
     displayRedStripe(txt);
     delay(300);
-    while(!checkSelPress()) yield();
-    while(checkSelPress()) yield();    
+    while(!check(SelPress)) yield();
+    while(check(SelPress)) yield();    
   }   
 }
 

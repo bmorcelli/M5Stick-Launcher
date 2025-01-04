@@ -1,3 +1,5 @@
+#ifndef __WEBINTERFACE_H
+#define __WEBINTERFACE_H
 
 #include <SD_MMC.h>
 #include <SD.h>
@@ -884,3 +886,5 @@ border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 </html>
 )rawliteral";
 #endif
+
+#endif /*__WEBINTERFACE_H*/

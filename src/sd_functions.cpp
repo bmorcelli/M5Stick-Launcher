@@ -1,4 +1,4 @@
-#include "globals.h"    
+#include <globals.h>    
 #include "sd_functions.h"
 #include "display.h"
 #include "mykeyboard.h"
@@ -208,7 +208,7 @@ bool pasteFile(String path) {
   size_t bytesRead;
   int tot=sourceFile.size();
   int prog=0;
-  //tft.drawRect(5,HEIGHT-12, (WIDTH-10), 9, FGCOLOR);
+  //tft.drawRect(5,tftHeight-12, (tftWidth-10), 9, FGCOLOR);
   while ((bytesRead = sourceFile.read(buffer, bufferSize)) > 0) {
     if (destFile.write(buffer, bytesRead) != bytesRead) {
       //Serial.println("Falha ao escrever no arquivo de destino");
@@ -218,8 +218,8 @@ bool pasteFile(String path) {
     } else {
       prog+=bytesRead;
       float rad = 360*prog/tot;
-      tft.drawArc(WIDTH/2,HEIGHT/2,HEIGHT/4,HEIGHT/5,0,int(rad),ALCOLOR,BGCOLOR,true);
-      //tft.fillRect(7,HEIGHT-10, (WIDTH-14)*prog/tot, 5, FGCOLOR);
+      tft.drawArc(tftWidth/2,tftHeight/2,tftHeight/4,tftHeight/5,0,int(rad),ALCOLOR,BGCOLOR,true);
+      //tft.fillRect(7,tftHeight-10, (tftWidth-14)*prog/tot, 5, FGCOLOR);
     }
   }
 
@@ -389,12 +389,14 @@ String loopSD(bool filePicker) {
   String Folder = "/";
   String PreFolder = "/";
   tft.fillScreen(BGCOLOR);
-  tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+  tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
 
   readFs(Folder, fileList);
   coord=listFiles(0, fileList);
 
   for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
+  bool longSelPress = false;
+  long longSelTmp=millis();
   while(1){
     if(returnToMenu) break; // stop this loop and retur to the previous loop
 
@@ -406,8 +408,8 @@ String loopSD(bool filePicker) {
         maxFiles=0;
         for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
         reload=false;
-        tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-        tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+        tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+        tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
       }
       coord=listFiles(index, fileList);
 
@@ -417,24 +419,30 @@ String loopSD(bool filePicker) {
 
     displayScrollingText(fileList[index][0], coord);
 
-    if(checkPrevPress()) {
+    if(check(PrevPress) || check(UpPress)) {
       if(index==0) index = maxFiles - 1;
       else if(index>0) index--;
       redraw = true;
     }
     /* DW Btn to next item */
-    if(checkNextPress()) { 
+    if(check(NextPress) || check(DownPress)) { 
       index++;
       if(index==maxFiles) index = 0;
       redraw = true;
     }
 
     /* Select to install */
-    if(checkSelPress()) { 
-      delay(200);
-      if(checkSelPress()) 
+    if(longSelPress || SelPress) {
+      if(!longSelPress) {
+        longSelPress = true;
+        longSelTmp = millis();
+      }
+      if(longSelPress && millis()-longSelTmp<200) goto WAITING;
+      longSelPress=false;
+
+      if(check(SelPress))
       {
-        while(checkSelPress()) yield();
+        while(check(SelPress)) yield();
         // Definição da matriz "Options" 
         if(fileList[index][2]=="folder") {
           options = {
@@ -445,7 +453,7 @@ String loopSD(bool filePicker) {
           };
           delay(200);
           loopOptions(options);
-          tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);  
+          tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);  
           reload = true;     
           redraw = true;
         } else if(fileList[index][2]=="file"){
@@ -486,21 +494,24 @@ String loopSD(bool filePicker) {
           reload = true;  
           redraw = true;
         } else {
+        BACK_FOLDER:
           if(Folder == "/") break;
+          while(fileList[index][2]!="operator") index++; // to reach pre_folder
           Folder = fileList[index][1];
           index = 0;
           redraw=true;
         }
         redraw = true;
       }
-      tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-      tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+      tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+      tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
       redraw = true;
     }
+    WAITING:
+    yield();
 
-    #ifdef ESC_LOGIC
-      if(checkEscPress()) break;
-    #endif
+    if(check(EscPress)) goto BACK_FOLDER;
+
   }
   //clear fileList memory
   for(int i=0; i<MAXFILES; i++) {
@@ -523,7 +534,7 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   // command = U_SPIFFS = 100
   // command = U_FLASH = 0
 
-  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
   progressHandler(0, 500);
 
   if (Update.begin(updateSize, command)) {
@@ -644,7 +655,7 @@ void updateFromSD(String path) {
       };
       delay(200);
       loopOptions(options);
-      tft.fillSmoothRoundRect(6, 6, WIDTH - 12, HEIGHT - 12, 5, BGCOLOR);
+      tft.fillSmoothRoundRect(6, 6, tftWidth - 12, tftHeight - 12, 5, BGCOLOR);
     }
 
     log_i("Appsize: %d", app_size);

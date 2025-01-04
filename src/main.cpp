@@ -1,11 +1,11 @@
-#include "globals.h"
+#include <globals.h>
 
 #include <EEPROM.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <M5-HTTPUpdate.h>
 #ifdef HEADLESS
-#include "util/VectorDisplay.h"
+#include <VectorDisplay.h>
 #else
 #include <TFT_eSPI.h>
 #endif
@@ -16,7 +16,7 @@
 #include <functional>
 #include <vector>
 #include <string>
-
+#include "powerSave.h"
 
 // Public Globals
 uint32_t MAX_SPIFFS = 0;
@@ -36,6 +36,42 @@ uint8_t _sck=0;
 uint8_t _cs=0;
 #endif
 
+// Navigation Variables
+volatile bool NextPress=false;
+volatile bool PrevPress=false;
+volatile bool UpPress=false;
+volatile bool DownPress=false;
+volatile bool SelPress=false;
+volatile bool EscPress=false;
+volatile bool AnyKeyPress=false;
+TouchPoint touchPoint;
+keyStroke KeyStroke;
+
+#if defined(HAS_TOUCH)
+uint16_t tftHeight = TFT_WIDTH-20;
+#else
+volatile uint16_t tftHeight = TFT_WIDTH;
+#endif
+volatile uint16_t tftWidth = TFT_HEIGHT;
+TaskHandle_t xHandle;
+void __attribute__((weak)) taskInputHandler(void *parameter) {
+    while (true) { 
+      checkPowerSaveTime();
+      NextPress=false;
+      PrevPress=false;
+      UpPress=false;
+      DownPress=false;
+      SelPress=false;
+      EscPress=false;
+      AnyKeyPress=false;
+      touchPoint.pressed=false;
+      KeyStroke.Clear();
+      InputHandler();
+      vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+}
+
+// More 2nd grade global Variables
 int dimmerSet=20;
 unsigned long previousMillis;
 bool isSleeping;
@@ -228,17 +264,7 @@ void setup() {
   #endif
     EEPROM.commit();       // Store data to EEPROM
   }
-  #if ROTATION == 0 // Marauder mini
-  if(EEPROM.read(EEPROMSIZE-13) != 0 && EEPROM.read(EEPROMSIZE-13) != 2)  { 
-    EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
-    EEPROM.commit();       // Store data to EEPROM
-  }
-  #else
-  if(EEPROM.read(EEPROMSIZE-13) != 1 && EEPROM.read(EEPROMSIZE-13) != 3)  { 
-    EEPROM.write(EEPROMSIZE-13, ROTATION);    // Left rotation
-    EEPROM.commit();       // Store data to EEPROM
-  }
-  #endif
+
   rotation = EEPROM.read(EEPROMSIZE-13);
   dimmerSet = EEPROM.read(EEPROMSIZE-14);
   bright = EEPROM.read(EEPROMSIZE-15);
@@ -292,8 +318,17 @@ void setup() {
   TouchFooter2();
   #endif    
 
-
   _post_setup_gpio();
+
+  // This task keeps running all the time, will never stop
+  xTaskCreate(
+        taskInputHandler,   // Task function
+        "InputHandler",     // Task Name
+        2600,               // Stack size
+        NULL,               // Task parameters
+        2,                  // Task priority (0 to 3), loopTask has priority 2.
+        &xHandle            // Task handle (not used)
+    );  
 
   //Start Bootscreen timer
   int i = millis();
@@ -306,19 +341,18 @@ void setup() {
       j++;
     }
   
-      if(checkSelPress())    
-      {
-          tft.fillScreen(BGCOLOR);
-          goto Launcher;
-        }
+    if(check(SelPress)) {
+      tft.fillScreen(BGCOLOR);
+      goto Launcher;
+    }
 
     #if defined (HAS_KEYBOARD)
       keyStroke key=_getKeyPress();
       if (key.pressed && !key.enter)
     #elif defined(STICK_C_PLUS2) || defined(STICK_C_PLUS)
-      if(checkNextPress()) 
+      if(check(NextPress)) 
     #else
-      if(checkNextPress() || checkPrevPress())
+      if(check(NextPress) || check(PrevPress))
     #endif 
       {
         tft.fillScreen(TFT_BLACK);
@@ -369,20 +403,20 @@ void loop() {
       delay(REDRAW_DELAY); 
     }
 
-    if(checkPrevPress()) {
+    if(check(PrevPress)) {
       if(index==0) index = opt - 1;
       else if(index>0) index--;
       redraw = true;
     }
     // DW Btn to next item 
-    if(checkNextPress()) { 
+    if(check(NextPress)) { 
       index++;
       if((index+1)>opt) index = 0;
       redraw = true;
     }
 
     // Select and run function 
-    if(checkSelPress()) { 
+    if(check(SelPress)) { 
       if(index == 0) {  
         if(setupSdCard()) { 
           loopSD(false); 
@@ -448,11 +482,11 @@ void loop() {
           else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true);   saveConfigs();}});
         }
         
-        if(askSpiffs) options.push_back({"Avoid Spiffs",  [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
-        else          options.push_back({"Ask Spiffs",    [=]() { gsetAskSpiffs(true, true);  saveConfigs();}});
-        options.push_back(              {"Rotate 180",    [=]() { gsetRotation(true);         saveConfigs(); }});
-        options.push_back(              {"Partition Change",   [=]() { partitioner(); }});
-        options.push_back(              {"List of Partitions",     [=]() { partList(); }});
+        if(askSpiffs) options.push_back({"Avoid Spiffs",        [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
+        else          options.push_back({"Ask Spiffs",          [=]() { gsetAskSpiffs(true, true);  saveConfigs();}});
+        options.push_back(              {"Orientation",         [=]() { gsetRotation(true);         saveConfigs(); }});
+        options.push_back(              {"Partition Change",    [=]() { partitioner(); }});
+        options.push_back(              {"List of Partitions",  [=]() { partList(); }});
 
       #ifndef PART_04MB
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});

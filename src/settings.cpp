@@ -1,5 +1,5 @@
 
-#include "globals.h"
+#include <globals.h>
 #include "display.h"
 #include "settings.h"
 #include "sd_functions.h"
@@ -9,19 +9,19 @@
 EEPROM ADDRESSES MAP
 
 
-0	N/B Rot 	  16		      32	Pass	  48	Pass	64	Pass	80	Pass	96		112	
-1	N/B Dim	    17		      33	Pass	  49	Pass	65	Pass	81	Pass	97		113	
-2	N/B Bri     18		      34	Pass  	50	Pass	66	Pass	82	Pass	98		114	
+0	N Rot 	    16		      32	Pass	  48	Pass	64	Pass	80	Pass	96		112	
+1	N Dim	      17		      33	Pass	  49	Pass	65	Pass	81	Pass	97		113	
+2	N Bri       18		      34	Pass  	50	Pass	66	Pass	82	Pass	98		114	
 3	N	          19		      35	Pass	  51	Pass	67	Pass	83	Pass	99		115	(L- Brigh)
 4	N	          20	Pass  	36	Pass	  52	Pass	68	Pass	84	Pass	100		116	(L- Dim)
 5	N	          21	Pass  	37	Pass  	53	Pass	69	Pass	85		    101		117	(L- Rotation)
-6	B-IrTX      22	Pass  	38	Pass  	54	Pass	70	Pass	86		    102		118	(L-odd)
-7	B-IrRx      23	Pass  	39	Pass  	55	Pass	71	Pass	87		    103		119	(L-odd)
-8	B-RfTX      24	Pass  	40	Pass  	56	Pass	72	Pass	88		    104		120	(L-even)
-9	B-RfRx      25	Pass  	41	Pass  	57	Pass	73	Pass	89		    105		121	(L-even)
-10 TimeZone	  26	Pass  	42	Pass  	58	Pass	74	Pass	90 miso   106		122	(L-BGCOLOR)
-11 FGCOLOR    27	Pass  	43	Pass  	59	Pass	75	Pass	91 mosi   107		123	(L-BGCOLOR)
-12 FGCOLOR    28	Pass  	44	Pass  	60	Pass	76	Pass	92 sck    108		124	(L-FGCOLOR)
+6	 	          22	Pass  	38	Pass  	54	Pass	70	Pass	86		    102		118	(L-odd)
+7	 	          23	Pass  	39	Pass  	55	Pass	71	Pass	87		    103		119	(L-odd)
+8	 	          24	Pass  	40	Pass  	56	Pass	72	Pass	88		    104		120	(L-even)
+9	 	          25	Pass  	41	Pass  	57	Pass	73	Pass	89		    105		121	(L-even)
+10  	        26	Pass  	42	Pass  	58	Pass	74	Pass	90 miso   106		122	(L-BGCOLOR)
+11  	        27	Pass  	43	Pass  	59	Pass	75	Pass	91 mosi   107		123	(L-BGCOLOR)
+12  	        28	Pass  	44	Pass  	60	Pass	76	Pass	92 sck    108		124	(L-FGCOLOR)
 13		        29	Pass  	45	Pass  	61	Pass	77	Pass	93 cs	    109		125	(L-FGCOLOR)
 14		        30	Pass	  46	Pass  	62	Pass	78	Pass	94		    110		126	(L-AskSpiffs)
 15		        31	Pass  	47	Pass  	63	Pass	79	Pass	95		    111		127	(L-OnlyBins)
@@ -148,19 +148,28 @@ int gsetRotation(bool set){
   EEPROM.begin(EEPROMSIZE);
   int getRot = EEPROM.read(EEPROMSIZE-13);
   int result = ROTATION;
-  
-  if(getRot==(DRV) && set) result = (DRV+2);
-  else if(getRot==(DRV+2) && set) result = DRV;
-  else if(getRot<=(DRV+2)) result = getRot;
-  else {
+
+  if(getRot>3) { 
     set=true;
     result = ROTATION;
-  } 
+  } else result = getRot;
 
   if(set) {
+    options = {
+      {"Default",     [&]() { result=ROTATION; }},
+      #if TFT_WIDTH>=200 && TFT_HEIGHT>=200
+      {"Portrait",    [&]() { result=(DRV==1?0:1); }},
+      #endif
+      {"Landscape",   [&]() { result=DRV; }},
+      #if TFT_WIDTH>=200 && TFT_HEIGHT>=200
+      {"Portrait 2",  [&]() { result=(DRV==1?2:3); }},
+      #endif
+      {"Landscape 2", [&]() { result=DRV+2; }}
+    };
+    loopOptions(options);
     rotation = result;
     tft.setRotation(result);
-    EEPROM.write(EEPROMSIZE-13, result);    // Left rotation
+    EEPROM.write(EEPROMSIZE-13, result); 
     EEPROM.commit();
     tft.fillScreen(BGCOLOR);
   }
@@ -234,6 +243,7 @@ void setdimmerSet() {
     {"30s", [&]() { time=30; }},
     {"45s", [&]() { time=45; }},
     {"60s", [&]() { time=60; }},
+    
   };
   delay(200);
   loopOptions(options);
@@ -255,7 +265,7 @@ void chargeMode() {
   delay(500);
   tft.fillScreen(BGCOLOR);
   unsigned long tmp=0;
-  while(!checkSelPress()) {
+  while(!check(SelPress)) {
     if(millis()-tmp>5000) {
       displayRedStripe(String(getBattery()) + " %");
       tmp=millis();

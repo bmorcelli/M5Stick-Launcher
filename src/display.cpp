@@ -1,6 +1,5 @@
-
 #include "display.h"
-#include "globals.h"
+#include <globals.h>
 #include "mykeyboard.h"
 #include "onlineLauncher.h"
 #include "sd_functions.h"
@@ -68,12 +67,12 @@ void setTftDisplay(int x, int y, uint16_t fc, int size, uint16_t bg) {
 ** Description:   Draw touch screen footer
 ***************************************************************************************/
 void TouchFooter(uint16_t color) {
-  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
+  tft.drawRoundRect(5,tftHeight+2,tftWidth-10,43,5,color);
   tft.setTextColor(color);
   tft.setTextSize(FM);
-  tft.drawCentreString("PREV",WIDTH/6,HEIGHT+4,1);
-  tft.drawCentreString("SEL",WIDTH/2,HEIGHT+4,1);
-  tft.drawCentreString("NEXT",5*WIDTH/6,HEIGHT+4,1);
+  tft.drawCentreString("PREV",tftWidth/6,tftHeight+4,1);
+  tft.drawCentreString("SEL",tftWidth/2,tftHeight+4,1);
+  tft.drawCentreString("NEXT",5*tftWidth/6,tftHeight+4,1);
 }
 
 /***************************************************************************************
@@ -81,12 +80,12 @@ void TouchFooter(uint16_t color) {
 ** Description:   Draw touch screen footer
 ***************************************************************************************/
 void TouchFooter2(uint16_t color) {
-  tft.drawRoundRect(5,HEIGHT+2,WIDTH-10,43,5,color);
+  tft.drawRoundRect(5,tftHeight+2,tftWidth-10,43,5,color);
   tft.setTextColor(color);
   tft.setTextSize(FM);
-  tft.drawCentreString("Skip",WIDTH/6,HEIGHT+4,1);
-  tft.drawCentreString("LAUNCHER",WIDTH/2,HEIGHT+4,1);
-  tft.drawCentreString("Skip",5*WIDTH/6,HEIGHT+4,1);
+  tft.drawCentreString("Skip",tftWidth/6,tftHeight+4,1);
+  tft.drawCentreString("LAUNCHER",tftWidth/2,tftHeight+4,1);
+  tft.drawCentreString("Skip",5*tftWidth/6,tftHeight+4,1);
 }
 
 /***************************************************************************************
@@ -98,8 +97,8 @@ void initDisplay(bool doAll) {
     String name="@Pirata";
     if(_name == 1) name="u/bmorcelli";
     else if(_name == 2) name="gh/bmorcelli";
-    tft.drawRoundRect(3,3,WIDTH-6,HEIGHT-6,5,FGCOLOR);
-    tft.setTextSize(FONT_P);
+    tft.drawRoundRect(3,3,tftWidth-6,tftHeight-6,5,FGCOLOR);
+    tft.setTextSize(FP);
     tft.setCursor(10,10);
     int cor = 0;
     String txt;
@@ -107,20 +106,20 @@ void initDisplay(bool doAll) {
     int _x=tft.getCursorX();
     int _y=tft.getCursorY();
     
-    while(tft.getCursorY()<(HEIGHT-12)) {
+    while(tft.getCursorY()<(tftHeight-12)) {
       cor = random(0,11);
-      tft.setTextSize(FONT_P);
+      tft.setTextSize(FP);
       show = random(0,40);
       if(show==0 || doAll) {
         if (cor==10) { txt=" "; }
         else if (cor & 1) { tft.setTextColor(odd_color,BGCOLOR); txt=String(cor); }
         else { tft.setTextColor(even_color,BGCOLOR); txt=String(cor); }
         
-        if(_x>=(WIDTH-10)) {_x=10; _y+=8; }
+        if(_x>=(tftWidth-10)) {_x=10; _y+=8; }
         else if(_x<10) { _x = 10; }
-        if(_y>=(HEIGHT-12)) break;
+        if(_y>=(tftHeight-12)) break;
         tft.setCursor(_x,_y);
-        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*name.length()))) {
+        if(_y>(tftHeight-20) && _x>=(tftWidth-(10+LW*name.length()))) {
           tft.setTextColor(FGCOLOR);
           tft.print(name);
           _x+=LW*name.length();
@@ -130,21 +129,21 @@ void initDisplay(bool doAll) {
           _x+=6;
         }
       } else { 
-        if(_y>(HEIGHT-20) && _x>=(WIDTH-(10+LW*name.length()))) _x+=LW*name.length();
+        if(_y>(tftHeight-20) && _x>=(tftWidth-(10+LW*name.length()))) _x+=LW*name.length();
         else _x+=6;
         
-        if(_x>=(WIDTH-10)) { _x=10; _y+=8; }
+        if(_x>=(tftWidth-10)) { _x=10; _y+=8; }
         }
         tft.setCursor(_x,_y); 
     }
-    tft.setTextSize(FONT_G);
+    tft.setTextSize(FG);
     tft.setTextColor(FGCOLOR);
-    #if WIDTH>200
-    tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,1); //SMOOTH_FONT
-    #else
-    tft.drawCentreString("Launcher",WIDTH/2,HEIGHT/2-10,SMOOTH_FONT); //SMOOTH_FONT
-    #endif
-    tft.setTextSize(FONT_G);
+  #if TFT_HEIGHT>200 
+    tft.drawCentreString("Launcher",tftWidth/2,tftHeight/2-10,1); //SMOOTH_FONT
+  #else 
+    tft.drawCentreString("Launcher",tftWidth/2,tftHeight/2-10,1);
+  #endif
+    tft.setTextSize(FG);
     tft.setTextColor(FGCOLOR);
 
     delay(50);
@@ -158,7 +157,7 @@ void initDisplayLoop() {
   tft.fillScreen(BGCOLOR);
   initDisplay(true);
   delay(250);
-  while(!checkAnyKeyPress()){
+  while(!check(AnyKeyPress)){
     initDisplay();
     delay(50);
   }
@@ -176,41 +175,41 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   const char* author = item["author"];
 
   //tft.fillScreen(BGCOLOR);
-  tft.fillRect(0,HEIGHT-5,WIDTH,5,BGCOLOR);
-  tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
-  tft.fillRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  tft.fillRect(0,tftHeight-5,tftWidth,5,BGCOLOR);
+  tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
+  tft.fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
 
-  setTftDisplay(10, 10, FGCOLOR,FONT_P);
+  setTftDisplay(10, 10, FGCOLOR,FP);
   tft.print("Firmware: ");
   
-  setTftDisplay(10, 22, ~BGCOLOR, FONT_M,BGCOLOR);
+  setTftDisplay(10, 22, ~BGCOLOR, FM,BGCOLOR);
   String name2 = String(name);
   tftprintln(name2,10,3);
   
-  setTftDisplay(10, 22+4*FONT_M*8, FGCOLOR);
+  setTftDisplay(10, 22+4*FM*8, FGCOLOR);
   tft.print("by: ");
   tft.setTextColor(~BGCOLOR);
   String author2 = String(author).substring(0,14);
   tftprintln(author2,10);
 
   tft.setTextColor(FGCOLOR);
-  tft.setTextSize(FONT_M);
-  tft.drawChar('<', 10, HEIGHT-(10+FONT_M*9));
-  tft.drawChar('>', WIDTH-(10+FONT_M*6), HEIGHT-(10+FONT_M*9));
-  tft.setTextSize(FONT_P);
-  #if WIDTH>200
+  tft.setTextSize(FM);
+  tft.drawChar('<', 10, tftHeight-(10+FM*9));
+  tft.drawChar('>', tftWidth-(10+FM*6), tftHeight-(10+FM*9));
+  tft.setTextSize(FP);
+  #if TFT_HEIGHT>200
   String texto = "More information";
   
   tft.setTextColor(FGCOLOR);
-  tft.drawCentreString(texto,WIDTH/2,HEIGHT-(10+FONT_M*9),1);
+  tft.drawCentreString(texto,tftWidth/2,tftHeight-(10+FM*9),1);
 
   texto = String(currentIndex+1) + " of " + String(doc.size());
-  tft.drawCentreString(texto,WIDTH/2,HEIGHT-(2+FONT_M*9),1);
-  tft.drawRoundRect(WIDTH/2 - (6*11), HEIGHT-(10+FONT_M*10), 12*11,19,3,FGCOLOR);
+  tft.drawCentreString(texto,tftWidth/2,tftHeight-(2+FM*9),1);
+  tft.drawRoundRect(tftWidth/2 - (6*11), tftHeight-(10+FM*10), 12*11,19,3,FGCOLOR);
   #else
 
   String texto = String(currentIndex+1) + " of " + String(doc.size());
-  setTftDisplay(int(WIDTH/2 - 3*texto.length()), HEIGHT-(10+FONT_M*6), FGCOLOR, FONT_P,BGCOLOR);
+  setTftDisplay(int(tftWidth/2 - 3*texto.length()), tftHeight-(10+FM*6), FGCOLOR, FP,BGCOLOR);
   tft.println(texto);
   #endif
 
@@ -221,9 +220,9 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   TouchFooter();
   #endif  
 
-  int bar = int(WIDTH/(doc.size()));
+  int bar = int(tftWidth/(doc.size()));
   if (bar<5) bar = 5;
-  tft.fillRect((WIDTH*currentIndex)/doc.size(),HEIGHT-5,bar,5,FGCOLOR);
+  tft.fillRect((tftWidth*currentIndex)/doc.size(),tftHeight-5,bar,5,FGCOLOR);
 
 }
 
@@ -233,15 +232,15 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
 ***************************************************************************************/
 void displayCurrentVersion(String name, String author, String version, String published_at, int versionIndex, JsonArray versions) {
     //tft.fillScreen(BGCOLOR);
-    tft.fillRect(0,HEIGHT-5,WIDTH,5,BGCOLOR);
-    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
-    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+    tft.fillRect(0,tftHeight-5,tftWidth,5,BGCOLOR);
+    tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
+    tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
 
-    setTftDisplay(10, 10, ~BGCOLOR,FONT_M,BGCOLOR);
+    setTftDisplay(10, 10, ~BGCOLOR,FM,BGCOLOR);
     String name2 = String(name);
     tftprintln(name2,10,2);
-    #if WIDTH>200
-    setTftDisplay(10,50,ALCOLOR,FONT_M);
+    #if TFT_HEIGHT>200
+    setTftDisplay(10,50,ALCOLOR,FM);
     #endif
     tft.print("by: ");
     tft.setTextColor(~BGCOLOR);
@@ -261,14 +260,14 @@ void displayCurrentVersion(String name, String author, String version, String pu
 
     if(versions.size()>1) {
         tft.setTextColor(ALCOLOR);
-        tft.drawChar('<', 10, HEIGHT-(10+FONT_M*9));
-        tft.drawChar('>', WIDTH-(10+FONT_M*6), HEIGHT-(10+FONT_M*9));
+        tft.drawChar('<', 10, tftHeight-(10+FM*9));
+        tft.drawChar('>', tftWidth-(10+FM*6), tftHeight-(10+FM*9));
         tft.setTextColor(~BGCOLOR);
     }
 
-    setTftDisplay(-1, -1,ALCOLOR,FONT_M,BGCOLOR);
-    tft.drawCentreString("Options",WIDTH/2,HEIGHT-(10+FONT_M*9),1);
-    tft.drawRoundRect(WIDTH/2 - 3*FONT_M*11, HEIGHT-(12+FONT_M*9), FONT_M*6*11,FONT_M*8+3,3,ALCOLOR);
+    setTftDisplay(-1, -1,ALCOLOR,FM,BGCOLOR);
+    tft.drawCentreString("Options",tftWidth/2,tftHeight-(10+FM*9),1);
+    tft.drawRoundRect(tftWidth/2 - 3*FM*11, tftHeight-(12+FM*9), FM*6*11,FM*8+3,3,ALCOLOR);
 
     int div = versions.size();
     if(div==0) div = 1;
@@ -277,9 +276,9 @@ void displayCurrentVersion(String name, String author, String version, String pu
     TouchFooter(ALCOLOR);
     #endif
 
-    int bar = int(WIDTH/div);
+    int bar = int(tftWidth/div);
     if (bar<5) bar = 5;
-    tft.fillRect((WIDTH*versionIndex)/div,HEIGHT-5,bar,5,ALCOLOR);
+    tft.fillRect((tftWidth*versionIndex)/div,tftHeight-5,bar,5,ALCOLOR);
 }
 
 /***************************************************************************************
@@ -296,17 +295,17 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
 
   //stripe drwawing
   int size;
-  if(text.length()*LW*FONT_M<(tft.width()-2*FONT_M*LW)) size = FONT_M;
-  else size = FONT_P;
-  tft.fillSmoothRoundRect(10,HEIGHT/2-13,WIDTH-20,26,7,bgcolor);
+  if(text.length()*LW*FM<(tft.width()-2*FM*LW)) size = FM;
+  else size = FP;
+  tft.fillSmoothRoundRect(10,tftHeight/2-13,tftWidth-20,26,7,bgcolor);
   tft.setTextColor(fgcolor,bgcolor);
-  if(size==FONT_M) { 
-    tft.setTextSize(FONT_M); 
-    tft.setCursor(WIDTH/2 - FONT_M*3*text.length(), HEIGHT/2-8);
+  if(size==FM) { 
+    tft.setTextSize(FM); 
+    tft.setCursor(tftWidth/2 - FM*3*text.length(), tftHeight/2-8);
   }
   else {
-    tft.setTextSize(FONT_P);
-    tft.setCursor(WIDTH/2 - FONT_P*3*text.length(), HEIGHT/2-8);
+    tft.setTextSize(FP);
+    tft.setCursor(tftWidth/2 - FP*3*text.length(), tftHeight/2-8);
   } 
   tft.println(text);
 
@@ -323,19 +322,19 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
 ** Dependencia: prog_handler =>>    0 - Flash, 1 - SPIFFS
 ***************************************************************************************/
 void progressHandler(int progress, size_t total) {
-#if WIDTH>200
-  int barWidth = map(progress, 0, total, 0, WIDTH-40);
+#if TFT_HEIGHT>200
+  int barWidth = map(progress, 0, total, 0, tftWidth-40);
   if(progress == 0) {
-    tft.setTextSize(FONT_M);
+    tft.setTextSize(FM);
     tft.setTextColor(ALCOLOR);
-    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-    tft.drawCentreString("-=Launcher=-",WIDTH/2,20,1);    
-    tft.drawRoundRect(5, 5, WIDTH - 10, HEIGHT - 10, 5, FGCOLOR);
+    tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+    tft.drawCentreString("-=Launcher=-",tftWidth/2,20,1);    
+    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, FGCOLOR);
     if (prog_handler == 1) { 
-      tft.drawRect(18, HEIGHT - 28, WIDTH-36, 17, ALCOLOR);
-      tft.fillRect(20, HEIGHT - 26, WIDTH-40, 13, BGCOLOR);
+      tft.drawRect(18, tftHeight - 28, tftWidth-36, 17, ALCOLOR);
+      tft.fillRect(20, tftHeight - 26, tftWidth-40, 13, BGCOLOR);
       }
-    else tft.drawRect(18, HEIGHT - 47, WIDTH-36, 17, FGCOLOR);
+    else tft.drawRect(18, tftHeight - 47, tftWidth-36, 17, FGCOLOR);
     
     String txt;
     switch(prog_handler) {
@@ -352,18 +351,18 @@ void progressHandler(int progress, size_t total) {
     displayRedStripe(txt);
   }
   
-  if (prog_handler == 1) tft.fillRect(20, HEIGHT - 26, barWidth, 13, ALCOLOR);
-  else tft.fillRect(20, HEIGHT - 45, barWidth, 13, FGCOLOR);
+  if (prog_handler == 1) tft.fillRect(20, tftHeight - 26, barWidth, 13, ALCOLOR);
+  else tft.fillRect(20, tftHeight - 45, barWidth, 13, FGCOLOR);
 
 
 #else
   
   int barWidth = map(progress, 0, total, 0, 100);
   if(barWidth <=1) {
-    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-    tft.drawRect(6, 6, WIDTH-12, HEIGHT-12, BGCOLOR);
-    if (prog_handler == 1) tft.drawRect(28, HEIGHT - 28, 104, 17, ALCOLOR);
-    else tft.drawRect(28, HEIGHT - 47, 104, 17, FGCOLOR);
+    tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+    tft.drawRect(6, 6, tftWidth-12, tftHeight-12, BGCOLOR);
+    if (prog_handler == 1) tft.drawRect(28, tftHeight - 28, 104, 17, ALCOLOR);
+    else tft.drawRect(28, tftHeight - 47, 104, 17, FGCOLOR);
     
     String txt;
     switch(prog_handler) {
@@ -379,8 +378,8 @@ void progressHandler(int progress, size_t total) {
     }
     displayRedStripe(txt);
   }
-  if (prog_handler == 1) tft.fillRect(30, HEIGHT - 26, barWidth, 13, ALCOLOR);
-  else tft.fillRect(30, HEIGHT - 45, barWidth, 13, FGCOLOR);
+  if (prog_handler == 1) tft.fillRect(30, tftHeight - 26, barWidth, 13, ALCOLOR);
+  else tft.fillRect(30, tftHeight - 45, barWidth, 13, FGCOLOR);
 
 #endif
 
@@ -392,7 +391,7 @@ void progressHandler(int progress, size_t total) {
 ** Function name: drawOptions
 ** Description:   Função para desenhar e mostrar as opçoes de contexto
 ***************************************************************************************/
-#define MAX_MENU_SIZE (int)(HEIGHT/25)
+#define MAX_MENU_SIZE (int)(tftHeight/25)
 Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
     Opt_Coord coord;
     int menuSize = options.size();
@@ -400,16 +399,16 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
       menuSize = MAX_MENU_SIZE; 
       } 
 
-    if(index==0) tft.fillRoundRect(WIDTH*0.10,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.8,(FONT_M*8+4)*menuSize+10,5,bgcolor);
+    if(index==0) tft.fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*(FM*8+4)/2 -5,tftWidth*0.8,(FM*8+4)*menuSize+10,5,bgcolor);
     
     tft.setTextColor(fgcolor,bgcolor);
-    tft.setTextSize(FONT_M);
-    tft.setCursor(WIDTH*0.10+5,HEIGHT/2-menuSize*(FONT_M*8+4)/2);
+    tft.setTextSize(FM);
+    tft.setCursor(tftWidth*0.10+5,tftHeight/2-menuSize*(FM*8+4)/2);
     
     int i=0;
     int init = 0;
     int cont = 1;
-    if(index==0) tft.fillRoundRect(WIDTH*0.10,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.8,(FONT_M*8+4)*menuSize+10,5,bgcolor);
+    if(index==0) tft.fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*(FM*8+4)/2 -5,tftWidth*0.8,(FM*8+4)*menuSize+10,5,bgcolor);
     menuSize = options.size();
     if(index>=MAX_MENU_SIZE) init=index-MAX_MENU_SIZE+1;
     for(i=0;i<menuSize;i++) {
@@ -417,23 +416,23 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
         String text="";
         if(i==index) { 
           text+=">";
-          coord.x=WIDTH*0.10+5+FM*LW;
+          coord.x=tftWidth*0.10+5+FM*LW;
           coord.y=tft.getCursorY()+4;
-          coord.size=(WIDTH*0.8 - 10)/(LW*FONT_M) - 1;
+          coord.size=(tftWidth*0.8 - 10)/(LW*FM) - 1;
           coord.fgcolor=fgcolor;
           coord.bgcolor=bgcolor;
         }
         else text +=" ";
         text += String(options[i].first.c_str()) + "              ";
-        tft.setCursor(WIDTH*0.10+5,tft.getCursorY()+4);
-        tft.println(text.substring(0,(WIDTH*0.8 - 10)/(LW*FONT_M) - 1));  
+        tft.setCursor(tftWidth*0.10+5,tft.getCursorY()+4);
+        tft.println(text.substring(0,(tftWidth*0.8 - 10)/(LW*FM) - 1));  
         cont++;
       }
       if(cont>MAX_MENU_SIZE) goto Exit;
     }
     Exit:
     if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
-    tft.drawRoundRect(WIDTH*0.10,HEIGHT/2-menuSize*(FONT_M*8+4)/2 -5,WIDTH*0.8,(FONT_M*8+4)*menuSize+10,5,fgcolor);
+    tft.drawRoundRect(tftWidth*0.10,tftHeight/2-menuSize*(FM*8+4)/2 -5,tftWidth*0.8,(FM*8+4)*menuSize+10,5,fgcolor);
     return coord;
 }
 
@@ -453,7 +452,7 @@ void drawMainMenu(int index) {
   };
 
     const char* texts[4] = { "SD", "OTA", "WUI","CFG" };
-#if WIDTH<200
+#if TFT_HEIGHT<200
     const char* messages[4] = { "Launch from SDCard", 
                                 "Online Installer", 
                                 "Start WebUI",
@@ -464,30 +463,30 @@ void drawMainMenu(int index) {
                                 "Start Web User Interface",
                                 "Change Launcher settings." };
 #endif
-    tft.fillSmoothRoundRect(6,26,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+    tft.fillSmoothRoundRect(6,26,tftWidth-12,tftHeight-12,5,BGCOLOR);
     setTftDisplay(12, 12, FGCOLOR, 1, BGCOLOR);
     
-#if WIDTH<200
+#if TFT_HEIGHT<200
     tft.print("Launcher " + String(LAUNCHER));
-    tft.setTextSize(FONT_M);
+    tft.setTextSize(FM);
 #else
     tft.print("Launcher " + String(LAUNCHER));
-    tft.setTextSize(FONT_G);
+    tft.setTextSize(FG);
 #endif
     for (int i = 0; i < 3; ++i) {
-        int x = border / 2 + i * ((WIDTH-20) / 3) + 10;
+        int x = border / 2 + i * ((tftWidth-20) / 3) + 10;
         int y = 20 + border + 10;
-        int w = (WIDTH-20) / 3 - border;
-        int h = (HEIGHT-20) / 2;
+        int w = (tftWidth-20) / 3 - border;
+        int h = (tftHeight-20) / 2;
         drawSection(x, y, w, h, colors[i+offset], texts[i+offset], index == (i + offset));
     }
 
     setTftDisplay(-1, -1, FGCOLOR, 1, BGCOLOR);
 
-#if WIDTH<125
-    tft.drawCentreString(messages[index], WIDTH / 2, 26, 1);
+#if TFT_HEIGHT<125
+    tft.drawCentreString(messages[index], tftWidth / 2, 26, 1);
 #else
-    tft.drawCentreString(messages[index], WIDTH / 2, HEIGHT - 25, 1);
+    tft.drawCentreString(messages[index], tftWidth / 2, tftHeight - 25, 1);
 #endif
 
     drawDeviceBorder();
@@ -501,30 +500,30 @@ void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, b
         tft.fillRoundRect(x, y, w, h, 5, color);
     }
     tft.drawRoundRect(x, y, w, h, 5, color);
-#if WIDTH<200
-    tft.drawCentreString(text,x + w/2, y + h/2 - 6, SMOOTH_FONT);
+#if TFT_HEIGHT<200
+    tft.drawCentreString(text,x + w/2, y + h/2 - 6, 1);
   #else
     tft.drawCentreString(text, x + w/2, y + h/2 - 12, 1);
 #endif
 }
 
 void drawDeviceBorder() {
-    tft.drawRoundRect(5, 5, WIDTH - 10, HEIGHT - 10, 5, FGCOLOR);
-    tft.drawLine(5, 25, WIDTH - 6, 25, FGCOLOR);
+    tft.drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, FGCOLOR);
+    tft.drawLine(5, 25, tftWidth - 6, 25, FGCOLOR);
 }
 
 void drawBatteryStatus() {
-    tft.drawRoundRect(WIDTH - 42, 7, 34, 17, 2, FGCOLOR);
+    tft.drawRoundRect(tftWidth - 42, 7, 34, 17, 2, FGCOLOR);
     int bat = getBattery();
-    tft.setTextSize(FONT_P);
+    tft.setTextSize(FP);
     tft.setTextColor(FGCOLOR, BGCOLOR); 
-  #if WIDTH>140 // Excludes Marauder Mini
-    tft.drawRightString("  " + String(bat) + "%", WIDTH - 45, 12, 1);
+  #if TFT_HEIGHT>140 // Excludes Marauder Mini
+    tft.drawRightString("  " + String(bat) + "%", tftWidth - 45, 12, 1);
   #endif
-    tft.fillRoundRect(WIDTH - 40, 9, 30, 13, 2, BGCOLOR);
-    tft.fillRoundRect(WIDTH - 40, 9, 30 * bat / 100, 13, 2, FGCOLOR);
-    tft.drawLine(WIDTH - 30, 9, WIDTH - 30, 9 + 13, BGCOLOR);
-    tft.drawLine(WIDTH - 20, 9, WIDTH - 20, 9 + 13, BGCOLOR);
+    tft.fillRoundRect(tftWidth - 40, 9, 30, 13, 2, BGCOLOR);
+    tft.fillRoundRect(tftWidth - 40, 9, 30 * bat / 100, 13, 2, FGCOLOR);
+    tft.drawLine(tftWidth - 30, 9, tftWidth - 30, 9 + 13, BGCOLOR);
+    tft.drawLine(tftWidth - 20, 9, tftWidth - 20, 9 + 13, BGCOLOR);
 }
 
 
@@ -532,11 +531,11 @@ void drawBatteryStatus() {
 ** Function name: listFiles
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
-#define MAX_ITEMS (int)(HEIGHT-20)/(LH*2)
+#define MAX_ITEMS (int)(tftHeight-20)/(LH*2)
 Opt_Coord listFiles(int index, String fileList[][3]) {
     Opt_Coord coord;
     tft.setCursor(10,10);
-    tft.setTextSize(FONT_M);
+    tft.setTextSize(FM);
     int i=0;
     int arraySize = 0;
     while(fileList[arraySize][2]!="" && arraySize < MAXFILES) arraySize++;
@@ -545,7 +544,7 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
         start=index-MAX_ITEMS+1;
         if(start<0) start=0;
     }
-    int nchars = (WIDTH-20)/(6*tft.textsize);
+    int nchars = (tftWidth-20)/(6*tft.textsize);
     String txt=">";
     int j=0;
     while(i<arraySize) {
@@ -590,7 +589,8 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   int numOpt = options.size()-1;
   Opt_Coord coord;
   coord=drawOptions(0,options, ALCOLOR, BGCOLOR);
-  
+  bool longPrevPress = false;
+  long longPrevTmp=millis();
   while(1){
     if (redraw) { 
       coord=drawOptions(index,options, ALCOLOR, BGCOLOR);
@@ -603,40 +603,50 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     String txt=options[index].first.c_str();
     displayScrollingText(txt, coord);
 
-    if(checkPrevPress()) {
-    #if defined(ESC_LOGIC)
+    #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
+    if(check(PrevPress) || check(UpPress)) {
       if(index==0) index = options.size() - 1;
       else if(index>0) index--;
       redraw = true;
     #else
-    long _tmp=millis();
-    while(checkPrevPress()) { if(millis()-_tmp>200) tft.drawArc(WIDTH/2, HEIGHT/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
-    if(millis()-_tmp>700) { // longpress detected to exit
-      delay(200);
-      break;
-    } 
-    else {
-      if(index==0) index = options.size() - 1;
-      else if(index>0) index--;
-      redraw = true;
-    }
+    if(longPrevPress || PrevPress) {
+      if(!longPrevPress) {
+        longPrevPress = true;
+        longSelTmp = millis();
+      }
+      if(longPrevPress && millis()-longSelTmp<700) { 
+        if(!PrevPress) {
+          AnyKeyPress=false;
+          if(index==0) index = options.size() - 1;
+          else if(index>0) index--;
+          longPrevPress=false;
+          redraw = true;
+        }
+        if(millis()-longSelTmp>200) tft.drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longSelTmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true);
+        if(millis()-longSelTmp>700) { // longpress detected to exit
+          delay(200);
+          break;
+        } else goto WAITING;
+      }
+      WAITING:
+
     #endif
     }
     /* DW Btn to next item */
-    if(checkNextPress()) { 
+    if(check(NextPress) || check(DownPress)) { 
       index++;
       if((index+1)>options.size()) index = 0;
       redraw = true;
     }
 
     /* Select and run function */
-    if(checkSelPress()) { 
+    if(check(SelPress)) { 
       options[index].second();
       break;
     }
 
-    #if defined(ESC_LOGIC)
-    if(checkEscPress()) break;
+    #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
+    if(check(EscPress)) break;
     #endif
   }
   delay(200);
@@ -680,7 +690,7 @@ void loopVersions() {
       delay(REDRAW_DELAY);
     }
     /* DW Btn to next item */
-    if(checkNextPress()) { 
+    if(check(NextPress)) { 
       versionIndex++;
       if(versionIndex>versions.size()-1) versionIndex = 0;
       redraw = true;
@@ -691,7 +701,7 @@ void loopVersions() {
     
     #ifdef ESC_LOGIC
         /* UP Btn go to previous item */
-    if(checkPrevPress()) { 
+    if(check(PrevPress)) { 
       versionIndex--;
       if(versionIndex<0) versionIndex = versions.size()-1;
       redraw = true;
@@ -704,9 +714,9 @@ void loopVersions() {
     } 
     #else // Esc logic is holding previous btn fot 1 second +-
 
-    if(checkPrevPress()) {
+    if(check(PrevPress)) {
       long _tmp=millis();
-      while(checkPrevPress()) { if(millis()-_tmp>200) tft.drawArc(WIDTH/2, HEIGHT/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
+      while(check(PrevPress)) { if(millis()-_tmp>200) tft.drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
       if(millis()-_tmp>700) { // longpress detected to exit
         delay(200);
         goto SAIR;
@@ -720,7 +730,7 @@ void loopVersions() {
     #endif
 
     /* Select to install */
-    if(checkSelPress()) { 
+    if(check(SelPress)) { 
 
       // Definição da matriz "Options"
       options = {
@@ -760,7 +770,7 @@ void loopFirmware(){
 
     if (WiFi.status() == WL_CONNECTED) {
     /* UP Btn go to previous item */
-      if(checkPrevPress()) {
+      if(check(PrevPress)) {
         if(currentIndex==0) currentIndex = doc.size() - 1;
         else if(currentIndex>0) currentIndex--;
         displayCurrentItem(doc, currentIndex);
@@ -768,7 +778,7 @@ void loopFirmware(){
 
       }
       /* DW Btn to next item */
-      if(checkNextPress()) { 
+      if(check(NextPress)) { 
         currentIndex++;
         if((currentIndex+1)>doc.size()) currentIndex = 0;
         displayCurrentItem(doc, currentIndex);
@@ -776,14 +786,14 @@ void loopFirmware(){
       }
 
       /* Select to install */
-      if(checkSelPress()) { 
+      if(check(SelPress)) { 
         
         //Checks for long press to get back to Main Menu, only for StickCs.. Cardputer uses Esc btn
         #ifndef ESC_LOGIC
           int time = millis();          // Saves the moment when the btn was pressed
-          while(checkSelPress()) { 
+          while(check(SelPress)) { 
 
-            if((millis()-time)>150) tft.drawArc(WIDTH/2,HEIGHT/2,25,15,0,360*(millis()-time)/1000,ALCOLOR,BGCOLOR,false);
+            if((millis()-time)>150) tft.drawArc(tftWidth/2,tftHeight/2,25,15,0,360*(millis()-time)/1000,ALCOLOR,BGCOLOR,false);
           }  // while pressed the btn, hold the code to count the time
           if((millis()-time)>1000) break;// check how many ms it was kept held on and stop the loop if more than 250ms
           else { 
@@ -820,13 +830,13 @@ void loopFirmware(){
 **********************************************************************/
 void tftprintln(String txt, int margin, int numlines) {
   int size=txt.length();
-  if(numlines == 0) numlines = (HEIGHT-2*margin) / (tft.textsize*8);
-  int nchars = (WIDTH-2*margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
+  if(numlines == 0) numlines = (tftHeight-2*margin) / (tft.textsize*8);
+  int nchars = (tftWidth-2*margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
   int x = tft.getCursorX();
   int start=0;
   while(size>0 && numlines>0) {
     if(tft.getCursorX()<margin) tft.setCursor(margin,tft.getCursorY());
-    nchars = (WIDTH-tft.getCursorX()-margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
+    nchars = (tftWidth-tft.getCursorX()-margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
     tft.println(txt.substring(0,nchars));
     txt=txt.substring(nchars);
     size -= nchars;
@@ -839,19 +849,30 @@ void tftprintln(String txt, int margin, int numlines) {
 **********************************************************************/
 void tftprint(String txt, int margin, int numlines) {
   int size=txt.length();
-  if(numlines == 0) numlines = (HEIGHT-2*margin) / (tft.textsize*8);
-  int nchars = (WIDTH-2*margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
+  if(numlines == 0) numlines = (tftHeight-2*margin) / (tft.textsize*8);
+  int nchars = (tftWidth-2*margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
   int x = tft.getCursorX();
   int start=0;
   bool prim=true;
   while(size>0 && numlines>0) {
     if(!prim) { tft.println(); }
     if(tft.getCursorX()<margin) tft.setCursor(margin,tft.getCursorY());
-    nchars = (WIDTH-tft.getCursorX()-margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
+    nchars = (tftWidth-tft.getCursorX()-margin)/(6*tft.textsize); // 6 pixels of width fot a letter size 1
     tft.print(txt.substring(0,nchars));
     txt = txt.substring(nchars);
     size -= nchars;
     numlines--;
     prim = false;
   }
+}
+
+/***************************************************************************************
+** Function name: getComplementaryColor
+** Description:   Get simple complementary color in RGB565 format
+***************************************************************************************/
+uint16_t getComplementaryColor(uint16_t color) {
+  int r = 31-((color >> 11) & 0x1F);
+  int g = 63-((color >> 5) & 0x3F);
+  int b = 31-(color & 0x1F);
+  return (r<<11) | (g<<5) | b;
 }

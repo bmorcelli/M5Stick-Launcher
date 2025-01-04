@@ -1,6 +1,6 @@
 #include "onlineLauncher.h"
 #include "sd_functions.h"
-#include "globals.h"
+#include <globals.h>
 #include "display.h"
 #include "mykeyboard.h"
 #include "settings.h"
@@ -95,10 +95,10 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 
     WiFi.begin(ssid.c_str(), pwd.c_str());
 
-    resetTftDisplay(10, 10, FGCOLOR, FONT_P);
+    resetTftDisplay(10, 10, FGCOLOR, FP);
     tft.fillScreen(BGCOLOR);
     tftprint("Connecting to: " + ssid + ".", 10);
-    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
+    tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
     // Simulação da função de desenho no display TFT
     int count = 0;
     while (WiFi.status() != WL_CONNECTED) {
@@ -167,13 +167,13 @@ bool GetJsonFromM5() {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     int httpResponseCode=-1;
-    resetTftDisplay(WIDTH/2 - 6*String("Getting info from").length(),32);
-    tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
-    tft.drawRoundRect(5,5,WIDTH-10,HEIGHT-10,5,FGCOLOR);
-    tft.drawCentreString("Getting info from", WIDTH/2, HEIGHT/3,1);
-    tft.drawCentreString("M5Burner repo", WIDTH/2, HEIGHT/3+FONT_M*9,1);
+    resetTftDisplay(tftWidth/2 - 6*String("Getting info from").length(),32);
+    tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+    tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
+    tft.drawCentreString("Getting info from", tftWidth/2, tftHeight/3,1);
+    tft.drawCentreString("M5Burner repo", tftWidth/2, tftHeight/3+FM*9,1);
 
-    tft.setCursor(18,  HEIGHT/3+FONT_M*9*2);
+    tft.setCursor(18,  tftHeight/3+FM*9*2);
     while(httpResponseCode<0) { 
       http.begin(serverUrl);
       http.useHTTP10(true);
@@ -210,7 +210,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
     return;
   }
 
-  tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
 
   WiFiClientSecure *client = new WiFiClientSecure;
@@ -274,11 +274,11 @@ retry:
         if (file.size()!=size) {
           SDM.remove(file.path());
           displayRedStripe("Download FAILED");
-          while(!checkSelPress()) yield();
+          while(!check(SelPress)) yield();
         } else { 
           log_i("File successfully downloaded.");
           displayRedStripe(" Downloaded ");
-          while(!checkSelPress()) yield();
+          while(!check(SelPress)) yield();
         }
         file.close();
         break;
@@ -321,7 +321,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   
   String fileAddr;
 
-  tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
 
   WiFiClientSecure *client = new WiFiClientSecure;
@@ -332,7 +332,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   httpUpdate.rebootOnUpdate(false);
   /* Install App */
   prog_handler = 0;
-  tft.fillSmoothRoundRect(6,6,WIDTH-12,HEIGHT-12,5,BGCOLOR);
+  tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
   progressHandler(0, 500);
   httpUpdate.onProgress(progressHandler);
   httpUpdate.setLedPin(LED, LED_ON);
@@ -346,8 +346,8 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 
   if(spiffs) {
     prog_handler = 1;
-    tft.fillRect(5, 60, WIDTH - 10, 16, ALCOLOR);
-    setTftDisplay(5, 60, TFT_WHITE, FONT_M, ALCOLOR);
+    tft.fillRect(5, 60, tftWidth - 10, 16, ALCOLOR);
+    setTftDisplay(5, 60, TFT_WHITE, FM, ALCOLOR);
 
     tft.println(" Preparing SPIFFS");
     // Format Spiffs partition
@@ -411,7 +411,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 bool installFAT_OTA( WiFiClientSecure *client, String fileAddr, uint32_t offset, uint32_t size, const char *label) {
   prog_handler = 1; // review
 
-  tft.fillRect(7, 40, WIDTH - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FAT");
 
   if(client) {
