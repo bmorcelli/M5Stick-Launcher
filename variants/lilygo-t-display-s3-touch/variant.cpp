@@ -92,25 +92,6 @@ void _setBrightness(uint8_t brightval) {
   ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
 }
 
-
-bool menuPress(int bot) {
-  //0 - prev
-  //1 - Sel
-  //2 - next
-  //3 - all
-  int terco=WIDTH/3;
-  if (touch.read()) {
-    auto t = touch.getPoint(0);
-    if(rotation==3) t.x = WIDTH-t.x;
-    else if (rotation==1) t.y = (HEIGHT+20)-t.y;
-
-    if(t.y>(HEIGHT) && ((t.x>terco*bot && t.x<terco*(1+bot)) || bot==3)) { 
-      t.x=WIDTH+1;
-      t.y=HEIGHT+11;
-      return true;
-    } else return false;
-  } else return false;
-}
 /*********************************************************************
 ** Function: InputHandler
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
@@ -118,7 +99,6 @@ bool menuPress(int bot) {
 void InputHandler(void) {
     if (touch.read()) { //touch.tirqTouched() &&
         auto t = touch.getPoint(0);
-        t = touch.getPointScaled();
         if(rotation==3) {
             //t.y = (tftHeight+20)-t.y;
             t.x = tftWidth-t.x;
