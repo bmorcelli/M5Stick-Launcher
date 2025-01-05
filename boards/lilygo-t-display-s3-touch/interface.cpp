@@ -99,15 +99,16 @@ void _setBrightness(uint8_t brightval) {
 void InputHandler(void) {
     if (touch.read()) { //touch.tirqTouched() &&
         auto t = touch.getPoint(0);
-        if(rotation==3) {
-            //t.y = (tftHeight+20)-t.y;
-            t.x = tftWidth-t.x;
+        if(rotation==1) {
+            t.y = (tftHeight+20)-t.y;
+            //t.x = tftWidth-t.x;
         }        
         if(rotation==3) {
             //t.y = (tftHeight+20)-t.y;
             t.x = tftWidth-t.x;
         }
         // Need to test the other orientations
+
         if(rotation==0) {
             int tmp=t.x;
             t.x = tftWidth-t.y;
@@ -118,6 +119,8 @@ void InputHandler(void) {
             t.x = t.y;
             t.y = (tftHeight+20)-tmp;
         }
+
+        //Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, rotation);
 
         if(!wakeUpScreen()) AnyKeyPress = true;
         else goto END;

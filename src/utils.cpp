@@ -7,7 +7,7 @@
 void touchHeatMap(struct TouchPoint t) {
     int third_x=tftWidth/3;
     int third_y=tftHeight/3;
-    
+
     if(t.x>third_x*0 && t.x<third_x*1 && t.y>third_y) PrevPress = true;
     if(t.x>third_x*1 && t.x<third_x*2 && ((t.y>third_y && t.y<third_y*2) || t.y>tftHeight)) SelPress = true; 
     if(t.x>third_x*2 && t.x<third_x*3) NextPress = true;

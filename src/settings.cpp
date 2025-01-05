@@ -158,16 +158,33 @@ int gsetRotation(bool set){
     options = {
       {"Default",     [&]() { result=ROTATION; }},
       #if TFT_WIDTH>=200 && TFT_HEIGHT>=200
-      {"Portrait",    [&]() { result=(DRV==1?0:1); }},
+      {String("Portrait " + String(DRV==1?0:1)).c_str(),    [&]() { result=(DRV==1?0:1); }},
       #endif
-      {"Landscape",   [&]() { result=DRV; }},
+      {String("Landscape " + String(DRV)).c_str(),   [&]() { result=DRV; }},
       #if TFT_WIDTH>=200 && TFT_HEIGHT>=200
-      {"Portrait 2",  [&]() { result=(DRV==1?2:3); }},
+      {String("Portrait " + String(DRV==1?2:3)).c_str(),  [&]() { result=(DRV==1?2:3); }},
       #endif
-      {"Landscape 2", [&]() { result=DRV+2; }}
+      {String("Landscape " + String(DRV+2)).c_str(), [&]() { result=DRV+2; }}
     };
     loopOptions(options);
     rotation = result;
+
+    if(rotation&0b1) {
+      #if defined(HAS_TOUCH)
+      tftHeight = TFT_WIDTH-20;
+      #else
+      tftHeight = TFT_WIDTH;
+      #endif
+      tftWidth = TFT_HEIGHT;
+    } else {
+      #if defined(HAS_TOUCH)
+      tftHeight = TFT_HEIGHT-20;
+      #else
+      tftHeight = TFT_HEIGHT;
+      #endif
+      tftWidth = TFT_WIDTH;
+    }
+    
     tft.setRotation(result);
     EEPROM.write(EEPROMSIZE-13, result); 
     EEPROM.commit();

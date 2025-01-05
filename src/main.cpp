@@ -301,6 +301,21 @@ void setup() {
     tft.init();
   #endif
   tft.setRotation(rotation);
+  if(rotation&0b1) {
+    #if defined(HAS_TOUCH)
+    tftHeight = TFT_WIDTH-20;
+    #else
+    tftHeight = TFT_WIDTH;
+    #endif
+    tftWidth = TFT_HEIGHT;
+  } else {
+    #if defined(HAS_TOUCH)
+    tftHeight = TFT_HEIGHT-20;
+    #else
+    tftHeight = TFT_HEIGHT;
+    #endif
+    tftWidth = TFT_WIDTH;
+  }
   tft.fillScreen(BGCOLOR);
   setBrightness(bright,false);
   initDisplay(true);  

@@ -136,22 +136,24 @@ void InputHandler(void) {
     TouchPointPro t;
     if (touch.getPoint(t.x, t.y, touch.getSupportTouchPoint()) && touch.isPressed()) {
         if(rotation==1) {
-            t.y[0] = (tftHeight+20)-t.y[0];
+            t.y[0] = TFT_WIDTH-t.y[0];
         }
         if(rotation==3) {
-            t.x[0] = tftWidth-t.x[0];
+            t.x[0] = TFT_HEIGHT-t.x[0];
         }
         // Need to test these 2
         if(rotation==0) {
             int tmp=t.x[0];
-            t.x[0] = tftWidth-t.y[0];
-            t.y[0] = tmp;
+            t.x[0]=t.y[0];
+            t.y[0]=tmp;
         }
         if(rotation==2) {
             int tmp=t.x[0];
-            t.x[0] = t.y[0];
-            t.y[0] = (tftHeight+20)-tmp;
+            t.x[0]=TFT_WIDTH-t.y[0];
+            t.y[0]=TFT_HEIGHT-tmp;
         }
+
+        Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x[0], t.y[0], rotation);
 
         if(!wakeUpScreen()) AnyKeyPress = true;
         else goto END;
@@ -165,7 +167,7 @@ void InputHandler(void) {
     END:
     if(AnyKeyPress) {
       long tmp=millis();
-      while((millis()-tmp)<200 && touch.getPoint(t.x, t.y, touch.getSupportTouchPoint()) && touch.isPressed());
+      while((millis()-tmp)<200 && touch.getPoint(t.x, t.y, touch.getSupportTouchPoint()) && touch.isPressed()) delay(50);
     }
 }
 
