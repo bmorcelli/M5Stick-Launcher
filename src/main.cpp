@@ -185,7 +185,7 @@ void get_partition_sizes() {
       if(__size==0x1000000) { partitionSetter(def_part16, sizeof(def_part16)); }
       while(1) {
         Serial.println("Turn Off and On again to apply partition changes.");
-        delay(2000);
+        delay(2500);
       }
     }
 
@@ -388,9 +388,6 @@ void setup() {
   Launcher:
   
   tft.fillScreen(BGCOLOR);
-  #if REDRAW_DELAY<50 // Encoder devices need delay to not open the firt option in the menu
-  delay(200);
-  #endif
   #if LED>0 && defined(HEADLESS)
     digitalWrite(LED, LED_ON?LOW:HIGH); // turn off the LED
   #endif
@@ -416,7 +413,6 @@ void loop() {
       #endif      
       redraw = false; 
       returnToMenu = false;
-      delay(REDRAW_DELAY); 
     }
 
     if(check(PrevPress)) {
@@ -459,7 +455,6 @@ void loop() {
             }
             options.push_back({"Hidden SSID", [=]() { String __ssid=keyboard("", 32, "Your SSID"); wifiConnect(__ssid.c_str(),8); }});
             options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
-            delay(200);
             loopOptions(options);
             if (WiFi.status() == WL_CONNECTED) {
               if(GetJsonFromM5()) loopFirmware();
@@ -523,7 +518,6 @@ void loop() {
         options.push_back({"Turn-off",  [=]() { powerOff(); }});
         #endif
         options.push_back({"Main Menu",  [=]() { returnToMenu=true; }});
-        delay(200);
         loopOptions(options);
         tft.fillScreen(BGCOLOR);
         tft.fillScreen(BGCOLOR);

@@ -64,7 +64,6 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
 
   Retry:
     if (!found || wrongPass) {
-      delay(200);
       if (encryptation > 0) pwd = keyboard(pwd, 63, "Network Password:");
       
       EEPROM.begin(EEPROMSIZE);
@@ -112,7 +111,6 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
           {"Main Menu", [&](){ returnToMenu=true;}},
         };
         loopOptions(options);
-        delay(200);
         if(!returnToMenu) goto Retry;
         else goto END;
       }
@@ -127,7 +125,7 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
     Serial.println(WiFi.softAPIP());
   }
 END:
-  delay(200);
+  delay(0);
 }
 /***************************************************************************************
 ** Function name: replaceChars
@@ -206,13 +204,13 @@ void downloadFirmware(String file_str, String fileName, String folder) {
   prog_handler = 2;
   if(!setupSdCard()) {
     displayRedStripe("SDCard Not Found");
-    delay(2000);
+    delay(2500);
     return;
   }
 
   tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
-
+  doc.clear(); // Clear Json Memory, m5burner is getting too big!!!
   WiFiClientSecure *client = new WiFiClientSecure;
   client->setCACert(root_ca3);  
 retry:  
@@ -291,6 +289,7 @@ retry:
 
   } else { displayRedStripe("Couldn't Connect"); }
   wakeUpScreen();
+  GetJsonFromM5();
 }
 
 /***************************************************************************************
@@ -306,7 +305,6 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
       {"SPIFFS No", [&](){ spiffs = false; }},
       {"SPIFFS Yes", [&](){ spiffs = true; }},
     };
-    delay(200);
     loopOptions(options);
   }
 
@@ -324,6 +322,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
 
+  doc.clear();
   WiFiClientSecure *client = new WiFiClientSecure;
   fileAddr = "https://m5burner-cdn.m5stack.com/firmware/" + file;
   client->setCACert(root_ca3);  
@@ -401,6 +400,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   // Só chega aqui se der errado
   SAIR:
   delay(5000);
+  GetJsonFromM5();
 }
 
 

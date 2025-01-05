@@ -50,7 +50,6 @@ void webUIMyNet() {
     }
     options.push_back({"Hidden SSID", [=]() { String __ssid=keyboard("", 32, "Your SSID"); wifiConnect(__ssid.c_str(),8); }});
     options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
-    delay(200);
     loopOptions(options);
 
   } else {
@@ -72,7 +71,6 @@ void loopOptionsWebUi() {
       {"AP mode", [=]()    { startWebUi("Launcher", 0, true); }},
       {"Main Menu", [=]() { returnToMenu=true; }},
   };
-  delay(200);
 
   loopOptions(options);
   // On fail installing will run the following line

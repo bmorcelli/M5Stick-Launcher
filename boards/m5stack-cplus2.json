@@ -30,9 +30,9 @@
   ],
   "name": "M5Stick CPlus2",
   "upload": {
-    "flash_size": "4MB",
+    "flash_size": "8MB",
     "maximum_ram_size": 327680,
-    "maximum_size": 4194304,
+    "maximum_size": 8388608,
     "require_upload_port": true,
     "speed": 1500000
   },

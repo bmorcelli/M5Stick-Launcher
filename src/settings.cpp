@@ -205,9 +205,7 @@ void setBrightnessMenu() {
     {"25 %", [=]() { setBrightness(25); }},
     {" 0 %", [=]() { setBrightness(1); }},
   };
-  delay(200);
   loopOptions(options, true);
-  delay(200);
 }
 /*********************************************************************
 **  Function: setUiColor
@@ -223,7 +221,6 @@ void setUiColor() {
     {"White",     [&]() { FGCOLOR=0xFFFF; BGCOLOR=0x0000; ALCOLOR=0x6b6d; odd_color=0x630C; even_color=0x8410; }},
     {"Black",     [&]() { FGCOLOR=0x0000; BGCOLOR=0xFFFF; ALCOLOR=0x6b6d; odd_color=0x8c71; even_color=0xb596; }},
   };
-  delay(200);
   loopOptions(options);
   displayRedStripe("Saving...");
   EEPROM.begin(EEPROMSIZE);
@@ -246,7 +243,6 @@ void setUiColor() {
   EEPROM.commit();       // Store data to EEPROM
   EEPROM.end();
 
-  delay(200);
 }
 /*********************************************************************
 **  Function: setdimmerSet
@@ -262,14 +258,13 @@ void setdimmerSet() {
     {"60s", [&]() { time=60; }},
     
   };
-  delay(200);
+
   loopOptions(options);
   dimmerSet=time;
   EEPROM.begin(EEPROMSIZE);
   EEPROM.write(EEPROMSIZE-14, dimmerSet);  // 20s Dimm time
   EEPROM.commit();
   EEPROM.end();
-  delay(200);
 }
 
 /*********************************************************************
@@ -290,7 +285,6 @@ void chargeMode() {
   }
   setCpuFrequencyMhz(240);
   setBrightness(bright,false);
-  delay(200);
 }
 
 

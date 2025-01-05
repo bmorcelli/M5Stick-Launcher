@@ -311,14 +311,14 @@ void readFs(String folder, String result[][3]) {
     if (!setupSdCard()) {
         //Serial.println("Falha ao iniciar o cartão SD");
         displayRedStripe("SD not found or not formatted in FAT32");
-        delay(2000);
+        delay(2500);
         return; // Retornar imediatamente em caso de falha
     }
 
     File root = SDM.open(folder);
     if (!root || !root.isDirectory()) {
         displayRedStripe("Fail open root");
-        delay(2000);
+        delay(2500);
         return; // Retornar imediatamente se não for possível abrir o diretório
     }
 
@@ -412,8 +412,6 @@ String loopSD(bool filePicker) {
         tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
       }
       coord=listFiles(index, fileList);
-
-      delay(REDRAW_DELAY);
       redraw = false;
     }
 
@@ -451,7 +449,6 @@ String loopSD(bool filePicker) {
             {"Delete", [=]() { deleteFromSd(fileList[index][1]); }},
             {"Main Menu", [=]() { returnToMenu=true; }},
           };
-          delay(200);
           loopOptions(options);
           tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);  
           reload = true;     
@@ -464,7 +461,6 @@ String loopSD(bool filePicker) {
           };
           if(fileToCopy!="") options.push_back({"Paste", [=]() { pasteFile(Folder); }});
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
-          delay(200);
           loopOptions(options);
           reload = true;  
           redraw = true;
@@ -484,7 +480,6 @@ String loopSD(bool filePicker) {
           if(fileToCopy!="") options.push_back({"Paste",  [=]() { pasteFile(Folder); }});
           options.push_back({"Delete", [=]() { deleteFromSd(fileList[index][1]); }});
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
-          delay(200);
 
           if(!filePicker) loopOptions(options);
           else {
@@ -562,7 +557,7 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   {
     uint8_t error = Update.getError();
     displayRedStripe("E:" + String(error) + "-Wrong Partition Scheme");
-    delay(2000);
+    delay(2500);
   }
 }
 
@@ -653,7 +648,7 @@ void updateFromSD(String path) {
         {"SPIFFS No", [&](){ spiffs = false; }},
         {"SPIFFS Yes", [&](){ spiffs = true; }},
       };
-      delay(200);
+
       loopOptions(options);
       tft.fillSmoothRoundRect(6, 6, tftWidth - 12, tftHeight - 12, 5, BGCOLOR);
     }
@@ -694,7 +689,7 @@ void updateFromSD(String path) {
   }
 Exit:
   displayRedStripe("Update Error.");
-  delay(2000);
+  delay(2500);
 }
 
 

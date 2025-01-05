@@ -188,7 +188,6 @@ void partitioner() {
         {"UiFlow1", [&](){ partition = 1; }},
       #endif      
     };
-    delay(200);
     loopOptions(options);
 
     if(partition==100) goto Exit;
@@ -212,7 +211,7 @@ void partitioner() {
       #elif defined(PART_16MB)
         case 1: data = uiFlow1;
                 displayRedStripe("Experimental");
-                delay(2000);
+                delay(2500);
                 data_size = sizeof(uiFlow1);
                 break;                
       #endif
@@ -315,7 +314,7 @@ void dumpPartition(const char* partitionLabel, const char* outputPath) {
   }
   outputFile.close();
   displayRedStripe("    Complete!    ");
-  delay(2000);
+  delay(2500);
 
   Serial.printf("Dump da partição %s para o arquivo %s concluído\n", partitionLabel, outputPath);
 }
@@ -351,7 +350,7 @@ void restorePartition(const char* partitionLabel) {
   }
   delay(100);
   displayRedStripe("    Restored!    ");
-  delay(2000);
+  delay(2500);
 }
 
 

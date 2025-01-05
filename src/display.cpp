@@ -598,7 +598,6 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
         setBrightness(100*(numOpt-index)/numOpt,false);
       }
       redraw=false;
-      delay(REDRAW_DELAY); 
     }
     String txt=options[index].first.c_str();
     displayScrollingText(txt, coord);
@@ -624,7 +623,6 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
         }
         if(millis()-longPrevTmp>200) tft.drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true);
         if(millis()-longPrevTmp>700) { // longpress detected to exit
-          delay(200);
           break;
         } else goto WAITING;
 
@@ -649,7 +647,6 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     if(check(EscPress)) break;
     #endif
   }
-  delay(200);
 }
 
 /*********************************************************************
@@ -665,6 +662,8 @@ void loopVersions() {
   JsonArray versions = item["versions"];
   bool redraw = true;
   
+  bool longPrevPress = false;
+  long longPrevTmp=millis();
   while(1) {
     if(returnToMenu) break; // Stops the loop to get back to Main menu
 
@@ -687,46 +686,60 @@ void loopVersions() {
       
       displayCurrentVersion(String(name), String(author), String(version), String(published_at), versionIndex, versions);
       redraw = false;
-      delay(REDRAW_DELAY);
     }
     /* DW Btn to next item */
     if(check(NextPress)) { 
       versionIndex++;
       if(versionIndex>versions.size()-1) versionIndex = 0;
       redraw = true;
-      delay(REDRAW_DELAY);
     }
 
     /* UP Btn go back to FW menu and ´<´ go to previous version item */
     
-    #ifdef ESC_LOGIC
+    #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
         /* UP Btn go to previous item */
     if(check(PrevPress)) { 
       versionIndex--;
       if(versionIndex<0) versionIndex = versions.size()-1;
       redraw = true;
-      delay(200);
     }
 
-    if(checkEscPress()) {
-      delay(200);
+    if(check(EscPress)) {
       goto SAIR;
     } 
     #else // Esc logic is holding previous btn fot 1 second +-
-
-    if(check(PrevPress)) {
-      long _tmp=millis();
-      while(check(PrevPress)) { if(millis()-_tmp>200) tft.drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(_tmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true); }
-      if(millis()-_tmp>700) { // longpress detected to exit
-        delay(200);
-        goto SAIR;
+    if(longPrevPress || PrevPress) {
+      if(!longPrevPress) {
+        longPrevPress = true;
+        longPrevTmp = millis();
       }
-      else {
-        if(versionIndex==0) versionIndex = versions.size() - 1;
-        else if(versionIndex>0) versionIndex--;
-        redraw = true;
+      if(longPrevPress && millis()-longPrevTmp<800) { 
+        WAITING:
+        vTaskDelay(10/portTICK_PERIOD_MS);
+        if(!PrevPress && millis()-longPrevTmp<200) {
+          AnyKeyPress=false;
+          if(versionIndex==0) versionIndex = versions.size() - 1;
+          else if(versionIndex>0) versionIndex--;
+          longPrevPress=false;
+          redraw = true;
+        }
+        if(!PrevPress && millis()-longPrevTmp>200) {
+          check(PrevPress);
+          redraw=true;
+          longPrevPress=false;
+          goto EXIT_CHECK;
+        }
+        if(millis()-longPrevTmp>200) tft.drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true);
+        if(millis()-longPrevTmp>700) { // longpress detected to exit
+          returnToMenu=true;
+          check(PrevPress);
+          goto SAIR;
+        } else goto WAITING;
       }
+      EXIT_CHECK:
+      yield();
     }
+    
     #endif
 
     /* Select to install */
@@ -738,8 +751,6 @@ void loopVersions() {
           {"Download->SD", [=]() { downloadFirmware(String(file), String(name) + "." + String(version).substring(0,10), dwn_path); }},
           {"Back to List", [=]() { returnToMenu=true; }},
       };
-      delay(200);
-
       loopOptions(options);
       // On fail installing will run the following line
       redraw = true;
@@ -761,57 +772,75 @@ void loopVersions() {
 **  Where you choose which Firmware to see more data   
 **********************************************************************/
 void loopFirmware(){  
+  bool longSelPress = false;
+  long longSelTmp=millis();
   currentIndex=0;
-  delay(200); //debounce from previous btn press
   displayCurrentItem(doc, currentIndex);
 
   while(1){
-    if(returnToMenu) break; // break the loop and gets back to Main Menu
-
     if (WiFi.status() == WL_CONNECTED) {
     /* UP Btn go to previous item */
       if(check(PrevPress)) {
         if(currentIndex==0) currentIndex = doc.size() - 1;
         else if(currentIndex>0) currentIndex--;
         displayCurrentItem(doc, currentIndex);
-        delay(REDRAW_DELAY);
-
       }
       /* DW Btn to next item */
       if(check(NextPress)) { 
         currentIndex++;
         if((currentIndex+1)>doc.size()) currentIndex = 0;
         displayCurrentItem(doc, currentIndex);
-        delay(REDRAW_DELAY);
       }
 
-      /* Select to install */
-      if(check(SelPress)) { 
-        
+      
         //Checks for long press to get back to Main Menu, only for StickCs.. Cardputer uses Esc btn
-        #ifndef ESC_LOGIC
-          int time = millis();          // Saves the moment when the btn was pressed
-          while(check(SelPress)) { 
-
-            if((millis()-time)>150) tft.drawArc(tftWidth/2,tftHeight/2,25,15,0,360*(millis()-time)/1000,ALCOLOR,BGCOLOR,false);
-          }  // while pressed the btn, hold the code to count the time
-          if((millis()-time)>1000) break;// check how many ms it was kept held on and stop the loop if more than 250ms
-          else { 
+        #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
+        /* Select to install */
+        if(check(SelPress)) { 
+          loopVersions();
+          delay(200);
+          returnToMenu=false;
+        }
+        #else
+        if(longSelPress || SelPress) {
+          if(!longSelPress) {
+            longSelPress = true;
+            longSelTmp = millis();
+          }
+          if(longSelPress && millis()-longSelTmp<250) goto WAITING;
+          longSelPress=false;
+          if(check(SelPress)) {
+            bool exit=false;
+            options = {
+              {"View version",[=](){ loopVersions(); }},
+              {"Main Menu",   [&](){ exit=true;}}
+            };
+            loopOptions(options);
+            returnToMenu=false;
+            if(exit) {
+              returnToMenu=true;
+              goto END;
+            }
+            displayCurrentItem(doc, currentIndex);
+            delay(200);
+          } else {
+            check(SelPress);
             loopVersions();          // goes to the Version information
+            displayCurrentItem(doc, currentIndex);
+            delay(200);
             returnToMenu=false;
           }
-        #else
-        loopVersions();
-        returnToMenu=false;
-
-        #endif
-
-        delay(200);
-      }
-
-      #ifdef ESC_LOGIC
-      if(checkEscPress()) break; //  Esc btn to get back to Main Menu.
+        }
+      WAITING:
+      yield();
       #endif
+
+      #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
+      if(check(EscPress)) break; //  Esc btn to get back to Main Menu.
+      #endif
+
+      if(returnToMenu) break; // break the loop and gets back to Main Menu
+
     } 
     else {
       displayRedStripe("WiFi: Disconnected");
@@ -819,6 +848,7 @@ void loopFirmware(){
       break;
     }
   }
+  END:
   WiFi.disconnect(true,true);
   WiFi.mode(WIFI_OFF);
   doc.clear();

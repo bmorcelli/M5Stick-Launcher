@@ -13,12 +13,10 @@ bool wakeUpScreen(){
     isScreenOff = false;
     dimmer = false;
     getBrightness();
-    delay(200);
     return true;
   }else if(dimmer){
     dimmer = false;
     getBrightness();
-    delay(200);
     return true;
   }
   return false;
@@ -45,7 +43,6 @@ void sleepModeOn(){
   disableCore0WDT();
   disableCore1WDT();
   disableLoopWDT();
-  delay(200);
 }
 
 /* Wake up device */
@@ -57,5 +54,4 @@ void sleepModeOff(){
   enableLoopWDT();
   feedLoopWDT();
   getBrightness();
-  delay(200);
 }

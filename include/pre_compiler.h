@@ -1,7 +1,3 @@
-#ifndef REDRAW_DELAY
-#define REDRAW_DELAY 250
-#endif
-
 #if !defined(PART_04MB) && !defined(PART_08MB) && !defined(PART_16MB) && !defined(HEADLESS)
 #define PART_04MB 1
 #endif
