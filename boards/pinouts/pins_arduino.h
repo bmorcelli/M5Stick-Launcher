@@ -16,10 +16,14 @@
 #include "m5stack-core2.h"
 #elif ARDUINO_M5STICK_C_PLUS
 #include "m5stack-cplus1_1.h"
+#elif ARDUINO_M5Stick_C
+#include "m5stack-c.h"
 #elif ARDUINO_M5STICK_C_PLUS2
 #include "m5stack-cplus2.h"
 #elif ESP32S3DEVKITC1
-#include "ESP-General.h"
+#include "ESP32S3-General.h"
+#elif ESP32S3_4M
+#include "ESP32S3-4M.h"
 #elif ESP32_DEV
 #include "esp32dev.h"
 #elif MARAUDERMINI
@@ -27,9 +31,9 @@
 #elif MARAUDERV4
 #include "marauder-v4og.h"
 #elif T_DISPLAY_S3_TOUCH
-#include "lilygo-t-displays3-touch.h"
+#include "lilygo-t-display-s3-touch.h"
 #elif T_DISPLAY_S3_PRO
-#include "lilygo-t-displays3-pro.h"
+#include "lilygo-t-display-s3-pro.h"
 #elif SMOOCHIEE_BOARD
 #include "smoochiee-board.h"
 #endif
