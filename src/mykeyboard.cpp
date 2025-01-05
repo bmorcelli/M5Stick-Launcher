@@ -319,7 +319,7 @@ String keyboard(String mytext, int maxSize, String msg) {
         if (box_list[48].contain(t.x, t.y)) { break; }      // Ok
         if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft.fillRect(0,54,tftWidth,tftHeight-54,BGCOLOR); goto THIS_END; } // CAP
         if (box_list[50].contain(t.x, t.y)) goto DEL;               // DEL
-        if (box_list[51].contain(t.x, t.y)) { mytext += box_list[51].key; goto ADD; } // SPACE
+        if (box_list[51].contain(t.x, t.y)) { mytext += " "; goto THIS_END; } // SPACE
         for(k=0;k<48;k++){
           if (box_list[k].contain(t.x, t.y)) {
             if(caps) mytext += box_list[k].key_sh;
@@ -372,33 +372,28 @@ String keyboard(String mytext, int maxSize, String msg) {
         goto SELECT;
       }
       /* Down Btn to move in X axis (to the right) */
-      if(check(DownPress))
+      if(check(NextPress))
       {
         x++;
-        if(y<0 && x>3) x=0;
-        if(x>11) x=0;
-        else if (x<0) x=11;
+        if((y<0 && x>3) || x>11) x=0;
         redraw = true;
       }
-      if(check(UpPress))
+      if(check(PrevPress))
       {
         x--;
-        if(y<0 && x>3) x=0;
-        if(x>11) x=0;
-        else if (x<0) x=11;
+        if(y<0 && x>3) x=3;
+        else if(x<0) x=11;
         redraw = true;
       }
       /* UP Btn to move in Y axis (Downwards) */
-      if(check(NextPress)) {    
+      if(check(DownPress)) {    
         y++;
         if(y>3) { y=-1; }
-        else if(y<-1) y=3;
         redraw = true;
       }
-      if(check(PrevPress)) {    
+      if(check(UpPress)) {    
         y--;
-        if(y>3) { y=-1; }
-        else if(y<-1) y=3;
+        if(y<-1) y=3;
         redraw = true;
       }
 
@@ -481,9 +476,9 @@ String keyboard(String mytext, int maxSize, String msg) {
         tft.setCursor(cX,cY);
         if(caps) z=1;
         else z=0;
-        if(x==0 && y==-1) break;
-        else if(x==1 && y==-1) caps=!caps;
-        else if(x==2 && y==-1 && mytext.length() > 0) {
+        if(x==0 && y==-1) break; // Ok key,
+        else if(x==1 && y==-1) caps=!caps; // CAPS key
+        else if(x==2 && y==-1 && mytext.length() > 0) { // DEL key
           DEL:
           mytext.remove(mytext.length()-1);
           int fS=FM;
@@ -497,8 +492,8 @@ String keyboard(String mytext, int maxSize, String msg) {
           cX=tft.getCursorX();
           cY=tft.getCursorY();
         }
-        else if(x>2 && y==-1 && mytext.length()<maxSize) mytext += " ";
-        else if(y>-1 && mytext.length()<maxSize) {
+        else if(x>2 && y==-1 && mytext.length()<maxSize) mytext += " "; // SPACE key
+        else if(y>-1 && mytext.length()<maxSize) { // Letters
           ADD:
           mytext += keys[y][x][z];
           if(mytext.length()!=20 && mytext.length()!=20) tft.print(keys[y][x][z]);
