@@ -11,6 +11,7 @@
 #endif
 #include <SPIFFS.h>
 #include "esp_ota_ops.h"
+#include <SD.h>
 
 #include <iostream>
 #include <functional>

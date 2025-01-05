@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <functional>
+#include <LittleFS.h> // to make M5GFX compile in Core, Core2 and CoreS3 devices
 #include <vector>
 #if !defined(SDM)
     #define SDM SD

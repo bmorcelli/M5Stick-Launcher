@@ -21,7 +21,7 @@
         ]
       ],
       "mcu": "esp32s3",
-      "variant": "m5stack_stamp_s3"
+      "variant": "pinouts"
     },
     "connectivity": [
       "bluetooth",

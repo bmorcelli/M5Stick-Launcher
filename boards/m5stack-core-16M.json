@@ -12,7 +12,7 @@
     "f_flash": "80000000L",
     "flash_mode": "qio",
     "mcu": "esp32",
-    "variant": "m5stack_core_esp32"
+    "variant": "pinouts"
   },
   "connectivity": [
     "wifi",

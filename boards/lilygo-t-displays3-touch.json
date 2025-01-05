@@ -7,27 +7,33 @@
     },
     "core": "esp32",
     "extra_flags": [
-      "-DT_DISPLAY_S3_PRO=1",
-      "-DARDUINO_ESP32S3_DEV",
-      "-DARDUINO_USB_MODE=1",
-      "-DARDUINO_USB_CDC_ON_BOOT=1",
-      "-DARDUINO_RUNNING_CORE=1",
-      "-DARDUINO_EVENT_RUNNING_CORE=1",
+      "-DT_DISPLAY_S3_TOUCH=1",
       "-DBOARD_HAS_PSRAM"
     ],
     "f_cpu": "240000000L",
     "f_flash": "80000000L",
     "flash_mode": "qio",
-    "hwids": [["0x303A", "0x1001"]],
+    "hwids": [
+      [
+        "0X303A",
+        "0x1001"
+      ]
+    ],
     "mcu": "esp32s3",
-    "variant": "esp32s3"
+    "variant": "pinouts"
   },
-  "connectivity": ["wifi", "bluetooth"],
+  "connectivity": [
+    "wifi",
+    "bluetooth"
+  ],
   "debug": {
-    "openocd_target": "esp32s3.cfg"
+    "openocd_target": "esp32s3-builtin.cfg"
   },
-  "frameworks": ["arduino", "espidf"],
-  "name": "LilyGo-T-Display-S3-Pro",
+  "frameworks": [
+    "arduino",
+    "espidf"
+  ],
+  "name": "T-DisplayS3",
   "upload": {
     "flash_size": "16MB",
     "maximum_ram_size": 327680,
@@ -35,6 +41,6 @@
     "require_upload_port": true,
     "speed": 921600
   },
-  "url": "https://www.lilygo.cc/products/t-display-s3-pro",
-  "vendor": "LilyGo"
+  "url": "https://www.lilygo.cc/products/t-display-s3",
+  "vendor": "LILYGO"
 }
