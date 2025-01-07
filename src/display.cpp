@@ -7,6 +7,8 @@
 
 #if defined(HEADLESS)
 SerialDisplayClass tft;
+#elif E_PAPER_DISPLAY
+EPD_translate tft;
 #else
 TFT_eSPI tft = TFT_eSPI();         // Invoke custom library
 #endif
