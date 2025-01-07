@@ -63,7 +63,7 @@ Sourcecode will be released in the future..
 
 ## Changelog
 * 2.4.2:
-     * [x] UiFlow2 v2.2.0 compatibility https://github.com/bmorcelli/M5Stick-Launcher/issues/92
+     * [x] UiFlow2 v2.2.0 compatibility https://github.com/bmorcelli/M5Stick-Launcher/issues/92 for Cardputer, Removed from StickCPlus2 due to lack of storage
      * [x] Fix for https://github.com/bmorcelli/M5Stick-Launcher/issues/93 https://github.com/bmorcelli/M5Stick-Launcher/issues/97 https://github.com/bmorcelli/M5Stick-Launcher/issues/95
      * [x] Possibility to connect to Hidden Networks https://github.com/bmorcelli/M5Stick-Launcher/issues/89 by typing the SSID and Pwd
      * [x] Changed porting system, reading inputs on a background task (same as Bruce)

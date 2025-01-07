@@ -179,7 +179,7 @@ void partitioner() {
     // Opções de partição
     options = {
         {"Default", [&](){ partition = 0; }},
-      #if defined(PART_08MB)  
+      #if defined(PART_08MB) && defined(CARDPUTER)
         {"Doom", [&](){ partition = 1; }},
         {"UiFlow2", [&](){ partition = 2; }},
       #elif defined(PART_04MB)
