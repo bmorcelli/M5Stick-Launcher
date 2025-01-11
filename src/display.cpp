@@ -97,18 +97,27 @@ void TouchFooter2(uint16_t color) {
 void initDisplay(bool doAll) {
     static uint8_t _name=random(0,3);
     String name="@Pirata";
+    String txt;
+    int cor, _x, _y, show;
+
+    #ifdef E_PAPER_DISPLAY // epaper display draws only once
+      static bool runOnce=false;
+      if(runOnce) goto END;
+      else runOnce=true;
+      tft.stopCallback();
+    #endif
+
     if(_name == 1) name="u/bmorcelli";
     else if(_name == 2) name="gh/bmorcelli";
     tft.drawRoundRect(3,3,tftWidth-6,tftHeight-6,5,FGCOLOR);
     tft.setTextSize(FP);
     tft.setCursor(10,10);
-    int cor = 0;
-    String txt;
-    int show = random(0,40);
-    int _x=tft.getCursorX();
-    int _y=tft.getCursorY();
+    cor = 0;
+    show = random(0,40);
+    _x=tft.getCursorX();
+    _y=tft.getCursorY();
     
-    while(tft.getCursorY()<(tftHeight-12)) {
+    while(tft.getCursorY()<(tftHeight-(LH+4))) {
       cor = random(0,11);
       tft.setTextSize(FP);
       show = random(0,40);
@@ -117,24 +126,24 @@ void initDisplay(bool doAll) {
         else if (cor & 1) { tft.setTextColor(odd_color,BGCOLOR); txt=String(cor); }
         else { tft.setTextColor(even_color,BGCOLOR); txt=String(cor); }
         
-        if(_x>=(tftWidth-10)) {_x=10; _y+=8; }
+        if(_x>=(tftWidth-(LW+4))) {_x=10; _y+=LH; }
         else if(_x<10) { _x = 10; }
-        if(_y>=(tftHeight-12)) break;
+        if(_y>=(tftHeight-(LH+LH/2))) break;
         tft.setCursor(_x,_y);
-        if(_y>(tftHeight-20) && _x>=(tftWidth-(10+LW*name.length()))) {
+        if(_y>(tftHeight-(LH*FM+LH/2)) && _x>=(tftWidth-((LW+4)+LW*name.length()))) {
           tft.setTextColor(FGCOLOR);
           tft.print(name);
           _x+=LW*name.length();
         }
         else {
           tft.print(txt);
-          _x+=6;
+          _x+=LW;
         }
       } else { 
-        if(_y>(tftHeight-20) && _x>=(tftWidth-(10+LW*name.length()))) _x+=LW*name.length();
-        else _x+=6;
+        if(_y>(tftHeight-(LH*FM+LH/2)) && _x>=(tftWidth-((LW+4)+LW*name.length()))) _x+=LW*name.length();
+        else _x+=LW;
         
-        if(_x>=(tftWidth-10)) { _x=10; _y+=8; }
+        if(_x>=(tftWidth-(LW+4))) { _x=10; _y+=LH; }
         }
         tft.setCursor(_x,_y); 
     }
@@ -147,7 +156,12 @@ void initDisplay(bool doAll) {
   #endif
     tft.setTextSize(FG);
     tft.setTextColor(FGCOLOR);
+  
+  #ifdef E_PAPER_DISPLAY // epaper display draws only once
+    tft.startCallback();
+  #endif
 
+  END:
     delay(50);
     
 }
@@ -171,6 +185,9 @@ void initDisplayLoop() {
 ** Description:   Display Item on Screen before instalation
 ***************************************************************************************/
 void displayCurrentItem(JsonDocument doc, int currentIndex) {
+  #ifdef E_PAPER_DISPLAY
+    tft.stopCallback();
+  #endif
   JsonObject item = doc[currentIndex];
 
   const char* name = item["name"];
@@ -215,9 +232,6 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   tft.println(texto);
   #endif
 
-
-  
-
   #if defined(HAS_TOUCH)
   TouchFooter();
   #endif  
@@ -226,6 +240,10 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   if (bar<5) bar = 5;
   tft.fillRect((tftWidth*currentIndex)/doc.size(),tftHeight-5,bar,5,FGCOLOR);
 
+  #ifdef E_PAPER_DISPLAY
+    tft.startCallback();
+  #endif
+
 }
 
 /***************************************************************************************
@@ -233,6 +251,9 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
 ** Description:   Display Version on Screen before instalation
 ***************************************************************************************/
 void displayCurrentVersion(String name, String author, String version, String published_at, int versionIndex, JsonArray versions) {
+  #ifdef E_PAPER_DISPLAY
+    tft.stopCallback();
+  #endif
     //tft.fillScreen(BGCOLOR);
     tft.fillRect(0,tftHeight-5,tftWidth,5,BGCOLOR);
     tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
@@ -281,6 +302,10 @@ void displayCurrentVersion(String name, String author, String version, String pu
     int bar = int(tftWidth/div);
     if (bar<5) bar = 5;
     tft.fillRect((tftWidth*versionIndex)/div,tftHeight-5,bar,5,ALCOLOR);
+
+    #ifdef E_PAPER_DISPLAY
+    tft.startCallback();
+    #endif
 }
 
 /***************************************************************************************
@@ -393,24 +418,33 @@ void progressHandler(int progress, size_t total) {
 ** Function name: drawOptions
 ** Description:   Função para desenhar e mostrar as opçoes de contexto
 ***************************************************************************************/
-#define MAX_MENU_SIZE (int)(tftHeight/25)
+#ifdef E_PAPER_DISPLAY
+  #define MAX_MENU_SIZE 13
+  #define FONT_S (FM*(LH+3)+4)
+#else
+  #define FONT_S (FM*LH+4)
+  #define MAX_MENU_SIZE (int)(tftHeight/25)
+#endif
 Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
+  #ifdef E_PAPER_DISPLAY
+    tft.stopCallback();
+  #endif
     Opt_Coord coord;
     int menuSize = options.size();
     if(options.size()>MAX_MENU_SIZE) { 
       menuSize = MAX_MENU_SIZE; 
       } 
 
-    if(index==0) tft.fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*(FM*8+4)/2 -5,tftWidth*0.8,(FM*8+4)*menuSize+10,5,bgcolor);
+    if(index==0) tft.fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*FONT_S/2 -5,tftWidth*0.8,FONT_S*menuSize+10,5,bgcolor);
     
     tft.setTextColor(fgcolor,bgcolor);
     tft.setTextSize(FM);
-    tft.setCursor(tftWidth*0.10+5,tftHeight/2-menuSize*(FM*8+4)/2);
+    tft.setCursor(tftWidth*0.10+5,tftHeight/2-menuSize*FONT_S/2);
     
     int i=0;
     int init = 0;
     int cont = 1;
-    if(index==0) tft.fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*(FM*8+4)/2 -5,tftWidth*0.8,(FM*8+4)*menuSize+10,5,bgcolor);
+    if(index==0) tft.fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*FONT_S/2 -5,tftWidth*0.8,FONT_S*menuSize+10,5,bgcolor);
     menuSize = options.size();
     if(index>=MAX_MENU_SIZE) init=index-MAX_MENU_SIZE+1;
     for(i=0;i<menuSize;i++) {
@@ -434,7 +468,10 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
     }
     Exit:
     if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
-    tft.drawRoundRect(tftWidth*0.10,tftHeight/2-menuSize*(FM*8+4)/2 -5,tftWidth*0.8,(FM*8+4)*menuSize+10,5,fgcolor);
+    tft.drawRoundRect(tftWidth*0.10,tftHeight/2-menuSize*FONT_S/2 -5,tftWidth*0.8,FONT_S*menuSize+10,5,fgcolor);
+  #ifdef E_PAPER_DISPLAY
+    tft.startCallback();
+  #endif
     return coord;
 }
 
@@ -443,6 +480,9 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
 void drawMainMenu(int index) {
+  #ifdef E_PAPER_DISPLAY
+    tft.stopCallback();
+  #endif
   int offset=0;
   if(index>2) offset=index-2;
   const int border = 10;
@@ -472,7 +512,7 @@ void drawMainMenu(int index) {
     tft.print("Launcher " + String(LAUNCHER));
     tft.setTextSize(FM);
 #else
-    tft.print("Launcher " + String(LAUNCHER));
+    tft.drawString("Launcher " + String(LAUNCHER),12,12);
     tft.setTextSize(FG);
 #endif
     for (int i = 0; i < 3; ++i) {
@@ -493,6 +533,9 @@ void drawMainMenu(int index) {
 
     drawDeviceBorder();
     drawBatteryStatus();
+  #ifdef E_PAPER_DISPLAY
+    tft.startCallback();
+  #endif
 }
 
 void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, bool isSelected) {
@@ -533,8 +576,15 @@ void drawBatteryStatus() {
 ** Function name: listFiles
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
-#define MAX_ITEMS (int)(tftHeight-20)/(LH*2)
+#ifdef E_PAPER_DISPLAY
+  #define MAX_ITEMS 14
+#else
+  #define MAX_ITEMS (int)(tftHeight-20)/(LH*2)
+#endif
 Opt_Coord listFiles(int index, String fileList[][3]) {
+  #ifdef E_PAPER_DISPLAY
+    tft.stopCallback();
+  #endif
     Opt_Coord coord;
     tft.setCursor(10,10);
     tft.setTextSize(FM);
@@ -576,6 +626,9 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
     #if defined(HAS_TOUCH)
     TouchFooter();
     #endif
+    #ifdef E_PAPER_DISPLAY
+    tft.startCallback();
+    #endif
     return coord;
 }
 
@@ -600,6 +653,9 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
         setBrightness(100*(numOpt-index)/numOpt,false);
       }
       redraw=false;
+      #ifdef E_PAPER_DISPLAY
+      delay(200);
+      #endif
     }
     String txt=options[index].first.c_str();
     displayScrollingText(txt, coord);
@@ -688,6 +744,9 @@ void loopVersions() {
       
       displayCurrentVersion(String(name), String(author), String(version), String(published_at), versionIndex, versions);
       redraw = false;
+      #ifdef E_PAPER_DISPLAY
+        delay(200);
+      #endif
     }
     /* DW Btn to next item */
     if(check(NextPress)) { 
@@ -786,12 +845,18 @@ void loopFirmware(){
         if(currentIndex==0) currentIndex = doc.size() - 1;
         else if(currentIndex>0) currentIndex--;
         displayCurrentItem(doc, currentIndex);
+        #ifdef E_PAPER_DISPLAY
+        delay(200);
+        #endif
       }
       /* DW Btn to next item */
       if(check(NextPress)) { 
         currentIndex++;
         if((currentIndex+1)>doc.size()) currentIndex = 0;
         displayCurrentItem(doc, currentIndex);
+        #ifdef E_PAPER_DISPLAY	
+        delay(200);
+        #endif
       }
 
       

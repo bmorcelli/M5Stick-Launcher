@@ -62,6 +62,11 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.4.3:
+     * [x] Fixed buttons on Core devices
+     * [x] Fixed random restartings when dimming screen
+     * [x] Ported to Lilygo E-Paper S3 Pro (Only Pro for now)
+
 * 2.4.2:
      * [x] UiFlow2 v2.2.0 compatibility https://github.com/bmorcelli/M5Stick-Launcher/issues/92
      * [x] Fix for https://github.com/bmorcelli/M5Stick-Launcher/issues/93 https://github.com/bmorcelli/M5Stick-Launcher/issues/97 https://github.com/bmorcelli/M5Stick-Launcher/issues/95

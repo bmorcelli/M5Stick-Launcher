@@ -1,16 +1,17 @@
 #include <interface.h>
 #include <Wire.h>
 #include "powerSave.h"
-// #include "touch.h"
-// TouchClass touch;
 #include <TouchDrvGT911.hpp>
 
 #include "epd_driver.h"
 #include "utilities.h"
-TouchDrvGT911 touch(Wire,6,5,0x5d);
+TouchDrvGT911 touch;
 
 #include <bq27220.h>
 BQ27220 bq;
+
+#include <XPowersLib.h>
+XPowersPPM PPM;
 
 #define BOARD_I2C_SDA       6
 #define BOARD_I2C_SCL       5
@@ -23,55 +24,79 @@ BQ27220 bq;
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio() { 
-    gpio_hold_dis((gpio_num_t)BOARD_TOUCH_RST);//PIN_TOUCH_RES 
     pinMode(SEL_BTN, INPUT);
-    //pinMode(UP_BTN, INPUT);
     pinMode(DW_BTN, INPUT);
 
     // CS pins of SPI devices to HIGH
     pinMode(46, OUTPUT); // LORA module
     digitalWrite(46,HIGH);
 
+    Wire.begin(BOARD_SDA, BOARD_SCL);
 
-    pinMode(BOARD_TOUCH_RST, OUTPUT); //PIN_TOUCH_RES 
-    digitalWrite(BOARD_TOUCH_RST, LOW);//PIN_TOUCH_RES 
-    delay(500);
-    digitalWrite(BOARD_TOUCH_RST, HIGH);//PIN_TOUCH_RES 
-    Wire.begin(BOARD_I2C_SDA, BOARD_I2C_SCL);//SDA, SCL
-
-// Assuming that the previous touch was in sleep state, wake it up
+    // Assuming that the previous touch was in sleep state, wake it up
     pinMode(TOUCH_INT, OUTPUT);
     digitalWrite(TOUCH_INT, HIGH);
 
-/*
+    /*
     * The touch reset pin uses hardware pull-up,
     * and the function of setting the I2C device address cannot be used.
     * Use scanning to obtain the touch device address.*/
-
-   /*
-   I2C device found at address 0x51
-I2C device found at address 0x55
-I2C device found at address 0x5d
-I2C device found at address 0x6b
-*/
-    delay(10000);
-    byte error, address;
-    int nDevices = 0;
-    Wire.begin(BOARD_SDA, BOARD_SCL);
-    delay(2);
-    for(address = 0x01; address < 0x7F; address++){
-        Wire.beginTransmission(address);
-        error = Wire.endTransmission();
-        if(error == 0){ // 0: success.
-            nDevices++;
-            Serial.printf("I2C device found at address 0x%x\n", address);
-        }
-        delay(2);
+    uint8_t touchAddress = 0;
+    Wire.beginTransmission(0x14);
+    if (Wire.endTransmission() == 0) {
+        touchAddress = 0x14;
     }
-    touch.begin(Wire,6,5,0x5d);
-    //Set to trigger on falling edge
-    touch.setInterruptMode(FALLING);
+    Wire.beginTransmission(0x5D);
+    if (Wire.endTransmission() == 0) {
+        touchAddress = 0x5D;
+    }
+    if (touchAddress == 0) {
+        while (1) {
+            Serial.println("Failed to find GT911 - check your wiring!");
+            delay(1000);
+        }
+    }
+    touch.setPins(-1, TOUCH_INT);
+    if (!touch.begin(Wire, touchAddress, BOARD_SDA, BOARD_SCL )) {
+        while (1) {
+            Serial.println("Failed to find GT911 - check your wiring!");
+            delay(1000);
+        }
+    }
+    touch.setMaxCoordinates(EPD_WIDTH, EPD_HEIGHT);
+    touch.setSwapXY(true);
+    touch.setMirrorXY(false, true);
 
+    Serial.println("Started Touchscreen poll...");
+
+
+   // BQ25896 --- 0x6B
+    Wire.beginTransmission(0x6B);
+    if (Wire.endTransmission() == 0)
+    {
+        // battery_25896.begin();
+        PPM.init(Wire, BOARD_SDA, BOARD_SCL, BQ25896_SLAVE_ADDRESS);
+        // Set the minimum operating voltage. Below this voltage, the PPM will protect
+        PPM.setSysPowerDownVoltage(3300);
+        // Set input current limit, default is 500mA
+        PPM.setInputCurrentLimit(3250);
+        Serial.printf("getInputCurrentLimit: %d mA\n",PPM.getInputCurrentLimit());
+        // Disable current limit pin
+        PPM.disableCurrentLimitPin();
+        // Set the charging target voltage, Range:3840 ~ 4608mV ,step:16 mV
+        PPM.setChargeTargetVoltage(4208);
+        // Set the precharge current , Range: 64mA ~ 1024mA ,step:64mA
+        PPM.setPrechargeCurr(64);
+        // The premise is that Limit Pin is disabled, or it will only follow the maximum charging current set by Limi tPin.
+        // Set the charging current , Range:0~5056mA ,step:64mA
+        PPM.setChargerConstantCurr(832);
+        // Get the set charging current
+        PPM.getChargerConstantCurr();
+        Serial.printf("getChargerConstantCurr: %d mA\n",PPM.getChargerConstantCurr());
+        PPM.enableADCMeasure();
+        PPM.enableCharge();
+        PPM.disableOTG();
+    }
 }
 
 /***************************************************************************************
@@ -79,7 +104,17 @@ I2C device found at address 0x6b
 ** Location: main.cpp
 ** Description:   second stage gpio setup to make a few functions work
 ***************************************************************************************/
-void _post_setup_gpio() { }
+	#define TFT_BRIGHT_CHANNEL 0
+	#define TFT_BRIGHT_Bits 8
+	#define TFT_BRIGHT_FREQ 5000	
+    #define TFT_BL 40
+void _post_setup_gpio() { 
+// Brightness control must be initialized after tft in this case @Pirata
+    pinMode(TFT_BL,OUTPUT);
+    ledcSetup(TFT_BRIGHT_CHANNEL,TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits); //Channel 0, 10khz, 8bits
+    ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
+    ledcWrite(TFT_BRIGHT_CHANNEL,125);
+}
 
 
 /***************************************************************************************
@@ -102,60 +137,54 @@ int getBattery() {
 ** location: settings.cpp
 ** set brightness value
 **********************************************************************/
-void _setBrightness(uint8_t brightval) { }
+void _setBrightness(uint8_t brightval) {
+    int dutyCycle;
+    if (brightval==100) dutyCycle=255;
+    else if (brightval==75) dutyCycle=130;
+    else if (brightval==50) dutyCycle=70;
+    else if (brightval==25) dutyCycle=20;
+    else if (brightval==0) dutyCycle=0;
+    else dutyCycle = ((brightval*255)/100);
+
+    log_i("dutyCycle for bright 0-255: %d",dutyCycle);
+    ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
+}
 
 struct TouchPointPro {
-  int16_t x[5];
-  int16_t y[5];
+  int16_t x=0;
+  int16_t y=0;
 };
+
 /*********************************************************************
 ** Function: InputHandler
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
 **********************************************************************/
 void InputHandler(void) {
+    static long _tmptmp;
     TouchPointPro t;
-    uint8_t index=0;
-     uint8_t touched = touch.getPoint(t.x, t.y, touch.getSupportTouchPoint());
-    Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, rotation);
-    delay(200);
-    if (touched) {
-        if(rotation==1) {
-            t.y[0] = TFT_WIDTH-t.y[0];
-        }
-        if(rotation==3) {
-            t.x[0] = TFT_HEIGHT-t.x[0];
-        }
-        // Need to test these 2
-        if(rotation==0) {
-            int tmp=t.x[0];
-            t.x[0]=t.y[0];
-            t.y[0]=tmp;
-        }
-        if(rotation==2) {
-            int tmp=t.x[0];
-            t.x[0]=TFT_WIDTH-t.y[0];
-            t.y[0]=TFT_HEIGHT-tmp;
-        }
-
-        Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, rotation);
+    uint8_t touched = 0;
+    touched = touch.getPoint(&t.x, &t.y);
+    if((millis()-_tmptmp)>150) { // one reading each 500ms
         
+        //Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, rotation);
+        if (touched) {
 
-        if(!wakeUpScreen()) AnyKeyPress = true;
-        else goto END;
+            Serial.printf("\nPressed x=%d , y=%d, rot: %d, millis=%d, tmp=%d",t.x, t.y, rotation, millis(), _tmptmp);
+            _tmptmp=millis();
 
-        // Touch point global variable
-        touchPoint.x = t.x[0];
-        touchPoint.y = t.y[0];
-        touchPoint.pressed=true;
-        touchHeatMap(touchPoint);
+            // if(!wakeUpScreen()) AnyKeyPress = true;
+            // else goto END;
+
+            // Touch point global variable
+            touchPoint.x = t.x;
+            touchPoint.y = t.y;
+            touchPoint.pressed=true;
+            touchHeatMap(touchPoint);
+            touched=0;
+        }
+        END:
+        yield();
     }
-    END:
-    yield();
-//     if(AnyKeyPress) {
-//       long tmp=millis();
-//       touch.getPoint(t.x, t.y, index);
-//       while((millis()-tmp)<200 && touch.data[0].state==0x07) { touch.getPoint(t.x, t.y, index); delay(50);}
-//     }
 }
 
 /*********************************************************************

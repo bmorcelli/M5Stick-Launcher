@@ -430,6 +430,7 @@ String loopSD(bool filePicker) {
     }
 
     /* Select to install */
+    #ifndef E_PAPER_DISPLAY
     if(longSelPress || SelPress) {
       if(!longSelPress) {
         longSelPress = true;
@@ -441,9 +442,16 @@ String loopSD(bool filePicker) {
       if(check(SelPress))
       {
         while(check(SelPress)) yield();
+    #else
+      if(check(SelPress)) {
+        if(true) {
+    #endif
         // Definição da matriz "Options" 
         if(fileList[index][2]=="folder") {
           options = {
+            #ifdef E_PAPER_DISPLAY
+            {"Open Folder", [&]() { Folder = fileList[index][1]; }},
+            #endif
             {"New Folder", [=]() { createFolder( Folder); }},
             {"Rename", [=]() { renameFile(fileList[index][1], fileList[index][0]); }},
             {"Delete", [=]() { deleteFromSd(fileList[index][1]); }},
@@ -456,12 +464,17 @@ String loopSD(bool filePicker) {
         } else if(fileList[index][2]=="file"){
           goto Files;
         } else {
+          bool bkf=false;
           options = {
+            #ifdef E_PAPER_DISPLAY
+            {"Back Folder", [&]() { bkf=true; }},
+            #endif
             {"New Folder", [=]() { createFolder(Folder); }},
           };
           if(fileToCopy!="") options.push_back({"Paste", [=]() { pasteFile(Folder); }});
           options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
           loopOptions(options);
+          if(bkf) goto BACK_FOLDER;
           reload = true;  
           redraw = true;
         }
