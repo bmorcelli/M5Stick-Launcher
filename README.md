@@ -66,6 +66,7 @@ Sourcecode will be released in the future..
      * [x] Fixed buttons on Core devices
      * [x] Fixed random restartings when dimming screen
      * [x] Ported to Lilygo E-Paper S3 Pro (Only Pro for now)
+     * [x] Fixed T-Embed return from deepSleep
 
 * 2.4.2:
      * [x] UiFlow2 v2.2.0 compatibility https://github.com/bmorcelli/M5Stick-Launcher/issues/92
