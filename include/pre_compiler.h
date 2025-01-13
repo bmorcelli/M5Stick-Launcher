@@ -50,3 +50,9 @@
 #ifndef SDCARD_SCK
   #define SDCARD_SCK -1
 #endif
+#ifndef LH
+  #define LH 8
+#endif
+#ifndef LW
+  #define LW 6
+#endif

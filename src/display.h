@@ -4,6 +4,8 @@
 
 #ifdef HEADLESS
 #include <VectorDisplay.h>
+#elif E_PAPER_DISPLAY
+#include <EPD_translate.h>
 #else
 #include <TFT_eSPI.h>
 #endif
@@ -14,6 +16,8 @@
 // Declaração dos objetos TFT
 #if defined(HEADLESS)
 extern SerialDisplayClass tft;
+#elif E_PAPER_DISPLAY
+extern EPD_translate tft;
 #else
 extern TFT_eSPI tft; 
 #endif
@@ -29,8 +33,8 @@ void setTftDisplay(int x = 0, int y = 0, uint16_t fc = tft.textcolor, int size =
 
 void displayCurrentItem(JsonDocument doc, int currentIndex);
 void displayCurrentVersion(String name, String author, String version, String published_at, int versionIndex, JsonArray versions);
-
-void displayRedStripe(String text, uint16_t fgcolor = TFT_WHITE, uint16_t bgcolor = ALCOLOR);
+uint16_t getComplementaryColor(uint16_t color);
+void displayRedStripe(String text, uint16_t fgcolor = getComplementaryColor(BGCOLOR), uint16_t bgcolor = ALCOLOR);
 
 void progressHandler(int progress, size_t total);
 
@@ -62,7 +66,5 @@ void TouchFooter2(uint16_t color = FGCOLOR);
 void tftprintln(String txt, int margin, int numlines = 0);
 
 void tftprint(String txt, int margin, int numlines = 0);
-
-uint16_t getComplementaryColor(uint16_t color);
 
 #endif

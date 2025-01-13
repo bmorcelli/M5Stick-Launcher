@@ -6,6 +6,8 @@
 #include <M5-HTTPUpdate.h>
 #ifdef HEADLESS
 #include <VectorDisplay.h>
+#elif E_PAPER_DISPLAY
+#include <EPD_translate.h>
 #else
 #include <TFT_eSPI.h>
 #endif
@@ -413,6 +415,9 @@ void loop() {
       #endif      
       redraw = false; 
       returnToMenu = false;
+      #ifdef E_PAPER_DISPLAY
+        delay(200);
+      #endif
     }
 
     if(check(PrevPress)) {
@@ -482,11 +487,14 @@ void loop() {
 
       if(index == 3) {  
         options = {
-          
+          #ifndef E_PAPER_DISPLAY
           {"Charge Mode", [=](){ chargeMode(); }},
+          #endif
           {"Brightness", [=]() { setBrightnessMenu();    saveConfigs();}},
           {"Dim time", [=]()   { setdimmerSet();         saveConfigs();}},
+          #ifndef E_PAPER_DISPLAY
           {"UI Color", [=]()   { setUiColor();           saveConfigs();}},
+          #endif
         };
         if(sdcardMounted) {
           if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false);  saveConfigs();}});
@@ -495,9 +503,14 @@ void loop() {
         
         if(askSpiffs) options.push_back({"Avoid Spiffs",        [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
         else          options.push_back({"Ask Spiffs",          [=]() { gsetAskSpiffs(true, true);  saveConfigs();}});
+        #ifndef E_PAPER_DISPLAY
         options.push_back(              {"Orientation",         [=]() { gsetRotation(true);         saveConfigs(); }});
+        #endif
+        #if !defined(CORE_4MB)
         options.push_back(              {"Partition Change",    [=]() { partitioner(); }});
+        #endif
         options.push_back(              {"List of Partitions",  [=]() { partList(); }});
+        
 
       #ifndef PART_04MB
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
