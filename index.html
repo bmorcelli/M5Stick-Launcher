@@ -357,18 +357,34 @@
 
 
     function updateManifest() {
-      const version = document.querySelector('input[name="version"]:checked').value;
-      const type = document.querySelector('input[name="type"]:checked').value;
+      const versionInput = document.querySelector('input[name="version"]:checked');
+      const typeInput = document.querySelector('input[name="type"]:checked');
+  
+      if (!versionInput || !typeInput) {
+        //console.error('Version or type is not selected.');
+        return; // Evita a execução do resto da função caso algum dos campos não esteja selecionado
+      }
+
+      const version = versionInput.value;
+      const type = typeInput.value;
+  
       const button = document.querySelector('esp-web-install-button');
       button.manifest = `${version}/Manifest-${type}.json`;
       button.classList.remove('invisible');
     }
+
 
     document.querySelectorAll('input[name="version"], input[name="type"]').forEach(radio => 
       radio.addEventListener("change", updateManifest)
     );
 
     updateManifest();
+    function showInstructions(device) {
+	// Hide all instructions
+	document.querySelectorAll('.instructions').forEach(el => el.style.display = 'none');
+	// Show the selected instruction
+	document.getElementById(device).style.display = 'block';
+    }
   </script>
   </body>
 </html>
