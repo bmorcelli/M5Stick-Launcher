@@ -62,6 +62,11 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.4.4:
+     * [x] Disabled OTA menu for non M5 Stack Devices (save flash memory for CYD and Marauder, mostly), creating a new partition scheme for these devices
+     * [x] Fixed T-Embed CC1101 battery value
+     * [ ] Use http download/update for OTA to reduce flash memory.
+
 * 2.4.3:
      * [x] Fixed buttons on Core devices
      * [x] Fixed random restartings when dimming screen

@@ -90,7 +90,12 @@ bool onlyBins;
 bool returnToMenu;
 bool update;
 bool askSpiffs;
+#ifdef DISABLE_OTA
+bool stopOta=true;
+#else
 bool stopOta;
+#endif
+
 //bool command;
 size_t file_size;
 String ssid;
@@ -342,7 +347,7 @@ void setup() {
   xTaskCreate(
         taskInputHandler,   // Task function
         "InputHandler",     // Task Name
-        2600,               // Stack size
+        3500,               // Stack size
         NULL,               // Task parameters
         2,                  // Task priority (0 to 3), loopTask has priority 2.
         &xHandle            // Task handle (not used)
@@ -447,6 +452,7 @@ void loop() {
         
       }
       if(index == 1) {  
+        #ifndef DISABLE_OTA
         if (!stopOta) {
           if (WiFi.status() != WL_CONNECTED) {
             int nets;
@@ -477,6 +483,10 @@ void loop() {
           displayRedStripe("Restart to open OTA");
           delay(3000);
         } 
+        #else
+        displayRedStripe("Not M5 Device");
+        delay(3000);
+        #endif
 
       }
       if(index == 2) {
@@ -508,20 +518,19 @@ void loop() {
         #endif
         #if !defined(CORE_4MB)
         options.push_back(              {"Partition Change",    [=]() { partitioner(); }});
-        #endif
         options.push_back(              {"List of Partitions",  [=]() { partList(); }});
-        
+        #endif
 
       #ifndef PART_04MB
         options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
       #endif
 
-        if(MAX_SPIFFS>0) options.push_back({"Save SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
-        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Bkp FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
-        if(MAX_FAT_vfs>0) options.push_back({"Bkp FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
-        if(MAX_SPIFFS>0) options.push_back({ "Rest SPIFFS",  [=]() { restorePartition("spiffs"); }});
-        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Rest FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
-        if(MAX_FAT_vfs>0) options.push_back({"Rest FAT Vfs",  [=]() { restorePartition("vfs"); }});
+        if(MAX_SPIFFS>0) options.push_back({"Backup SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
+        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Backup FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
+        if(MAX_FAT_vfs>0) options.push_back({"Backup FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
+        if(MAX_SPIFFS>0) options.push_back({ "Restore SPIFFS",  [=]() { restorePartition("spiffs"); }});
+        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Restore FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
+        if(MAX_FAT_vfs>0) options.push_back({"Restore FAT Vfs",  [=]() { restorePartition("vfs"); }});
 
         if(dev_mode) options.push_back({"Boot Animation",  [=]() { initDisplayLoop(); }});
 

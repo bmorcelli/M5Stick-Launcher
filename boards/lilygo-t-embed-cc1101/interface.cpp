@@ -88,7 +88,9 @@ void _setup_gpio() {
 int getBattery() {
   int percent=0;
   #if defined(USE_BQ27220_VIA_I2C)
-    percent=bq.getChargePcnt();
+    //percent=bq.getChargePcnt(); // this function runs bq.getRemainCap()/bq.getFullChargeCap().... bq.getFullChargeCap() is hardcoded int 3000.
+    percent=bq.getRemainCap()/10.7; // My battery is 1300mAh and bq.getRemainCap() doesn't go upper than 1083, that is why i'm dividing by 10.7 (var/1070)*100
+    
   #elif defined(T_EMBED)
     uint8_t _batAdcCh = ADC1_GPIO4_CHANNEL;
     uint8_t _batAdcUnit = 1;
