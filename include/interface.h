@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <vector>
-#include <globals.h>
+
 
 /***************************************************************************************
 ** Function name: _setup_gpio()
@@ -63,4 +63,6 @@ void checkReboot();
 ** Touchscreen Mapping, include this function after reading the touchPoint
 **********************************************************************/
 void touchHeatMap(struct TouchPoint t);
+
+#include <globals.h>
 #endif

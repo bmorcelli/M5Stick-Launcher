@@ -344,6 +344,7 @@ void setup() {
   _post_setup_gpio();
 
   // This task keeps running all the time, will never stop
+  #ifndef DONT_USE_INPUT_TASK
   xTaskCreate(
         taskInputHandler,   // Task function
         "InputHandler",     // Task Name
@@ -352,7 +353,7 @@ void setup() {
         2,                  // Task priority (0 to 3), loopTask has priority 2.
         &xHandle            // Task handle (not used)
     );  
-
+  #endif
   //Start Bootscreen timer
   int i = millis();
   int j = 0;

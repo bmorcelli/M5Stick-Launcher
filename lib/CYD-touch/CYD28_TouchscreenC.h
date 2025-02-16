@@ -7,10 +7,21 @@
 
 #define I2C_ADDR_CST820 0x15
 
+#ifndef CYD28_TouchC_SDA
 #define CYD28_TouchC_SDA 33
+#endif
+
+#ifndef CYD28_TouchC_SCL
 #define CYD28_TouchC_SCL 32
+#endif
+
+#ifndef CYD28_TouchC_INT
 #define CYD28_TouchC_INT 21
+#endif
+
+#ifndef CYD28_TouchC_RST
 #define CYD28_TouchC_RST 25
+#endif
 
 class CYD28_TS_Point {
 public:

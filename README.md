@@ -62,6 +62,11 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.4.5:
+     * [x] Port to CYD-2432S024R and CYD-2432W328R
+     * [x] Port to CYD-2432S022C
+     * [x] Fixed Marauder V4-OG device
+     * [x] Removed Battery indication when it is not available
 * 2.4.4:
      * [x] Disabled OTA menu for non M5 Stack Devices (save flash memory for CYD and Marauder, mostly), creating a new partition scheme for these devices
      * [x] Fixed T-Embed CC1101 battery value

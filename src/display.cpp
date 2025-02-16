@@ -532,7 +532,8 @@ void drawMainMenu(int index) {
 #endif
 
     drawDeviceBorder();
-    drawBatteryStatus();
+    int bat = getBattery();
+    drawBatteryStatus(bat);
   #ifdef E_PAPER_DISPLAY
     tft.startCallback();
   #endif
@@ -557,9 +558,9 @@ void drawDeviceBorder() {
     tft.drawLine(5, 25, tftWidth - 6, 25, FGCOLOR);
 }
 
-void drawBatteryStatus() {
+void drawBatteryStatus(uint8_t bat) {
+    if(bat==0) return;
     tft.drawRoundRect(tftWidth - 42, 7, 34, 17, 2, FGCOLOR);
-    int bat = getBattery();
     tft.setTextSize(FP);
     tft.setTextColor(FGCOLOR, BGCOLOR); 
   #if TFT_HEIGHT>140 // Excludes Marauder Mini

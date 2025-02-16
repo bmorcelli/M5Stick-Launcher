@@ -53,7 +53,7 @@ void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, b
 
 void drawDeviceBorder();
 
-void drawBatteryStatus();
+void drawBatteryStatus(uint8_t bat);
 
 void drawMainMenu(int index = 0);
 
