@@ -39,6 +39,12 @@ void _setup_gpio() {
       pinMode(CC1101_SW1_PIN, OUTPUT);
       pinMode(CC1101_SW0_PIN, OUTPUT);
 
+      // before powering on, all CS signals should be pulled high and in an unselected state;
+      pinMode(TFT_CS, OUTPUT);
+      digitalWrite(TFT_CS, HIGH);
+      pinMode(SDCARD_CS, OUTPUT);
+      digitalWrite(SDCARD_CS, HIGH);
+
       // Chip Select CC1101 to HIGH State
       pinMode(CC1101_SS_PIN, OUTPUT);
       digitalWrite(CC1101_SS_PIN,HIGH);
