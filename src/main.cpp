@@ -219,6 +219,13 @@ void _post_setup_gpio() { }
 void setup() {
   Serial.begin(115200);
 
+  pinMode(TFT_CS, OUTPUT);
+  digitalWrite(TFT_CS, HIGH);
+  pinMode(SDCARD_CS, OUTPUT);
+  digitalWrite(SDCARD_CS, HIGH);
+  pinMode(CC1101_SS_PIN, OUTPUT);
+  digitalWrite(CC1101_SS_PIN, HIGH);
+
   // Setup GPIOs and stuff
   #if defined(HEADLESS)
     #if SEL_BTN >= 0 // handle enter in launcher
