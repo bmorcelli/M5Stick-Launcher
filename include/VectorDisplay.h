@@ -69,25 +69,25 @@ public:
 #define VECTOR_DISPLAY_SEND_DELAY 0
 #endif
 
-#define TFT_BLACK       0x0000      /*   0,   0,   0 */
-#define TFT_NAVY        0x000F      /*   0,   0, 128 */
-#define TFT_DARKGREEN   0x03E0      /*   0, 128,   0 */
-#define TFT_DARKCYAN    0x03EF      /*   0, 128, 128 */
-#define TFT_MAROON      0x7800      /* 128,   0,   0 */
-#define TFT_PURPLE      0x780F      /* 128,   0, 128 */
-#define TFT_OLIVE       0x7BE0      /* 128, 128,   0 */
-#define TFT_LIGHTGREY   0xC618      /* 192, 192, 192 */
-#define TFT_DARKGREY    0x7BEF      /* 128, 128, 128 */
-#define TFT_BLUE        0x001F      /*   0,   0, 255 */
-#define TFT_GREEN       0x07E0      /*   0, 255,   0 */
-#define TFT_CYAN        0x07FF      /*   0, 255, 255 */
-#define TFT_RED         0xF800      /* 255,   0,   0 */
-#define TFT_MAGENTA     0xF81F      /* 255,   0, 255 */
-#define TFT_YELLOW      0xFFE0      /* 255, 255,   0 */
-#define TFT_WHITE       0xFFFF      /* 255, 255, 255 */
-#define TFT_ORANGE      0xFD20      /* 255, 165,   0 */
-#define TFT_GREENYELLOW 0xAFE5      /* 173, 255,  47 */
-#define TFT_PINK        0xF81F
+#define BLACK       0x0000      /*   0,   0,   0 */
+#define NAVY        0x000F      /*   0,   0, 128 */
+#define DARKGREEN   0x03E0      /*   0, 128,   0 */
+#define DARKCYAN    0x03EF      /*   0, 128, 128 */
+#define MAROON      0x7800      /* 128,   0,   0 */
+#define PURPLE      0x780F      /* 128,   0, 128 */
+#define OLIVE       0x7BE0      /* 128, 128,   0 */
+#define LIGHTGREY   0xC618      /* 192, 192, 192 */
+#define DARKGREY    0x7BEF      /* 128, 128, 128 */
+#define BLUE        0x001F      /*   0,   0, 255 */
+#define GREEN       0x07E0      /*   0, 255,   0 */
+#define CYAN        0x07FF      /*   0, 255, 255 */
+#define RED         0xF800      /* 255,   0,   0 */
+#define MAGENTA     0xF81F      /* 255,   0, 255 */
+#define YELLOW      0xFFE0      /* 255, 255,   0 */
+#define WHITE       0xFFFF      /* 255, 255, 255 */
+#define ORANGE      0xFD20      /* 255, 165,   0 */
+#define GREENYELLOW 0xAFE5      /* 173, 255,  47 */
+#define PINK        0xF81F
 
 // Color definitions for backwards compatibility
 #define ILI9341_BLACK       0x0000      /*   0,   0,   0 */
@@ -258,8 +258,8 @@ private:
     
 public:    
     int textsize = 1;
-    uint32_t textcolor = TFT_WHITE;
-    uint32_t textbgcolor = TFT_BLACK;
+    uint32_t textcolor = WHITE;
+    uint32_t textbgcolor = BLACK;
 
     void setWaitForAck(bool wait) {
         waitForAck = wait;
@@ -946,7 +946,7 @@ public:
         return write(string);
     };
 
-    int16_t  drawChar(uint16_t uniCode, int32_t x, int32_t y) {
+    int16_t  drawChar(uint16_t uniCode, int32_t x, int32_t y, uint16_t a, uint16_t b) {
         setCursor(x, y);
         return write(uniCode);
     }
@@ -1049,12 +1049,12 @@ public:
       fillCircle(x, y,  r,  color) ;     
     }
 
-  void   drawSmoothRoundRect(int32_t x, int32_t y, int32_t r, int32_t ir, int32_t w, int32_t h, uint32_t fg_color, uint32_t bg_color = 0x00FFFFFF, uint8_t quadrants = 0xF) {
+  void   drawRoundRect(int32_t x, int32_t y, int32_t r, int32_t ir, int32_t w, int32_t h, uint32_t fg_color, uint32_t bg_color = 0x00FFFFFF, uint8_t quadrants = 0xF) {
         drawRoundRect(x, y, w, h, r, fg_color);
   }
 
   // Draw a filled rounded rectangle , corner radius r and bounding box defined by x,y and w,h
-  void fillSmoothRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint32_t color, uint32_t bg_color = 0x00FFFFFF) {
+  void fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint32_t color, uint32_t bg_color = 0x00FFFFFF) {
       fillRoundRect(x, y, w, h, radius,  color);
   }
 

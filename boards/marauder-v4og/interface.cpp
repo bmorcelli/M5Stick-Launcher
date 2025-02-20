@@ -21,7 +21,7 @@ void _setup_gpio() {
   uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from maruader
   //uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY  from maruader
 
-  tft.setTouch(calData);
+  tft->setTouch(calData);
 
 }
 
@@ -48,7 +48,7 @@ bool menuPress(int bot) {
   //2 - next
   //3 - all
   TouchPoint t;
-  bool touched = tft.getTouch(&t.x, &t.y, 600);
+  bool touched = tft->getTouch(&t.x, &t.y, 600);
 
   int terco=tftWidth/3;
   if(touched) { 
@@ -72,7 +72,7 @@ bool menuPress(int bot) {
 **********************************************************************/
 void InputHandler(void) {
     TouchPoint t;
-    bool touched = tft.getTouch(&t.x, &t.y, 600);
+    bool touched = tft->getTouch(&t.x, &t.y, 600);
     if (touched) {
         if(rotation==3) {
             t.y = (tftHeight+20)-t.y;
@@ -101,7 +101,7 @@ void InputHandler(void) {
     END:
     if(AnyKeyPress) {
       long tmp=millis();
-      while((millis()-tmp)<200 && tft.getTouch(&t.x, &t.y, 600));
+      while((millis()-tmp)<200 && tft->getTouch(&t.x, &t.y, 600));
     }
 }
 

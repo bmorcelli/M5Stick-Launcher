@@ -69,9 +69,9 @@ void wifiConnect(String ssid, int encryptation, bool isAP) {
     WiFi.begin(ssid.c_str(), pwd.c_str());
 
     resetTftDisplay(10, 10, FGCOLOR, FP);
-    tft.fillScreen(BGCOLOR);
+    tft->fillScreen(BGCOLOR);
     tftprint("Connecting to: " + ssid + ".", 10);
-    tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
+    tft->drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
     // Simulação da função de desenho no display TFT
     int count = 0;
     while (WiFi.status() != WL_CONNECTED) {
@@ -171,12 +171,12 @@ bool GetJsonFromM5() {
     HTTPClient http;
     int httpResponseCode=-1;
     resetTftDisplay(tftWidth/2 - 6*String("Getting info from").length(),32);
-    tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
-    tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
-    tft.drawCentreString("Getting info from", tftWidth/2, tftHeight/3,1);
-    tft.drawCentreString("M5Burner repo", tftWidth/2, tftHeight/3+FM*9,1);
+    tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+    tft->drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
+    tft->drawCentreString("Getting info from", tftWidth/2, tftHeight/3,1);
+    tft->drawCentreString("M5Burner repo", tftWidth/2, tftHeight/3+FM*9,1);
 
-    tft.setCursor(18,  tftHeight/3+FM*9*2);
+    tft->setCursor(18,  tftHeight/3+FM*9*2);
     while(httpResponseCode<0) { 
       http.begin(serverUrl);
       http.useHTTP10(true);
@@ -213,7 +213,7 @@ void downloadFirmware(String file_str, String fileName, String folder) {
     return;
   }
 
-  tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  tft->fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
   doc.clear(); // Clear Json Memory, m5burner is getting too big!!!
   WiFiClientSecure *client = new WiFiClientSecure;
@@ -324,7 +324,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   
   String fileAddr;
 
-  tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  tft->fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FW");
 
   doc.clear();
@@ -336,7 +336,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
   httpUpdate.rebootOnUpdate(false);
   /* Install App */
   prog_handler = 0;
-  tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+  tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
   progressHandler(0, 500);
   httpUpdate.onProgress(progressHandler);
   httpUpdate.setLedPin(LED, LED_ON);
@@ -350,10 +350,10 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 
   if(spiffs) {
     prog_handler = 1;
-    tft.fillRect(5, 60, tftWidth - 10, 16, ALCOLOR);
-    setTftDisplay(5, 60, TFT_WHITE, FM, ALCOLOR);
+    tft->fillRect(5, 60, tftWidth - 10, 16, ALCOLOR);
+    setTftDisplay(5, 60, WHITE, FM, ALCOLOR);
 
-    tft.println(" Preparing SPIFFS");
+    tft->println(" Preparing SPIFFS");
     // Format Spiffs partition
     if(!SPIFFS.begin(true)) { 
       displayRedStripe("Fail to start SPIFFS");
@@ -416,7 +416,7 @@ void installFirmware(String file, uint32_t app_size, bool spiffs, uint32_t spiff
 bool installFAT_OTA( WiFiClientSecure *client, String fileAddr, uint32_t offset, uint32_t size, const char *label) {
   prog_handler = 1; // review
 
-  tft.fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
+  tft->fillRect(7, 40, tftWidth - 14, 88, BGCOLOR); // Erase the information below the firmware name
   displayRedStripe("Connecting FAT");
 
   if(client) {

@@ -9,7 +9,7 @@
 #elif E_PAPER_DISPLAY
 #include <EPD_translate.h>
 #else
-#include <TFT_eSPI.h>
+#include <Arduino_GFX_Library.h>
 #endif
 #include <SPIFFS.h>
 #include "esp_ota_ops.h"
@@ -26,9 +26,9 @@ uint32_t MAX_SPIFFS = 0;
 uint32_t MAX_APP = 0;
 uint32_t MAX_FAT_vfs = 0;
 uint32_t MAX_FAT_sys = 0;
-uint16_t FGCOLOR = TFT_GREEN;
-uint16_t ALCOLOR = TFT_RED;
-uint16_t BGCOLOR = TFT_BLACK;
+uint16_t FGCOLOR = GREEN;
+uint16_t ALCOLOR = RED;
+uint16_t BGCOLOR = BLACK;
 uint16_t odd_color = 0x30c5;
 uint16_t even_color = 0x32e5;
 
@@ -304,10 +304,10 @@ void setup() {
 
   //Init Display
   #ifndef HEADLESS
-    tft.setAttribute(PSRAM_ENABLE,true);
-    tft.init();
+    //tft->setAttribute(PSRAM_ENABLE,true);
+    tft->begin();
   #endif
-  tft.setRotation(rotation);
+  tft->setRotation(rotation);
   if(rotation&0b1) {
     #if defined(HAS_TOUCH)
     tftHeight = TFT_WIDTH-20;
@@ -323,7 +323,7 @@ void setup() {
     #endif
     tftWidth = TFT_WIDTH;
   }
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   setBrightness(bright,false);
   initDisplay(true);  
 
@@ -342,6 +342,7 @@ void setup() {
   #endif    
 
   _post_setup_gpio();
+
 
   // This task keeps running all the time, will never stop
   #ifndef DONT_USE_INPUT_TASK
@@ -366,7 +367,7 @@ void setup() {
     }
   
     if(check(SelPress)) {
-      tft.fillScreen(BGCOLOR);
+      tft->fillScreen(BGCOLOR);
       goto Launcher;
     }
 
@@ -379,14 +380,14 @@ void setup() {
       if(check(NextPress) || check(PrevPress))
     #endif 
       {
-        tft.fillScreen(TFT_BLACK);
+        tft->fillScreen(BLACK);
         ESP.restart();
       } 
   }
   
   // If nothing is done, check if there are any app installed in the ota partition, if it does, restart device to start installed App.
   if(firstByte==0xE9) {
-    tft.fillScreen(TFT_BLACK);
+    tft->fillScreen(BLACK);
 	  ESP.restart();  
   }
   else goto Launcher;
@@ -395,7 +396,7 @@ void setup() {
   // If M5 or Enter button is pressed, continue from here
   Launcher:
   
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   #if LED>0 && defined(HEADLESS)
     digitalWrite(LED, LED_ON?LOW:HIGH); // turn off the LED
   #endif
@@ -443,7 +444,7 @@ void loop() {
       if(index == 0) {  
         if(setupSdCard()) { 
           loopSD(false); 
-          tft.fillScreen(BGCOLOR);
+          tft->fillScreen(BGCOLOR);
           redraw=true;
         }
         else {
@@ -477,7 +478,7 @@ void loop() {
             closeSdCard();
             if(GetJsonFromM5()) loopFirmware();
           }
-          tft.fillScreen(BGCOLOR);
+          tft->fillScreen(BGCOLOR);
           redraw=true;
         } 
         else {
@@ -492,7 +493,7 @@ void loop() {
       }
       if(index == 2) {
         loopOptionsWebUi();
-        tft.fillScreen(BGCOLOR);
+        tft->fillScreen(BGCOLOR);
         redraw=true;        
       }
 
@@ -542,8 +543,8 @@ void loop() {
         #endif
         options.push_back({"Main Menu",  [=]() { returnToMenu=true; }});
         loopOptions(options);
-        tft.fillScreen(BGCOLOR);
-        tft.fillScreen(BGCOLOR);
+        tft->fillScreen(BGCOLOR);
+        tft->fillScreen(BGCOLOR);
         redraw=true;
       }
       returnToMenu = false;
