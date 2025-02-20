@@ -15,9 +15,9 @@
 #include <globals.h>
 // Declaração dos objetos TFT
 #if defined(HEADLESS)
-extern SerialDisplayClass tft;
+extern SerialDisplayClass *tft;
 #elif E_PAPER_DISPLAY
-extern EPD_translate tft;
+extern EPD_translate *tft;
 #else
 extern Ard_eSPI *tft; 
 #endif
