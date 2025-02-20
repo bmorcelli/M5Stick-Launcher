@@ -209,6 +209,28 @@
                 },
               } 
             - {
+                vendor: "CYD",
+                name: "CYD 2432W328R or 2432S024R",
+                description: "(Resistive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2432W328R-or-S024R",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }  
+            - {
+                vendor: "CYD",
+                name: "CYD-2432S022C",
+                description: "(Capacitive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2432S022C",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }               
+            - {
                 vendor: "Marauder",
                 name: "V4-OG",
                 description: "",

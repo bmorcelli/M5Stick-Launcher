@@ -538,7 +538,8 @@ void drawMainMenu(int index) {
 #endif
 
     drawDeviceBorder();
-    drawBatteryStatus();
+    int bat = getBattery();
+    drawBatteryStatus(bat);
   #ifdef E_PAPER_DISPLAY
     tft->startCallback();
   #endif
@@ -562,6 +563,7 @@ void drawDeviceBorder() {
     tft->drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, FGCOLOR);
     tft->drawLine(5, 25, tftWidth - 6, 25, FGCOLOR);
 }
+
 
 void drawBatteryStatus() {
     tft->drawRoundRect(tftWidth - 42, 7, 34, 17, 2, FGCOLOR);
