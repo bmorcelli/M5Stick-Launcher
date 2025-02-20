@@ -565,9 +565,8 @@ void drawDeviceBorder() {
 }
 
 
-void drawBatteryStatus() {
+void drawBatteryStatus(uint8_t bat) {
     tft->drawRoundRect(tftWidth - 42, 7, 34, 17, 2, FGCOLOR);
-    int bat = getBattery();
     tft->setTextSize(FP);
     tft->setTextColor(FGCOLOR, BGCOLOR); 
   #if TFT_HEIGHT>140 // Excludes Marauder Mini
@@ -687,7 +686,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
           longPrevPress=false;
           redraw = true;
         }
-        if(millis()-longPrevTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true);
+        if(millis()-longPrevTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111);
         if(millis()-longPrevTmp>700) { // longpress detected to exit
           break;
         } else goto WAITING;
@@ -798,7 +797,7 @@ void loopVersions() {
           longPrevPress=false;
           goto EXIT_CHECK;
         }
-        if(millis()-longPrevTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111,BGCOLOR,true);
+        if(millis()-longPrevTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111);
         if(millis()-longPrevTmp>700) { // longpress detected to exit
           returnToMenu=true;
           check(PrevPress);

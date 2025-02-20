@@ -1034,12 +1034,12 @@ public:
    // As per "drawSmoothArc" except the ends of the arc are NOT anti-aliased, this facilitates dynamic arc length changes with
    // arc segments and ensures clean segment joints.
    // The sides of the arc are anti-aliased by default. If smoothArc is false sides will NOT be anti-aliased
-    void drawArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color, bool smoothArc = true){
+    void drawArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color = 0, bool smoothArc = true){
         // TODO
         drawRect(x, y, r*2, ir*2, fg_color);
     }
 
-    void drawSmoothArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color, bool roundEnds = false) {
+    void drawSmoothArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color = 0, bool roundEnds = false) {
         drawArc(x, y, r, ir, startAngle, endAngle, fg_color, bg_color);
     }
 

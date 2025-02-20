@@ -159,6 +159,6 @@ void checkReboot() {
 
         // Clear text after releasing the button
         delay(30);
-        tft->fillRect(60, 12, tftWidth - 60, tft->fontHeight(1), BGCOLOR);
+        tft->fillRect(60, 12, tftWidth - 60, 8, BGCOLOR);
     }
 }
