@@ -80,27 +80,6 @@ static const uint8_t ADC = 10;
 #define HAS_SCREEN
 #define ROTATION 1
 
-// TFT_eSPI Setup
-#define USER_SETUP_LOADED
-#define ILI9341_DRIVER
-#define TFT_INVERSION_ON
-#define USE_HSPI_PORT
-#define M5STACK
-#define TFT_HEIGHT 320
-#define TFT_WIDTH 240
-#define TFT_MOSI 37
-#define TFT_MISO 35
-#define TFT_SCLK 36
-#define TFT_CS 3
-#define TFT_DC 35
-#define TFT_RST -1
-#define TFT_BL -1
-#define TOUCH_CS -1
-#define SMOOTH_FONT 1
-#define SPI_FREQUENCY 20000000
-#define SPI_READ_FREQUENCY 20000000
-#define SPI_TOUCH_FREQUENCY 2500000
-
 
 #define BTN_ALIAS '"Ok"'
 #define BTN_PIN -1

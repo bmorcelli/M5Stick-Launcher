@@ -185,10 +185,10 @@ int gsetRotation(bool set){
       tftWidth = TFT_WIDTH;
     }
     
-    tft.setRotation(result);
+    tft->setRotation(result);
     EEPROM.write(EEPROMSIZE-13, result); 
     EEPROM.commit();
-    tft.fillScreen(BGCOLOR);
+    tft->fillScreen(BGCOLOR);
   }
   EEPROM.end(); // Free EEPROM memory
   return result;
@@ -275,7 +275,7 @@ void chargeMode() {
   setCpuFrequencyMhz(80);
   setBrightness(5,false);
   delay(500);
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   unsigned long tmp=0;
   while(!check(SelPress)) {
     if(millis()-tmp>5000) {

@@ -454,29 +454,29 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   server->begin();
   delay(500);
 
-  tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,ALCOLOR);
-  tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+  tft->drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,ALCOLOR);
+  tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
   setTftDisplay(7,7,ALCOLOR,FP,BGCOLOR);
-  tft.drawCentreString("-= Launcher WebUI =-",tftWidth/2,0,8);
+  tft->drawCentreString("-= Launcher WebUI =-",tftWidth/2,0,8);
   String txt;
   if(!mode_ap) txt = WiFi.localIP().toString();
   else txt = WiFi.softAPIP().toString();
   
 #if TFT_HEIGHT<200
-  tft.drawCentreString("http://launcher.local", tftWidth/2,17,1);
+  tft->drawCentreString("http://launcher.local", tftWidth/2,17,1);
   setTftDisplay(7,26,~BGCOLOR,FP,BGCOLOR);
 #else
-  tft.drawCentreString("http://launcher.local", tftWidth/2,22,1);
+  tft->drawCentreString("http://launcher.local", tftWidth/2,22,1);
   setTftDisplay(7,47,~BGCOLOR,FP,BGCOLOR);
 #endif
-  tft.setTextSize(FM);
-  tft.print("IP ");   tftprintln(txt,10,1);
+  tft->setTextSize(FM);
+  tft->print("IP ");   tftprintln(txt,10,1);
   tftprintln("Usr: " + String(wui_usr),10,1);
   tftprintln("Pwd: " + String(wui_pwd),10,1);
 
   setTftDisplay(7,tftHeight-39,ALCOLOR,FP);
 
-  tft.drawCentreString("press " + String(BTN_ALIAS) + " to stop", tftWidth/2,tftHeight-15,1);
+  tft->drawCentreString("press " + String(BTN_ALIAS) + " to stop", tftWidth/2,tftHeight-15,1);
 
   while (!check(SelPress))
   {
@@ -503,7 +503,7 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   WiFi.mode(WIFI_OFF);
   stopOta = true; // used to verify if webUI was opened before to stop OTA and request restart
   
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
 }
 
 #else 

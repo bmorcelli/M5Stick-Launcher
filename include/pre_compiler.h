@@ -56,3 +56,6 @@
 #ifndef LW
   #define LW 6
 #endif
+#ifndef TFT_MISO 
+  #define TFT_MISO  -1
+#endif

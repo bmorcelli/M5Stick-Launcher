@@ -240,7 +240,7 @@ void partList() {
 
 
 void dumpPartition(const char* partitionLabel, const char* outputPath) {
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   const esp_partition_t* partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, partitionLabel);
   if (partition == NULL) {
     Serial.printf("Partição %s não encontrada\n", partitionLabel);
@@ -284,7 +284,7 @@ void dumpPartition(const char* partitionLabel, const char* outputPath) {
 
 void restorePartition(const char* partitionLabel) {
   String filepath = loopSD(true);
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   if(filepath=="") return;
   else {
     File source = SDM.open(filepath, "r");

@@ -68,24 +68,23 @@ static const uint8_t ADC2 = 8;
 #define ROTATION	1
 #define MINBRIGHT	160
 
-#define USER_SETUP_LOADED	1
-#define USE_HSPI_PORT	    1
 #define ST7789_DRIVER	    1
-#define TFT_RGB_ORDER	    1
 #define TFT_WIDTH	        170
 #define TFT_HEIGHT	        320
-#define TFT_BACKLIGHT_ON	1
 #define TFT_BL	            6
 #define TFT_RST	            16
 #define TFT_DC	            15
 #define TFT_MOSI	        17
 #define TFT_SCLK	        18
 #define TFT_CS	            7
-#define TOUCH_CS	        -1
-#define SMOOTH_FONT	        1
-#define SPI_FREQUENCY	    20000000
-#define SPI_READ_FREQUENCY	20000000
-#define SPI_TOUCH_FREQUENCY	2500000
+
+#define GFX_BL 21
+#define TFT_IPS 1
+#define TFT_COL_OFS1 35
+#define TFT_ROW_OFS1 0
+#define TFT_COL_OFS2 35
+#define TFT_ROW_OFS2 0
+
 
 #define SDCARD_CS	3
 #define SDCARD_SCK	18
