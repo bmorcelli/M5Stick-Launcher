@@ -12,8 +12,9 @@ Ard_eSPI *tft;
 #else
   #ifdef TFT_PARALLEL_8_BIT
   Arduino_DataBus *bus = new Arduino_ESP32PAR8Q(TFT_DC, TFT_CS,TFT_WR, TFT_RD, TFT_D0, TFT_D1, TFT_D2, TFT_D3, TFT_D4, TFT_D5, TFT_D6, TFT_D7);
-
-  #else // SPI Data Bus
+  #elif defined(CYD28_TouchR_MOSI) && CYD28_TouchR_MOSI==TFT_MOSI
+  Arduino_DataBus *bus = new Arduino_ESP32SPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO);
+  #else // SPI Data Bus shared with SDCard and other SPIClass devices
   Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO);
   #endif
   
