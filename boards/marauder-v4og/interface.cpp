@@ -7,7 +7,7 @@
 #include <soc/adc_channel.h>
 #include <CYD28_TouchscreenR.h>
 
-CYD28_TouchR touch;
+CYD28_TouchR touch(320,240);
 
 /***************************************************************************************
 ** Function name: _setup_gpio()
