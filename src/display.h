@@ -4,8 +4,6 @@
 
 #ifdef HEADLESS
 #include <VectorDisplay.h>
-#elif E_PAPER_DISPLAY
-#include <EPD_translate.h>
 #else
 #include <tft.h>
 #endif
@@ -16,8 +14,6 @@
 // Declaração dos objetos TFT
 #if defined(HEADLESS)
 extern SerialDisplayClass *tft;
-#elif E_PAPER_DISPLAY
-extern EPD_translate *tft;
 #else
 extern Ard_eSPI *tft; 
 #endif

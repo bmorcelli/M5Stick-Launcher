@@ -6,10 +6,8 @@
 #include <M5-HTTPUpdate.h>
 #ifdef HEADLESS
 #include <VectorDisplay.h>
-#elif E_PAPER_DISPLAY
-#include <EPD_translate.h>
 #else
-#include <Arduino_GFX_Library.h>
+#include <tft.h>
 #endif
 #include <SPIFFS.h>
 #include "esp_ota_ops.h"

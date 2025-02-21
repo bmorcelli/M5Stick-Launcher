@@ -905,7 +905,10 @@ public:
         cury = y;
     }
     
-    
+    int getTextsize() { return 0; }
+    uint16_t getTextcolor() { return 0; }
+    uint16_t getTextbgcolor() { return 0; }
+
   int16_t  getCursorX(void) {
       return curx;
   }
@@ -1054,7 +1057,7 @@ public:
   }
 
   // Draw a filled rounded rectangle , corner radius r and bounding box defined by x,y and w,h
-  void fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint32_t color, uint32_t bg_color = 0x00FFFFFF) {
+  void fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint32_t color, uint32_t bg_color) {
       fillRoundRect(x, y, w, h, radius,  color);
   }
 

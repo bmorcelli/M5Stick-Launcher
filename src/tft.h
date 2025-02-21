@@ -1,3 +1,27 @@
+#ifndef __TFT_H
+#define __TFT_H
+
+#if defined(E_PAPER_DISPLAY)
+#include <EPD_translate.h>
+#define DARKGREY TFT_DARKGREY
+#define BLACK TFT_BLACK
+#define RED TFT_RED
+#define GREEN TFT_GREEN
+class Ard_eSPI: public EPD_translate {
+    public:
+    inline int getTextsize() { return textsize; };
+    inline uint16_t getTextcolor() { return textcolor; };
+    inline uint16_t getTextbgcolor() { return textbgcolor; };
+    inline void drawChar(char c, uint32_t x, uint32_t y, uint16_t a, uint16_t b) { EPD_translate::drawChar(c,x,y); };
+    inline void drawArc(int a, int b, int c, int d, int e, int f, int g) { };
+    inline void begin() {EPD_translate::init(); };
+    private:
+
+};
+#elif defined (HEADLESS)
+// do nothing
+#else
+
 #include <Arduino_GFX_Library.h>
 
 #if ST7789_DRIVER
@@ -12,8 +36,7 @@
 #elif ST7796_DRIVER
 #define _TFT_DRV Arduino_ST7796
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7796(a,b,c,d,e,f,g,h,i,j)
-
-#endif   
+#endif
 
 class Ard_eSPI: public _TFT_DRV {
     public:
@@ -33,3 +56,5 @@ class Ard_eSPI: public _TFT_DRV {
     private:
   
 };
+#endif
+#endif //__TFT_H
