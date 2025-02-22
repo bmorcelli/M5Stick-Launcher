@@ -26,7 +26,7 @@ class Ard_eSPI: public EPD_translate {
 
 #if ST7789_DRIVER
 #define _TFT_DRV Arduino_ST7789
-#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7789(a,b,c,d,e,f,g,h,i,j)
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7789(a,b,c,d,e,320,g,h,i,j) // it is not passing values greater than 255 for f
 #elif ST7735_DRIVER
 #define _TFT_DRV Arduino_ST7735
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7735(a,b,c,d,e,f,g,h,i,j)
@@ -38,7 +38,7 @@ class Ard_eSPI: public EPD_translate {
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ILI9342(a,b,c,d)
 #elif ST7796_DRIVER
 #define _TFT_DRV Arduino_ST7796
-#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7796(a,b,c,d,e,f,g,h,i,j)
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7796(a,b,c,d,320,480,g,h,i,j)
 #endif
 
 class Ard_eSPI: public _TFT_DRV {

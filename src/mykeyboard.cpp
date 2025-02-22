@@ -208,7 +208,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   x2=0;
   y2=0;
 #endif
-
+  tft->drawPixel(0,0,0);
   tft->fillScreen(BGCOLOR);
 
 #if defined(HAS_3_BUTTONS) // StickCs and Core for long press detection logic
