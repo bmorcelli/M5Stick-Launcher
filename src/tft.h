@@ -26,7 +26,7 @@ class Ard_eSPI: public EPD_translate {
 
 #if ST7789_DRIVER
 #define _TFT_DRV Arduino_ST7789
-#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7789(a,b,c,d,e,320,g,h,i,j) // it is not passing values greater than 255 for f
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7789(a,b,c,d,e,f,g,h,i,j) // it is not passing values greater than 255 for f
 #elif ST7735_DRIVER
 #define _TFT_DRV Arduino_ST7735
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7735(a,b,c,d,e,f,g,h,i,j)
@@ -38,13 +38,13 @@ class Ard_eSPI: public EPD_translate {
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ILI9342(a,b,c,d)
 #elif ST7796_DRIVER
 #define _TFT_DRV Arduino_ST7796
-#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7796(a,b,c,d,320,480,g,h,i,j)
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7796(a,b,c,d,e,f,g,h,i,j)
 #endif
 
 class Ard_eSPI: public _TFT_DRV {
     public:
     // Driver initilizer
-    Ard_eSPI(Arduino_DataBus *bus, int8_t rst, uint8_t rotation, bool ips, uint8_t w, uint8_t h, uint8_t co1, uint8_t ro1 ,uint8_t co2, uint8_t ro2)
+    Ard_eSPI(Arduino_DataBus *bus, int8_t rst, uint8_t rotation, bool ips, uint16_t w, uint16_t h, uint16_t co1, uint16_t ro1 ,uint16_t co2, uint16_t ro2)
         : _TFT_DRVF(bus, rst, rotation, ips, w, h,co1,ro1,co2,ro2) {}
     
     void drawString(String s, uint16_t x, uint16_t y);
