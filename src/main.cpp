@@ -304,6 +304,11 @@ void setup() {
   #ifndef HEADLESS
     //tft->setAttribute(PSRAM_ENABLE,true);
     tft->begin();
+
+    #ifdef TFT_INVERSION_ON
+    tft->invertDisplay(true);
+    #endif
+    
   #endif
   tft->setRotation(rotation);
   if(rotation&0b1) {

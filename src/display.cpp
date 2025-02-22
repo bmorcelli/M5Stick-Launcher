@@ -12,8 +12,6 @@ Ard_eSPI *tft;
 #else
   #ifdef TFT_PARALLEL_8_BIT
   Arduino_DataBus *bus = new Arduino_ESP32PAR8Q(TFT_DC, TFT_CS,TFT_WR, TFT_RD, TFT_D0, TFT_D1, TFT_D2, TFT_D3, TFT_D4, TFT_D5, TFT_D6, TFT_D7);
-  #elif defined(CYD28_TouchR_MOSI) && CYD28_TouchR_MOSI==TFT_MOSI
-  Arduino_DataBus *bus = new Arduino_ESP32SPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO);
   #else // SPI Data Bus shared with SDCard and other SPIClass devices
   Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO);
   #endif
@@ -220,8 +218,8 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
 
   tft->setTextColor(FGCOLOR);
   tft->setTextSize(FM);
-  tft->drawChar('<', 10, tftHeight-(10+FM*9),FGCOLOR,BGCOLOR);
-  tft->drawChar('>', tftWidth-(10+FM*6), tftHeight-(10+FM*9),FGCOLOR,BGCOLOR);
+  tft->drawChar(10, tftHeight-(10+FM*9),'<', FGCOLOR,BGCOLOR);
+  tft->drawChar(tftWidth-(10+FM*6), tftHeight-(10+FM*9),'>', FGCOLOR,BGCOLOR);
   tft->setTextSize(FP);
   #if TFT_HEIGHT>200
   String texto = "More information";
@@ -290,8 +288,8 @@ void displayCurrentVersion(String name, String author, String version, String pu
 
     if(versions.size()>1) {
         tft->setTextColor(ALCOLOR);
-        tft->drawChar('<', 10, tftHeight-(10+FM*9),FGCOLOR,BGCOLOR);
-        tft->drawChar('>', tftWidth-(10+FM*6), tftHeight-(10+FM*9),FGCOLOR,BGCOLOR);
+        tft->drawChar(10, tftHeight-(10+FM*9),'<', FGCOLOR,BGCOLOR);
+        tft->drawChar(tftWidth-(10+FM*6), tftHeight-(10+FM*9),'>', FGCOLOR,BGCOLOR);
         tft->setTextColor(~BGCOLOR);
     }
 
@@ -540,7 +538,7 @@ void drawMainMenu(int index) {
 
     drawDeviceBorder();
     int bat = getBattery();
-    drawBatteryStatus(bat);
+    if(bat>0) drawBatteryStatus(bat);
   #ifdef E_PAPER_DISPLAY
     tft->startCallback();
   #endif

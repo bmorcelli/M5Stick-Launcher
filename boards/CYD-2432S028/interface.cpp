@@ -9,8 +9,13 @@
     CYD28_TouchC touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
 #else
     #include "CYD28_TouchscreenR.h"
+    #ifndef CYD28_DISPLAY_HOR_RES_MAX
     #define CYD28_DISPLAY_HOR_RES_MAX 320
+    #endif
+
+    #ifndef CYD28_DISPLAY_VER_RES_MAX
     #define CYD28_DISPLAY_VER_RES_MAX 240  
+    #endif
     CYD28_TouchR touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
 #endif
 
@@ -23,16 +28,6 @@ void _setup_gpio() {
 #if !defined(HAS_CAPACITIVE_TOUCH)
     pinMode(XPT2046_CS, OUTPUT);
 #endif
-
-    if(!touch.begin()) {
-        Serial.println("Touch IC not Started");
-        log_i("Touch IC not Started");
-    } else log_i("Touch IC Started");
-
-  #if !defined(HAS_CAPACITIVE_TOUCH)
-    digitalWrite(XPT2046_CS, LOW);
-  #endif
-
 
 }
 
@@ -47,6 +42,18 @@ void _post_setup_gpio() {
     ledcSetup(TFT_BRIGHT_CHANNEL,TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits); //Channel 0, 10khz, 8bits
     ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
     ledcWrite(TFT_BRIGHT_CHANNEL,255);
+
+    if(!touch.begin(
+        #ifdef CYD28_TouchR_MOSI    
+            #if TFT_MOSI==CYD28_TouchR_MOSI
+            &SPI
+            #endif
+        #endif
+    
+        )) {
+            Serial.println("Touch IC not Started");
+            log_i("Touch IC not Started");
+        } else Serial.println("Touch IC Started");
 }
 
 /*********************************************************************
@@ -93,7 +100,17 @@ void InputHandler(void) {
             touchPoint.pressed=false;
           #endif
 
-        //Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d",t.x, t.y);
+        #ifdef CYD28_TouchR_MOSI    
+            #if TFT_MOSI==CYD28_TouchR_MOSI // S024R is inverted
+                int tmp=t.x;
+                t.x=t.y;
+                t.y=tmp;
+            #endif
+        #endif
+        auto tt = touch.getPointRaw();
+        Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d",tt.x, tt.y);
+        Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d, rot=%d",t.x, t.y,rotation);
+
         if(rotation==3) {
             t.y = (tftHeight+20)-t.y;
             t.x = tftWidth-t.x;
@@ -108,7 +125,7 @@ void InputHandler(void) {
             t.x = t.y;
             t.y = (tftHeight+20)-tmp;
         }
-        //Serial.printf("\nROT: Touch Pressed on x=%d, y=%d\n",t.x, t.y);
+        Serial.printf("\nROT: Touch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
 
         if(!wakeUpScreen()) AnyKeyPress = true;
         else goto END;

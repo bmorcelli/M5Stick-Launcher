@@ -119,9 +119,9 @@ uint16_t CYD28_TouchR::transfer16(uint16_t data)
     out.lsb = transfer(in.lsb);
     return out.val;
   } else {
-    out.msb =_pspi->transfer(in.msb);
-    out.lsb =_pspi->transfer(in.lsb);
-    return out.val;
+    //out.msb =_pspi->transfer(in.msb);
+    //out.lsb =_pspi->transfer(in.lsb);
+    return _pspi->transfer16(data);
   }
 }
 // ------------------------------------------------------------
@@ -136,7 +136,7 @@ void CYD28_TouchR::wait(uint_fast8_t del)
 CYD28_TS_Point CYD28_TouchR::getPointScaled()
 {
   update();
-  int16_t x = xraw, y = yraw;
+  uint16_t x = xraw, y = yraw;
   convertRawXY(&x, &y);
   return CYD28_TS_Point(x, y, zraw);
 }
@@ -238,32 +238,47 @@ void CYD28_TouchR::update()
   }
 }
 // ------------------------------------------------------------
-void CYD28_TouchR::convertRawXY(int16_t *x, int16_t *y)
+void CYD28_TouchR::convertRawXY(uint16_t *x, uint16_t *y)
 {
-  int16_t x_tmp = *x, y_tmp = *y, xx, yy;
-  switch (rotation)
-  {
-  case 0: // PORT0
-    xx = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    yy = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    xx = sizeY_px - xx;
-    break;
-  case 1: // LANDSC0
-    xx = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    yy = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    break;      
-  case 2: // PORT1
-    xx = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    yy = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    yy = sizeX_px - yy;
-    break;
-  default: // 3 LANDSC1
-    xx = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    yy = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    xx = sizeX_px - xx;
-    yy = sizeY_px - yy;
-    break;
-  } 
+  uint16_t x_tmp = *x, y_tmp = *y, xx, yy;
+
+  if(!touchCalibration_rotate){
+    xx=(x_tmp-touchCalibration_x0)*sizeX_px/(touchCalibration_x1-touchCalibration_x0);
+    yy=(y_tmp-touchCalibration_y0)*sizeY_px/(touchCalibration_y1-touchCalibration_y0);
+    if(touchCalibration_invert_x)
+      xx = sizeX_px - xx;
+    if(touchCalibration_invert_y)
+      yy = sizeY_px - yy;
+  } else {
+    xx=(y_tmp-touchCalibration_x0)*sizeX_px/(touchCalibration_x1-touchCalibration_x0);
+    yy=(x_tmp-touchCalibration_y0)*sizeY_px/(touchCalibration_y1-touchCalibration_y0);
+    if(touchCalibration_invert_x)
+      xx = sizeX_px - xx;
+    if(touchCalibration_invert_y)
+      yy = sizeY_px;
+  }
+  if(xx>sizeX_px) xx=sizeX_px-1;
+  if(yy>sizeY_px) yy=sizeY_px-1;
   *x = xx;
   *y = yy;
+}
+
+/***************************************************************************************
+** Function name:           setTouch
+** Description:             imports calibration parameters for touchscreen. 
+***************************************************************************************/
+void CYD28_TouchR::setTouch(uint16_t *parameters){
+  touchCalibration_x0 = parameters[0];
+  touchCalibration_x1 = parameters[1];
+  touchCalibration_y0 = parameters[2];
+  touchCalibration_y1 = parameters[3];
+
+  if(touchCalibration_x0 == 0) touchCalibration_x0 = 1;
+  if(touchCalibration_x1 == 0) touchCalibration_x1 = 1;
+  if(touchCalibration_y0 == 0) touchCalibration_y0 = 1;
+  if(touchCalibration_y1 == 0) touchCalibration_y1 = 1;
+
+  touchCalibration_rotate = parameters[4] & 0x01;
+  touchCalibration_invert_x = parameters[4] & 0x02;
+  touchCalibration_invert_y = parameters[4] & 0x04;
 }
