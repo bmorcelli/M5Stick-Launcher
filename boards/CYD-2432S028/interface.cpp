@@ -107,10 +107,7 @@ void InputHandler(void) {
                 t.y=tmp;
             #endif
         #endif
-        auto tt = touch.getPointRaw();
-        Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d",tt.x, tt.y);
-        Serial.printf("\nRAW: Touch Pressed on x=%d, y=%d, rot=%d",t.x, t.y,rotation);
-
+        
         if(rotation==3) {
             t.y = (tftHeight+20)-t.y;
             t.x = tftWidth-t.x;
@@ -125,7 +122,7 @@ void InputHandler(void) {
             t.x = t.y;
             t.y = (tftHeight+20)-tmp;
         }
-        Serial.printf("\nROT: Touch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
+        //Serial.printf("\nTouch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
 
         if(!wakeUpScreen()) AnyKeyPress = true;
         else goto END;
