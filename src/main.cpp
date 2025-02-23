@@ -3,7 +3,7 @@
 #include <EEPROM.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <M5-HTTPUpdate.h>
+//#include <M5-HTTPUpdate.h>
 #ifdef HEADLESS
 #include <VectorDisplay.h>
 #else

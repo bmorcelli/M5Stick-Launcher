@@ -26,7 +26,7 @@
 ***************************************************************************************/
 void _setup_gpio() { 
 #if !defined(HAS_CAPACITIVE_TOUCH)
-    pinMode(XPT2046_CS, OUTPUT);
+    pinMode(33, OUTPUT);
 #endif
 
 }

@@ -17,6 +17,6 @@ void wifiConnect(String ssid, int encryptation, bool isAP = false);
 
 bool GetJsonFromM5();
 
-bool installFAT_OTA( WiFiClientSecure *client, String fileAddr, uint32_t offset, uint32_t size, const char *label);
+bool installFAT_OTA( WiFiClient *client, String fileAddr, uint32_t offset, uint32_t size, const char *label);
 
 #endif
