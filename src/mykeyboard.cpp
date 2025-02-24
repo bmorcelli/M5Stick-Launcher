@@ -36,8 +36,8 @@ struct box_t
     {
       tft->drawRect(x, y, w, h,color);
       tft->setTextColor(color);
-      if(shift) tft->drawChar(x+w/2-FM*LW/2,y+h/2-FM*LH/2,key_sh,FGCOLOR,BGCOLOR);
-      else tft->drawChar(x+w/2-FM*LW/2,y+h/2-FM*LH/2,key,FGCOLOR,BGCOLOR);
+      if(shift) tft->drawChar2(x+w/2-FM*LW/2,y+h/2-FM*LH/2,key_sh,FGCOLOR,BGCOLOR);
+      else tft->drawChar2(x+w/2-FM*LW/2,y+h/2-FM*LH/2,key,FGCOLOR,BGCOLOR);
     }
   }
   bool contain(int x, int y)
@@ -301,8 +301,8 @@ String keyboard(String mytext, int maxSize, String msg) {
         #ifdef HAS_TOUCH
           box_list[_i++].draw(caps);
         #else
-          if(!caps) tft->drawChar((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][0], FGCOLOR,BGCOLOR);
-          else tft->drawChar((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][1], FGCOLOR,BGCOLOR);
+          if(!caps) tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][0], FGCOLOR,BGCOLOR);
+          else tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][1], FGCOLOR,BGCOLOR);
         #endif
 
           /* Return colors to normal to print the other letters */

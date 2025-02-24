@@ -12,7 +12,7 @@ class Ard_eSPI: public EPD_translate {
     inline int getTextsize() { return textsize; };
     inline uint16_t getTextcolor() { return textcolor; };
     inline uint16_t getTextbgcolor() { return textbgcolor; };
-    inline void drawChar( uint32_t x, uint32_t y, char c,uint16_t a, uint16_t b) { EPD_translate::drawChar(c,x,y); };
+    inline void drawChar2( uint32_t x, uint32_t y, char c,uint16_t a, uint16_t b) { EPD_translate::drawChar(c,x,y); };
     inline void drawArc(int a, int b, int c, int d, int e, int f, int g) { };
     inline void begin() {EPD_translate::init(); };
     private:
@@ -20,6 +20,109 @@ class Ard_eSPI: public EPD_translate {
 };
 #elif defined (HEADLESS)
 // do nothing
+
+#elif defined (USE_TFT_ESPI)
+#include <TFT_eSPI.h>
+#define DARKGREY TFT_DARKGREY
+#define BLACK TFT_BLACK
+#define RED TFT_RED
+#define GREEN TFT_GREEN
+#define WHITE TFT_WHITE
+class Ard_eSPI : public TFT_eSPI {
+    public:
+    inline int getTextsize() { return textsize; };
+    inline uint16_t getTextcolor() { return textcolor; };
+    inline uint16_t getTextbgcolor() { return textbgcolor; };
+    inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { TFT_eSPI::drawChar(c,x,y); }
+    inline void drawArc(int16_t x, int16_t y, int16_t r, int16_t ir, int16_t sA, int16_t eA, int16_t fg) { TFT_eSPI::drawArc(x,y,r,ir,sA,eA,fg,TFT_BLACK,true); };
+
+};
+
+#elif defined(USE_LOVYANGFX)
+#include <LovyanGFX.hpp>
+#include "driver/i2c.h"
+#define DARKGREY TFT_DARKGREY
+#define BLACK TFT_BLACK
+#define RED TFT_RED
+#define GREEN TFT_GREEN
+class Ard_eSPI : public lgfx::LGFX_Device {
+    lgfx::Panel_ST7789*      _panel_instance;
+    lgfx::Bus_Parallel8*  _bus_instance;
+    lgfx::Light_PWM     _light_instance;
+    lgfx::Touch_CST816S*          _touch_instance;
+
+    public:
+    inline int getTextsize() { return _text_style.size_x; };
+    inline uint16_t getTextcolor() { return _text_style.fore_rgb888; };
+    inline uint16_t getTextbgcolor() { return _text_style.back_rgb888; };
+    inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { lgfx::LGFX_Device::drawChar(c,x,y,a,b,_text_style.size_x); }
+    inline void drawCentreString(String s, uint16_t x, uint16_t y, int f) { lgfx::LGFX_Device::drawCentreString(s,x,y); };
+    inline void drawRightString(String s, uint16_t x, uint16_t y, int f) { lgfx::LGFX_Device::drawRightString(s,x,y); };
+
+
+    Ard_eSPI(void) {
+    {
+        auto cfg       = _bus_instance->config();
+        cfg.freq_write = 16000000;
+        cfg.pin_wr     = TFT_WR;
+        cfg.pin_rd     = TFT_RD;
+        cfg.pin_rs     = TFT_DC; // D/C
+        cfg.pin_d0     = TFT_D0;
+        cfg.pin_d1     = TFT_D1;
+        cfg.pin_d2     = TFT_D2;
+        cfg.pin_d3     = TFT_D3;
+        cfg.pin_d4     = TFT_D4;
+        cfg.pin_d5     = TFT_D5;
+        cfg.pin_d6     = TFT_D6;
+        cfg.pin_d7     = TFT_D7;
+        _bus_instance->config(cfg);
+        _panel_instance->setBus(_bus_instance);
+    }
+
+    {
+        auto cfg             = _panel_instance->config();
+        cfg.pin_cs           = TFT_CS;
+        cfg.pin_rst          = TFT_RST;
+        cfg.pin_busy         = -1;//TFT_BUSY;
+        cfg.memory_width     = TFT_WIDTH;
+        cfg.memory_height    = TFT_HEIGHT;
+        cfg.panel_width      = TFT_WIDTH;
+        cfg.panel_height     = TFT_HEIGHT;
+        cfg.offset_x         = 0;
+        cfg.offset_y         = 0;
+        cfg.offset_rotation  = ROTATION;
+        cfg.dummy_read_pixel = 8;
+        cfg.dummy_read_bits  = 1;
+        cfg.readable         = true;
+        cfg.invert           = false;
+        cfg.rgb_order        = false;
+        cfg.dlen_16bit       = false;
+        cfg.bus_shared       = false;
+        _panel_instance->config(cfg);
+    }
+
+    {
+        auto cfg = _touch_instance->config();
+
+        cfg.x_min           = 0;
+        cfg.x_max           = TFT_WIDTH;
+        cfg.y_min           = 0;
+        cfg.y_max           = TFT_HEIGHT;
+        cfg.pin_int         = 36;
+        cfg.bus_shared      = true;
+        cfg.offset_rotation = 0;
+        cfg.i2c_port = I2C_NUM_0;
+        cfg.i2c_addr = 0x15;
+        cfg.pin_sda  = 21;
+        cfg.pin_scl  = 22;
+        cfg.freq     = 400000;
+
+        _touch_instance->config(cfg);
+        _panel_instance->setTouch(_touch_instance);
+    }
+  }
+};
+
 #else
 
 #include <Arduino_GFX_Library.h>

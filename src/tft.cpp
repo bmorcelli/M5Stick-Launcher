@@ -4,6 +4,10 @@
 
 #elif defined(HEADLESS)
 
+#elif defined(USE_LOVYANGFX)
+
+#elif defined(USE_TFT_ESPI)
+
 #else
 void Ard_eSPI::drawCentreString(String s, uint16_t x, uint16_t y, int f) {
     uint16_t _x = cursor_x;

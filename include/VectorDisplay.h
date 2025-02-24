@@ -949,7 +949,7 @@ public:
         return write(string);
     };
 
-    int16_t  drawChar(uint16_t uniCode, int32_t x, int32_t y, uint16_t a, uint16_t b) {
+    int16_t  drawChar2(uint16_t uniCode, int32_t x, int32_t y, uint16_t a, uint16_t b) {
         setCursor(x, y);
         return write(uniCode);
     }
@@ -1274,7 +1274,7 @@ public:
       /* the following Adafruit GFX APIs are not implemented at present */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-    void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color,
+    void drawChar2(int16_t x, int16_t y, unsigned char c, uint16_t color,
       uint16_t bg, uint8_t size) {}
     void setFont(const void /*GFXfont*/ *f = NULL) {}
     void getTextBounds(const char *string, int16_t x, int16_t y,

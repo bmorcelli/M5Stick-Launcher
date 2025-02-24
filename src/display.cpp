@@ -7,8 +7,9 @@
 
 #if defined(HEADLESS)
 SerialDisplayClass *tft;
-#elif E_PAPER_DISPLAY
+#elif defined(E_PAPER_DISPLAY) || defined(USE_LOVYANGFX) || defined(USE_TFT_ESPI)
 Ard_eSPI *tft;
+
 #else
   #ifdef TFT_PARALLEL_8_BIT
   Arduino_DataBus *bus = new Arduino_ESP32PAR8Q(TFT_DC, TFT_CS,TFT_WR, TFT_RD, TFT_D0, TFT_D1, TFT_D2, TFT_D3, TFT_D4, TFT_D5, TFT_D6, TFT_D7);
@@ -218,8 +219,8 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
 
   tft->setTextColor(FGCOLOR);
   tft->setTextSize(FM);
-  tft->drawChar(10, tftHeight-(10+FM*9),'<', FGCOLOR,BGCOLOR);
-  tft->drawChar(tftWidth-(10+FM*6), tftHeight-(10+FM*9),'>', FGCOLOR,BGCOLOR);
+  tft->drawChar2(10, tftHeight-(10+FM*9),'<', FGCOLOR,BGCOLOR);
+  tft->drawChar2(tftWidth-(10+FM*6), tftHeight-(10+FM*9),'>', FGCOLOR,BGCOLOR);
   tft->setTextSize(FP);
   #if TFT_HEIGHT>200
   String texto = "More information";
@@ -288,8 +289,8 @@ void displayCurrentVersion(String name, String author, String version, String pu
 
     if(versions.size()>1) {
         tft->setTextColor(ALCOLOR);
-        tft->drawChar(10, tftHeight-(10+FM*9),'<', FGCOLOR,BGCOLOR);
-        tft->drawChar(tftWidth-(10+FM*6), tftHeight-(10+FM*9),'>', FGCOLOR,BGCOLOR);
+        tft->drawChar2(10, tftHeight-(10+FM*9),'<', FGCOLOR,BGCOLOR);
+        tft->drawChar2(tftWidth-(10+FM*6), tftHeight-(10+FM*9),'>', FGCOLOR,BGCOLOR);
         tft->setTextColor(~BGCOLOR);
     }
 
