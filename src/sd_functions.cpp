@@ -67,7 +67,13 @@ bool setupSdCard() {
   delay(10);
   if (!SDM.begin(SDCARD_CS, sdcardSPI))  
   #elif defined(DONT_USE_INPUT_TASK)
-  if (!SDM.begin(SDCARD_CS))  
+    #if (TFT_MOSI != SDCARD_MOSI)
+    sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
+    if (!SDM.begin(SDCARD_CS, sdcardSPI))
+    #else
+    if (!SDM.begin(SDCARD_CS))  
+    #endif
+  
   #else
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
   delay(10);
