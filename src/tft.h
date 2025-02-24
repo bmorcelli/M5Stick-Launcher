@@ -119,12 +119,13 @@ class Ard_eSPI : public lgfx::LGFX_Device {
         cfg.dummy_read_pixel = 8;
         cfg.dummy_read_bits  = 1;
         cfg.readable         = true;
-        cfg.invert           = false;
+        cfg.invert           = TFT_INVERTED;
         cfg.rgb_order        = false;
         cfg.dlen_16bit       = false;
-        cfg.bus_shared       = false;
+        cfg.bus_shared       = TFT_BUS_SHARED;
         _panel_instance.config(cfg);
     }
+    setPanel(&_panel_instance);
   }
 };
 

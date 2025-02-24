@@ -7,9 +7,10 @@
 
 #if defined(HEADLESS)
 SerialDisplayClass *tft;
-#elif defined(E_PAPER_DISPLAY) || defined(USE_LOVYANGFX) || defined(USE_TFT_ESPI)
+#elif defined(E_PAPER_DISPLAY) || defined(USE_TFT_ESPI)
 Ard_eSPI *tft;
-
+#elif defined(USE_LOVYANGFX) 
+Ard_eSPI *tft = new Ard_eSPI();
 #else
   #ifdef TFT_PARALLEL_8_BIT
   Arduino_DataBus *bus = new Arduino_ESP32PAR8Q(TFT_DC, TFT_CS,TFT_WR, TFT_RD, TFT_D0, TFT_D1, TFT_D2, TFT_D3, TFT_D4, TFT_D5, TFT_D6, TFT_D7);
