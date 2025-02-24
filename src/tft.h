@@ -46,10 +46,8 @@ class Ard_eSPI : public TFT_eSPI {
 #define RED TFT_RED
 #define GREEN TFT_GREEN
 class Ard_eSPI : public lgfx::LGFX_Device {
-    lgfx::Panel_ST7789*      _panel_instance;
-    lgfx::Bus_Parallel8*  _bus_instance;
-    lgfx::Light_PWM     _light_instance;
-    lgfx::Touch_CST816S*          _touch_instance;
+    lgfx::LOVYAN_PANEL*      _panel_instance;
+    lgfx::LOVYAN_BUS*  _bus_instance;
 
     public:
     inline int getTextsize() { return _text_style.size_x; };
@@ -62,6 +60,7 @@ class Ard_eSPI : public lgfx::LGFX_Device {
 
     Ard_eSPI(void) {
     {
+        #if LOVYAN_BUS == Bus_Parallel8
         auto cfg       = _bus_instance->config();
         cfg.freq_write = 16000000;
         cfg.pin_wr     = TFT_WR;
@@ -75,8 +74,33 @@ class Ard_eSPI : public lgfx::LGFX_Device {
         cfg.pin_d5     = TFT_D5;
         cfg.pin_d6     = TFT_D6;
         cfg.pin_d7     = TFT_D7;
+
+        #elif LOVYAN_BUS == Bus_SPI
+        cfg.spi_host = TFT_SPI_MODE;     // VSPI ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
+        // ※ ESP-IDFバージョンアップに伴い、VSPI_HOST , HSPI_HOSTの記述は非推奨になるため、エラーが出る場合は代わりにSPI2_HOST , SPI3_HOSTを使用してください。
+        cfg.spi_mode = 0;             
+        cfg.freq_write = 40000000;    
+        cfg.freq_read  = 16000000;    
+        cfg.spi_3wire  = true;        
+        cfg.use_lock   = true;        
+        cfg.dma_channel = SPI_DMA_CH_AUTO; 
+        cfg.pin_sclk = TFT_SCLK;
+        cfg.pin_mosi = TFT_MOSI;
+        cfg.pin_miso = TFT_MISO;
+        cfg.pin_dc   = TFT_DC;
+
+        #elif LOVYAN_BUS == Bus_I2C
+        cfg.i2c_port    = TFT_I2C_PORT;          // (0 or 1)
+        cfg.freq_write  = TFT_I2C_WRITE;     //400000 
+        cfg.freq_read   = TFT_I2C_READ;     // 400000
+        cfg.pin_sda     = TFT_SDA;         // 
+        cfg.pin_scl     = TFT_SCL;         // 
+        cfg.i2c_addr    = TFT_ADDR;       // 
+        #endif
+
         _bus_instance->config(cfg);
         _panel_instance->setBus(_bus_instance);
+
     }
 
     {
@@ -90,7 +114,7 @@ class Ard_eSPI : public lgfx::LGFX_Device {
         cfg.panel_height     = TFT_HEIGHT;
         cfg.offset_x         = 0;
         cfg.offset_y         = 0;
-        cfg.offset_rotation  = ROTATION;
+        cfg.offset_rotation  = TFT_ROTATION;
         cfg.dummy_read_pixel = 8;
         cfg.dummy_read_bits  = 1;
         cfg.readable         = true;
@@ -99,26 +123,6 @@ class Ard_eSPI : public lgfx::LGFX_Device {
         cfg.dlen_16bit       = false;
         cfg.bus_shared       = false;
         _panel_instance->config(cfg);
-    }
-
-    {
-        auto cfg = _touch_instance->config();
-
-        cfg.x_min           = 0;
-        cfg.x_max           = TFT_WIDTH;
-        cfg.y_min           = 0;
-        cfg.y_max           = TFT_HEIGHT;
-        cfg.pin_int         = 36;
-        cfg.bus_shared      = true;
-        cfg.offset_rotation = 0;
-        cfg.i2c_port = I2C_NUM_0;
-        cfg.i2c_addr = 0x15;
-        cfg.pin_sda  = 21;
-        cfg.pin_scl  = 22;
-        cfg.freq     = 400000;
-
-        _touch_instance->config(cfg);
-        _panel_instance->setTouch(_touch_instance);
     }
   }
 };
@@ -150,6 +154,7 @@ class Ard_eSPI: public _TFT_DRV {
     Ard_eSPI(Arduino_DataBus *bus, int8_t rst, uint8_t rotation, bool ips, uint16_t w, uint16_t h, uint16_t co1, uint16_t ro1 ,uint16_t co2, uint16_t ro2)
         : _TFT_DRVF(bus, rst, rotation, ips, w, h,co1,ro1,co2,ro2) {}
     
+    inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { drawChar(x, y, c, a, b); };
     void drawString(String s, uint16_t x, uint16_t y);
     void drawCentreString(String s, uint16_t x, uint16_t y, int f);
     void drawRightString(String s, uint16_t x, uint16_t y, int f);
