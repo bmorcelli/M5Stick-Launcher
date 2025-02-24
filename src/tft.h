@@ -46,8 +46,8 @@ class Ard_eSPI : public TFT_eSPI {
 #define RED TFT_RED
 #define GREEN TFT_GREEN
 class Ard_eSPI : public lgfx::LGFX_Device {
-    lgfx::LOVYAN_PANEL*      _panel_instance;
-    lgfx::LOVYAN_BUS*  _bus_instance;
+    lgfx::LOVYAN_PANEL  _panel_instance;
+    lgfx::LOVYAN_BUS    _bus_instance;
 
     public:
     inline int getTextsize() { return _text_style.size_x; };
@@ -60,8 +60,9 @@ class Ard_eSPI : public lgfx::LGFX_Device {
 
     Ard_eSPI(void) {
     {
+        auto cfg       = _bus_instance.config();
+
         #if LOVYAN_BUS == Bus_Parallel8
-        auto cfg       = _bus_instance->config();
         cfg.freq_write = 16000000;
         cfg.pin_wr     = TFT_WR;
         cfg.pin_rd     = TFT_RD;
@@ -98,13 +99,13 @@ class Ard_eSPI : public lgfx::LGFX_Device {
         cfg.i2c_addr    = TFT_ADDR;       // 
         #endif
 
-        _bus_instance->config(cfg);
-        _panel_instance->setBus(_bus_instance);
+        _bus_instance.config(cfg);
+        _panel_instance.setBus(&_bus_instance);
 
     }
 
     {
-        auto cfg             = _panel_instance->config();
+        auto cfg             = _panel_instance.config();
         cfg.pin_cs           = TFT_CS;
         cfg.pin_rst          = TFT_RST;
         cfg.pin_busy         = -1;//TFT_BUSY;
@@ -122,7 +123,7 @@ class Ard_eSPI : public lgfx::LGFX_Device {
         cfg.rgb_order        = false;
         cfg.dlen_16bit       = false;
         cfg.bus_shared       = false;
-        _panel_instance->config(cfg);
+        _panel_instance.config(cfg);
     }
   }
 };
