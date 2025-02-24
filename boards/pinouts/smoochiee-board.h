@@ -85,6 +85,8 @@ static const uint8_t ADC2 = 8;
 #define TFT_COL_OFS2 35
 #define TFT_ROW_OFS2 0
 
+#define CC1101_SS_PIN	46
+#define NRF24_SS_PIN	14 
 
 #define SDCARD_CS	3
 #define SDCARD_SCK	18
