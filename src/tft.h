@@ -1,6 +1,6 @@
 #ifndef __TFT_H
 #define __TFT_H
-
+#include <globals.h>
 #if defined(E_PAPER_DISPLAY)
 #include <EPD_translate.h>
 #define DARKGREY TFT_DARKGREY
@@ -53,7 +53,7 @@ class Ard_eSPI : public lgfx::LGFX_Device {
     inline int getTextsize() { return _text_style.size_x; };
     inline uint16_t getTextcolor() { return _text_style.fore_rgb888; };
     inline uint16_t getTextbgcolor() { return _text_style.back_rgb888; };
-    inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { lgfx::LGFX_Device::drawChar(c,x,y,a,b,_text_style.size_x); }
+    inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { lgfx::LGFX_Device::drawChar(x,y,c,a,b,_text_style.size_x); }
     inline void drawCentreString(String s, uint16_t x, uint16_t y, int f) { lgfx::LGFX_Device::drawCentreString(s,x,y); };
     inline void drawRightString(String s, uint16_t x, uint16_t y, int f) { lgfx::LGFX_Device::drawRightString(s,x,y); };
 
@@ -113,8 +113,8 @@ class Ard_eSPI : public lgfx::LGFX_Device {
         cfg.memory_height    = TFT_HEIGHT;
         cfg.panel_width      = TFT_WIDTH;
         cfg.panel_height     = TFT_HEIGHT;
-        cfg.offset_x         = 0;
-        cfg.offset_y         = 0;
+        cfg.offset_x         = TFT_COL_OFS1;
+        cfg.offset_y         = TFT_ROW_OFS1;
         cfg.offset_rotation  = TFT_ROTATION;
         cfg.dummy_read_pixel = 8;
         cfg.dummy_read_bits  = 1;

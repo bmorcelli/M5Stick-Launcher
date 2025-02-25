@@ -1,3 +1,7 @@
+#ifndef _PRE_COMPILER
+#define _PRE_COMPILER
+
+#include <cyd_predefs.h>
 #if !defined(PART_04MB) && !defined(PART_08MB) && !defined(PART_16MB) && !defined(HEADLESS)
 #define PART_04MB 1
 #endif
@@ -59,3 +63,6 @@
 #ifndef TFT_MISO 
   #define TFT_MISO  -1
 #endif
+
+
+#endif // _PRE_COMPILER

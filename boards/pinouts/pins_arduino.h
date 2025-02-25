@@ -6,7 +6,7 @@
 #include "lilygo-t-deck.h"
 #elif ARDUINO_M5STACK_CARDPUTER
 #include "m5stack-cardputer.h"
-#elif CYD_2432S028
+#elif CYD
 #include "CYD-2432S028.h"
 #elif ARDUINO_M5STACK_CORE
 #include "m5stack-core.h"

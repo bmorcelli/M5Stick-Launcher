@@ -7,6 +7,9 @@
     #define CYD28_DISPLAY_HOR_RES_MAX 240
     #define CYD28_DISPLAY_VER_RES_MAX 320
     CYD28_TouchC touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
+#elif defined(TOUCH_GT911_I2C) || defined(AXS15231B) || defined(TOUCH_CST816S_I2C)
+    #include <bb_captouch.h>
+
 #else
     #include "CYD28_TouchscreenR.h"
     #ifndef CYD28_DISPLAY_HOR_RES_MAX
