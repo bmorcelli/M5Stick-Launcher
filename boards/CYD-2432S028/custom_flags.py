@@ -59,7 +59,7 @@ def generate_build_flags(board_config):
         flags.append("-DTFT_RST=ILI9341_DEV_CONFIG_RESET_GPIO_NUM")
         flags.append("-DTFT_BL=GPIO_BCKL")
         flags.append("-DTFT_WIDTH=DISPLAY_WIDTH")
-        flags.append("-DTFT_HEIGH=DISPLAY_HEIGHT")
+        flags.append("-DTFT_HEIGHT=DISPLAY_HEIGHT")
         flags.append("-DTFT_IPS=0")
         flags.append("-DTFT_COL_OFS1=0")
         flags.append("-DTFT_ROW_OFS1=0")
