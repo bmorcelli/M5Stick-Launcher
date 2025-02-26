@@ -1,6 +1,5 @@
 #ifndef __TFT_H
 #define __TFT_H
-#include <globals.h>
 #if defined(E_PAPER_DISPLAY)
 #include <EPD_translate.h>
 #define DARKGREY TFT_DARKGREY
@@ -133,6 +132,13 @@ class Ard_eSPI : public lgfx::LGFX_Device {
 
 #include <Arduino_GFX_Library.h>
 
+#ifdef RGB_PANEL
+    #define TFT_BUS_TYPE Arduino_ESP32RGBPanel
+#else 
+    #define TFT_BUS_TYPE Arduino_DataBus
+#endif 
+
+
 #if ST7789_DRIVER
 #define _TFT_DRV Arduino_ST7789
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7789(a,b,c,d,e,f,g,h,i,j) // it is not passing values greater than 255 for f
@@ -148,12 +154,19 @@ class Ard_eSPI : public lgfx::LGFX_Device {
 #elif ST7796_DRIVER
 #define _TFT_DRV Arduino_ST7796
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ST7796(a,b,c,d,e,f,g,h,i,j)
+#elif RGB_PANEL
+#define _TFT_DRV Arduino_RGB_Display
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_RGB_Display(e,f,a,0,true)
+#else
+// CYD Default to not shoot errors on screen
+#define _TFT_DRV Arduino_ILI9341
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_ILI9341(a,b,c)
 #endif
 
 class Ard_eSPI: public _TFT_DRV {
     public:
     // Driver initilizer
-    Ard_eSPI(Arduino_DataBus *bus, int8_t rst, uint8_t rotation, bool ips, uint16_t w, uint16_t h, uint16_t co1, uint16_t ro1 ,uint16_t co2, uint16_t ro2)
+    Ard_eSPI(TFT_BUS_TYPE *bus, int8_t rst, uint8_t rotation, bool ips, uint16_t w, uint16_t h, uint16_t co1, uint16_t ro1 ,uint16_t co2, uint16_t ro2)
         : _TFT_DRVF(bus, rst, rotation, ips, w, h,co1,ro1,co2,ro2) {}
     
     inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { drawChar(x, y, c, a, b); };

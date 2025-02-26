@@ -1,15 +1,46 @@
 #include <interface.h>
 #include "powerSave.h"
 
+#ifndef TFT_BRIGHT_CHANNEL
+    #define TFT_BRIGHT_CHANNEL 0
+    #define TFT_BRIGHT_FREQ 5000
+    #define TFT_BRIGHT_Bits 8
+    #define TFT_BL GPIO_BCKL
+#endif
 
 #if defined(HAS_CAPACITIVE_TOUCH)
     #include "CYD28_TouchscreenC.h"
     #define CYD28_DISPLAY_HOR_RES_MAX 240
     #define CYD28_DISPLAY_VER_RES_MAX 320
     CYD28_TouchC touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
-#elif defined(TOUCH_GT911_I2C) || defined(AXS15231B) || defined(TOUCH_CST816S_I2C)
+#elif defined(TOUCH_GT911_I2C) || defined(TOUCH_AXS15231B_I2C) || defined(TOUCH_CST816S_I2C)
     #include <bb_captouch.h>
+    #ifdef TOUCH_GT911_I2C
+        #define TOUCH_SDA_PIN GT911_I2C_CONFIG_SDA_IO_NUM
+        #define TOUCH_SCL_PIN GT911_I2C_CONFIG_SCL_IO_NUM
+    #elif TOUCH_CST816S_I2C
+        #define TOUCH_SDA_PIN CST816S_I2C_CONFIG_SDA_IO_NUM
+        #define TOUCH_SCL_PIN CST816S_I2C_CONFIG_SCL_IO_NUM
+    #elif TOUCH_AXS15231B_I2C
+        #define TOUCH_SDA_PIN 41
+        #define TOUCH_SCL_PIN 42
+    #endif
 
+    class CYD_Touch: public BBCapTouch {
+        public:
+        TouchPoint t;
+        TOUCHINFO ti;
+        CYD_Touch() { BBCapTouch(); }
+        inline bool begin() { 
+            bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN); // returns 0 if CT_SUCCESS;
+            setOrientation(90, 320,240); // This orientation reflects the right position for the InputHandler logic.
+            return result==0? true:false;
+        }
+        inline bool touched() { if(getSamples(&ti)) { t.x = ti.x[0]; t.y = ti.y[0]; t.pressed = true; } else { t.x=0; t.y=0; t.pressed=false; } }
+        inline TouchPoint getPointScaled() { return t; }
+
+    };
+    CYD_Touch touch;
 #else
     #include "CYD28_TouchscreenR.h"
     #ifndef CYD28_DISPLAY_HOR_RES_MAX

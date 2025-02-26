@@ -13,11 +13,43 @@ Ard_eSPI *tft;
 Ard_eSPI *tft = new Ard_eSPI();
 #else
   #ifdef TFT_PARALLEL_8_BIT
-  Arduino_DataBus *bus = new Arduino_ESP32PAR8Q(TFT_DC, TFT_CS,TFT_WR, TFT_RD, TFT_D0, TFT_D1, TFT_D2, TFT_D3, TFT_D4, TFT_D5, TFT_D6, TFT_D7);
+    Arduino_DataBus *bus = new Arduino_ESP32PAR8Q(TFT_DC, TFT_CS,TFT_WR, TFT_RD, TFT_D0, TFT_D1, TFT_D2, TFT_D3, TFT_D4, TFT_D5, TFT_D6, TFT_D7);
+  #elif RGB_PANEL // 16-par connections
+    Arduino_ESP32RGBPanel *bus = new Arduino_ESP32RGBPanel(
+      ST7262_PANEL_CONFIG_DE_GPIO_NUM /* DE */, 
+      ST7262_PANEL_CONFIG_VSYNC_GPIO_NUM /* VSYNC */, 
+      ST7262_PANEL_CONFIG_HSYNC_GPIO_NUM /* HSYNC */, 
+      ST7262_PANEL_CONFIG_PCLK_GPIO_NUM /* PCLK */,
+      ST7262_PANEL_CONFIG_DATA_GPIO_R0 /* R0 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_R1 /* R1 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_R2 /* R2 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_R3 /* R3 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_R4 /* R4 */,
+      ST7262_PANEL_CONFIG_DATA_GPIO_G0 /* G0 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_G1 /* G1 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_G2 /* G2 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_G3 /* G3 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_G4 /* G4 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_G5 /* G5 */,
+      ST7262_PANEL_CONFIG_DATA_GPIO_B0 /* B0 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_B1 /* B1 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_B2 /* B2 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_B3 /* B3 */, 
+      ST7262_PANEL_CONFIG_DATA_GPIO_B4 /* B4 */,
+      0 /* hsync_polarity */, 
+      1 /* hsync_front_porch */, 
+      1 /* hsync_pulse_width */, 
+      ST7262_PANEL_CONFIG_TIMINGS_HSYNC_BACK_PORCH /* hsync_back_porch */,
+      0 /* vsync_polarity */, 
+      3 /* vsync_front_porch */, 
+      1 /* vsync_pulse_width */, 
+      ST7262_PANEL_CONFIG_TIMINGS_VSYNC_BACK_PORCH /* vsync_back_porch */,
+      1 /* pclk_active_neg */, 
+      10000000 /* prefer_speed */);
+
   #else // SPI Data Bus shared with SDCard and other SPIClass devices
     Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO,&SPI);
   #endif
-  
   Ard_eSPI *tft = new Ard_eSPI(bus,TFT_RST,ROTATION,TFT_IPS,TFT_WIDTH,TFT_HEIGHT,TFT_COL_OFS1,TFT_ROW_OFS1,TFT_COL_OFS2,TFT_ROW_OFS2);
 #endif
 
