@@ -29,7 +29,7 @@
                 family: "ESP32-S3",
                 env: "m5stack-cardputer",
                 partitions: {
-                  bootloader_addr: "0x0000",
+                  bootloader_addr: "0x0",
                 },
               }
             - {
@@ -268,7 +268,7 @@
                 name: "CYD-8048S043C",
                 description: "(ESP32S3, 4.3in, 800x480, Capacitive)",
                 link: "",
-                family: "ESP32",
+                family: "ESP32-S3",
                 env: "CYD-8048S043C",
                 partitions: {
                   bootloader_addr: "0x0",
@@ -279,7 +279,7 @@
                 name: "CYD-8048W550C",
                 description: "(ESP32S3, 5.5in, 800x480, Capacitive)",
                 link: "",
-                family: "ESP32",
+                family: "ESP32-S3",
                 env: "CYD-8048W550C",
                 partitions: {
                   bootloader_addr: "0x0",
