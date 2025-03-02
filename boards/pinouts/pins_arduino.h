@@ -22,6 +22,8 @@
 #include "m5stack-cplus2.h"
 #elif ESP32S3DEVKITC1
 #include "ESP32S3-General.h"
+#elif CYDS3
+#include "ESP32S3-General.h"
 #elif ESP32S3_4M
 #include "ESP32S3-4M.h"
 #elif ESP32_DEV

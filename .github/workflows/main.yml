@@ -265,6 +265,17 @@
               }              
             - {
                 vendor: "CYD",
+                name: "CYD-2432S032R",
+                description: "(3.2in, Resistive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2432S032R",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }  
+            - {
+                vendor: "CYD",
                 name: "CYD-8048S043C",
                 description: "(ESP32S3, 4.3in, 800x480, Capacitive)",
                 link: "",
