@@ -374,6 +374,11 @@ void configureWebServer() {
         EEPROM.write(93, static_cast<uint8_t>(cs));
         EEPROM.commit();
         EEPROM.end();
+        _sck=sck;
+        _miso=miso;
+        _mosi=mosi;
+        _cs=cs;
+        setupSdCard();
         request->send(200, "text/plain", "Pins configured.");
         error:
         delay(1);

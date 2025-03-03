@@ -281,62 +281,22 @@ public:
     virtual size_t remoteAvailable() = 0;
     
     void attribute8(char a, uint8_t value) {
-        args.attribute8.attr = a;
-        args.attribute8.value = value;
-        sendCommand('Y', &args, 2);
     }
 
     void attribute8(char a, bool value) {
-        args.attribute8.attr = a;
-        args.attribute8.value = value ? 1 : 0;
-        sendCommand('Y', &args, 2);
     }
 
     void attribute16(char a, uint16_t value) {
-        args.attribute16.attr = a;
-        args.attribute16.value = value;
-        sendCommand('A', &args, 3);
     }
 
     void attribute32(char a, uint32_t value) {
-        args.attribute32.attr = a;
-        args.attribute32.value = value;
-        sendCommand('B', &args, 5);
     }
 
     void sendCommand(char c, const void* arguments, int argumentsLength) {
-        sendDelay();
-        remoteWrite(c);
-        remoteWrite(c^0xFF);
-        if (argumentsLength > 0) 
-            remoteWrite((uint8_t*)arguments, argumentsLength);
-        uint8_t sum = 0;
-        for (int i = 0; i<argumentsLength; i++)
-            sum += ((uint8_t*)arguments)[i];
-        remoteWrite((uint8_t)(sum^0xFF));
     }
    
     
-    void sendCommandWithAck(char c, const void* arguments, int argumentsLength) {
-       readPos = 0;        
-       bool done = false;
-        do {
-            uint32_t t0 = millis();
-            
-            sendCommand(c, arguments, argumentsLength);
-
-            return;
-            //if (!waitForAck)
-            //    return;
-            
-            while ((millis()-t0) < 500) {
-                if (readMessage(NULL) && !memcmp(readBuf, "Acknwld", 7) && readBuf[7]==c) {
-                    done = true;
-                    break;
-                }
-            }
-            
-        } while(!done);        
+    void sendCommandWithAck(char c, const void* arguments, int argumentsLength) {   
     }    
     
     uint16_t width() {
@@ -356,89 +316,36 @@ public:
     }
     
     void startPoly(char c, uint16_t n) {
-        polyLineCount = n;
-        remoteWrite(c);
-        remoteWrite(c^0xFF);
-        args.twoByte[0] = n;
-        remoteWrite((uint8_t*)&args, 2);
-        polyLineSum = args.bytes[0] + args.bytes[1];
     }
 
     void startFillPoly(uint16_t n) {
-        startPoly('N', n);
     }
 
     void startPolyLine(uint16_t n) {
-        startPoly('O', n);
     }
 
     void addPolyLine(int16_t x, int16_t y) {
-        if (polyLineCount>0) {
-            args.twoByte[0] = x;
-            args.twoByte[1] = y;
-            remoteWrite((uint8_t*)&args, 4);
-            polyLineSum += args.bytes[0] + args.bytes[1] + args.bytes[2] + args.bytes[3];
-            polyLineCount--;
-            if (polyLineCount == 0) {
-                remoteWrite(0xFF^polyLineSum);
-            }
-        }
     }
 
     void line(int x1, int y1, int x2, int y2) {
-        args.twoByte[0] = x1;
-        args.twoByte[1] = y1;
-        args.twoByte[2] = x2;
-        args.twoByte[3] = y2;
-        sendCommand('L', &args, 8);
     }
     
     void fillRectangle(int x1, int y1, int x2, int y2) {
-        args.twoByte[0] = x1;
-        args.twoByte[1] = y1;
-        args.twoByte[2] = x2;
-        args.twoByte[3] = y2;
-        sendCommand('R', &args, 8);
     }
     
     void rectangle(int x1, int y1, int x2, int y2, bool fill=false) {
-        if (fill)
-            fillRectangle(x1,y1,x2,y2);
-        else {
-            startPolyLine(4);
-            addPolyLine(x1,y1);
-            addPolyLine(x2,y1);
-            addPolyLine(x2,y2);
-            addPolyLine(x1,y2);
-        }
     }
     
     void roundedRectangle(int x1, int y1, int x2, int y2, int r, bool fill) {
-        args.roundedRectangle.filled = fill ? 1 : 0;
-        args.roundedRectangle.x1 = x1;
-        args.roundedRectangle.x2 = x2;
-        args.roundedRectangle.y1 = y1;
-        args.roundedRectangle.y2 = y2;
-        args.roundedRectangle.r = r;
-        sendCommand('Q', &args, 11);
     }
     
     void roundedRectangle(int x1, int y1, int x2, int y2, int r) {
-        roundedRectangle(x1,y1,x2,y2,r,false);
     }
     
     void fillRoundedRectangle(int x1, int y1, int x2, int y2, int r) {
-        roundedRectangle(x1,y1,x2,y2,r,true);
     }
     
     void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
-        args.twoByte[0] = x1;
-        args.twoByte[1] = y1;
-        args.twoByte[2] = x2;
-        args.twoByte[3] = y2;
-        args.twoByte[4] = x3;
-        args.twoByte[5] = y3;
-        sendCommand('G', &args, 12);
     }
     
 /*    void initialize() {
@@ -448,182 +355,85 @@ public:
     } */
     
     void initialize(int w=VECTOR_DISPLAY_DEFAULT_WIDTH, int h=VECTOR_DISPLAY_DEFAULT_HEIGHT) {
-        args.initialize.endianness = 0x1234; // endianness detector
-        args.initialize.width = w;
-        args.initialize.height = h;
-        args.initialize.aspectRatio = TO_FP32(1.);
-        args.initialize.reserved[0] = 0;
-        args.initialize.reserved[1] = 0;
-        args.initialize.reserved[2] = 0;
-        curWidth = w;
-        curHeight = h;
-        
-        sendCommandWithAck('Z', &args, 16);
     }
     
     void fillCircle(int x, int y, int r) {
-        args.twoByte[0] = x;
-        args.twoByte[1] = y;
-        args.twoByte[2] = r;
-        sendCommand('J', &args, 6);
     }
     
     void circle(int x, int y, int r) {
-        args.twoByte[0] = x;
-        args.twoByte[1] = y;
-        args.twoByte[2] = r;
-        sendCommand('I', &args, 6);
     }
     
     void point(int x, int y) {
-        args.twoByte[0] = x;
-        args.twoByte[1] = y;
-        sendCommand('P', &args, 4);
     }
     
     void arc(int x, int y, int r, FixedPoint32 angle1, FixedPoint32 sweep, bool fill=false) {
-        args.arc.x = x;
-        args.arc.y = y;
-        args.arc.r = r;
-        args.arc.angle1 = angle1;
-        args.arc.sweep = sweep;
-        args.arc.filled = fill ? 1 : 0;
-        sendCommand('S', &args, 15);
     }
     
     void arc(int x, int y, int r, float angle1, float sweep, bool fill=false) {
-        arc(x,y,r,TO_FP32(angle1),TO_FP32(sweep),fill);
     }
     
     // 32-bit fixed point
     void textSize(FixedPoint32 s) {
-        args.attribute32.attr = 's';
-        args.attribute32.value = s;
-        sendCommand('B', &args, 5);
     }
     
     void text(int x, int y, const char* str, int n) {
-        args.xyText.x = x;
-        args.xyText.y = y;
-        if (n>VECTOR_DISPLAY_MAX_STRING)
-            n = VECTOR_DISPLAY_MAX_STRING;
-        strncpy(args.xyText.text, str, n);
-        
-        if (fixCP437) {
-            for (int i=0;i<n;i++) {
-                if ((uint8_t)args.xyText.text[i] >=176)
-                    args.xyText.text[i]++;
-            }
-        }
-        args.xyText.text[n] = 0;
-        sendCommand('T', &args, 4+strlen(args.xyText.text)+1);
     }
     
     void text(int x, int y, const char* str) {
-        text(x, y, str, strlen(str));
     }
     
     void text(int x, int y, String str) {
-        text(x,y,str.c_str(), str.length());
     }
     
     void deleteButton(uint8_t command) {
-        sendCommand('D', &command, 1);
     }
 
     void addButton(uint8_t command, const char* str) {
-        args.charText.c = command;
-        strncpy(args.charText.text, str, VECTOR_DISPLAY_MAX_STRING);
-        args.charText.text[VECTOR_DISPLAY_MAX_STRING] = 0;
-        sendCommand('U', &args, 1+strlen(args.charText.text)+1);
     }
 
     void addButton(uint8_t command, String str) {
-        addButton(command, str.c_str());
     }
 
     void toast(const char* str, unsigned n) {
-        if (VECTOR_DISPLAY_MAX_STRING < n)
-            n = VECTOR_DISPLAY_MAX_STRING;
-        strncpy(args.text, str, n);
-        args.text[n] = 0;
-        sendCommand('M', &args, n+1);
     }
     
     void toast(const char* str) {
-        toast(str, strlen(str));
     }
     
     void toast(String text) {
-        toast(text.c_str(), text.length());
     }
     
     void foreColor(uint32_t color) {
-        args.attribute32.attr = 'f';
-        args.attribute32.value = color;
-        sendCommand('B', &args, 5);
-        curForeColor565 = -1;
     }
 
     void backColor(uint32_t color) {
-        args.attribute32.attr = 'b';
-        args.attribute32.value = color;
-        sendCommand('B', &args, 5);
     }
 
     void textBackColor(uint32_t color) {
-        args.attribute32.attr = 'k';
-        args.attribute32.value = color;
-        sendCommand('B', &args, 5);
     }
     
     void textForeColor(uint32_t color) {
-        args.attribute32.attr = 'F';
-        args.attribute32.value = color;
-        sendCommand('B', &args, 5);
     }
     
     void foreColor565(uint16_t color) {
-        args.attribute16.attr = 'f';
-        args.attribute16.value = color;
-        sendCommand('A', &args, 3);
-        curForeColor565 = color;
     }
 
     void backColor565(uint16_t color) {
-        args.attribute16.attr = 'b';
-        args.attribute16.value = color;
-        sendCommand('A', &args, 3);
     }
 
     void textBackColor565(uint16_t color) {
-        args.attribute16.attr = 'k';
-        args.attribute16.value = color;
-        sendCommand('A', &args, 3);
     }
     
     void textForeColor565(uint16_t color) {
-        args.attribute16.attr = 'F';
-        args.attribute16.value = color;
-        sendCommand('A', &args, 3);
     }
     
     void rounded(uint8_t value) {
-        args.attribute8.attr = 'n';
-        args.attribute8.value = value ? 1 : 0;
-        sendCommand('Y', &args, 2);
     }
     
     void thickness(FixedPoint32 t) {
-        args.attribute32.attr = 't';
-        args.attribute32.value = t;
-        sendCommand('B', &args, 5);
     }
 
     void pixelAspectRatio(FixedPoint32 a) {
-        args.attribute32.attr = 'a';
-        args.attribute32.value = a;
-        sendCommand('B', &args, 5);
     }
 
 #ifdef SUPPORT_FLOATING_POINT
@@ -649,121 +459,46 @@ public:
     } */
 
     void coordinates(int width, int height) {
-        args.attribute16x2.attr = 'c';
-        curWidth = width;
-        curHeight = height;
-        args.attribute16x2.values[0] = width;
-        args.attribute16x2.values[1] = height;
-        sendCommandWithAck('B', &args, 5);
     }
     
     void continuousUpdate(bool value) {
-        args.attribute8.attr = 'c';
-        args.attribute8.value = value ? 1 : 0;
-        sendCommand('Y', &args, 2);
     }
     
     void textHorizontalAlign(char hAlign) {
-        args.attribute8.attr = 'h';
-        args.attribute8.value = hAlign;
-        sendCommand('Y', &args, 2);
     }
 
     void textVerticalAlign(char hAlign) {
-        args.attribute8.attr = 'v';
-        args.attribute8.value = hAlign;
-        sendCommand('Y', &args, 2);
     }
 
     void textOpaqueBackground(bool opaque) {
-        args.attribute8.attr = 'o';
-        args.attribute8.value = opaque ? 1 : 0;
-        sendCommand('Y', &args, 2);
     }
     
     void textBold(bool bold) {
-        args.attribute8.attr = 'b';
-        args.attribute8.value = bold ? 1 : 0;
-        sendCommand('Y', &args, 2);
     }
     
     bool isTouchDown() {
-        return pointerDown;
     }
     
     int getTouchX() {
-        return pointerX;
     }
     
     int getTouchY() {
-        return pointerY;
     }
         
     bool readMessage(VectorDisplayMessage* msg) {
-        while (remoteAvailable()) {
-            uint8_t c = remoteRead();
-
-            if (0 < readPos && millis()-lastMessageStart > MESSAGE_TIMEOUT)
-                readPos = 0;
-
-            if (2 <= readPos) {
-                readBuf[readPos++] = c;
-                if (readPos >= VECTOR_DISPLAY_MESSAGE_SIZE) {
-                    readPos = 0;
-                    if (msg != NULL) 
-                        memcpy(msg, readBuf, sizeof(VectorDisplayMessage));
-                    else
-                        msg = (VectorDisplayMessage*)readBuf;
-                                        
-                    if (msg->what == MESSAGE_DOWN || msg->what == MESSAGE_UP || msg->what == MESSAGE_MOVE) {
-                        pointerDown = msg->what != MESSAGE_UP;
-                        pointerX = msg->data.xy.x;
-                        pointerY = msg->data.xy.y;
-                    }
-                    return true;
-                }
-                continue;
-            }
-            
-            if (1 <= readPos) {
-                if ( (*readBuf == 'U' && c == 'P') ||
-                     (*readBuf == 'D' && c == 'N') ||
-                     (*readBuf == 'M' && c == 'V') ||
-                     (*readBuf == 'B' && c == 'T') ||
-                     (*readBuf == 'A' && c == 'c') 
-                     ) {
-                    readBuf[readPos++] = c;
-                    continue;
-                }
-                readPos = 0;
-            }
-            if (readPos == 0 && (c == 'U' || c == 'D' || c == 'M' || c == 'B' || c == 'A')) {
-                readBuf[readPos++] = c;
-                lastMessageStart = millis();
-            }
-        }
-        return false;
     }
     
     uint32_t color565To8888(uint16_t c) {
-        return 0xFF000000 | ((((c>>11) & 0x1F) * 255 / 0x1F) << 16) | ((((c>>5) & 0x3F) * 255 / 0x3F) << 8) | ((c & 0x1F) * 255 / 0x1F);
     }
     
     uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
-      return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
     }
     
     uint32_t getBitmap1Size(int16_t w, int16_t h, uint8_t flags=0) {
-        return (flags & FLAG_PAD_BYTE) ? ((uint32_t)w+7)/8*h : ((uint32_t)w*h+7)/8;
     }
     
     uint32_t getBitmapSize(int16_t w, int16_t h, uint8_t depth=1, uint8_t flags=0) {
-        if (depth==1) {
-            return getBitmap1Size(w,h,flags);
-        }
-        else {
-            return w*h*(depth/8);
-        }
+
     }
     
     /*TODO: stubs*/
@@ -776,44 +511,6 @@ public:
       int16_t w, int16_t h, uint8_t depth=1, uint8_t flags=0, const uint8_t* mask=NULL, 
       uint32_t foreColor=0xFFFFFFFF, 
       uint32_t backColor=0x00FFFFFF) /* PROGMEM */ {
-        if (mask != NULL)
-            flags |= FLAG_HAVE_MASK;
-        uint32_t bitmapSize = getBitmapSize(w,h,depth,flags);
-        int headerSize = depth==1 ? 22 : 14;
-        uint32_t maskSize = mask == NULL ? 0 : getBitmap1Size(w,h,flags);
-        uint32_t fullSize = bitmapSize + headerSize + maskSize;
-        
-        if (fullSize + 1 > MAX_BUFFER)
-            return;
-
-        sendDelay();
-        remoteWrite('K');
-        remoteWrite('K'^0xFF);
-        args.bitmap.length = fullSize;
-        args.bitmap.depth = 1;
-        args.bitmap.flags = flags;
-        args.bitmap.x = x;
-        args.bitmap.y = y;
-        args.bitmap.w = w;
-        args.bitmap.h = h;
-        if (depth == 1) {
-            args.bitmap.foreColor = foreColor;
-            args.bitmap.backColor = backColor;
-        }
-        
-        uint8_t sum = sumBytes(&args, headerSize);
-        remoteWrite(&args,headerSize);
-        for (uint32_t i=0; i<bitmapSize; i++) {
-            uint8_t c = pgm_read_byte_near(bmp+i);
-            remoteWrite(c);
-            sum += c;
-        }
-        for (uint32_t i=0; i<maskSize; i++) {
-            uint8_t c = pgm_read_byte_near(mask+i);
-            remoteWrite(c);
-            sum += c;
-        }
-        remoteWrite(sum^0xFF);
     }
 
     void bitmap(int16_t x, int16_t y, uint8_t *bmp,
@@ -821,450 +518,176 @@ public:
       uint8_t* mask=NULL,
       uint32_t foreColor=0xFFFFFFFF, 
       uint32_t backColor=0x00FFFFFF) {
-        if (mask != NULL)
-            flags |= FLAG_HAVE_MASK;
-        uint32_t bitmapSize = getBitmapSize(w,h,depth,flags);
-        int headerSize = depth==1 ? 22 : 14;
-        uint32_t maskSize = mask == NULL ? 0 : getBitmap1Size(w,h,flags);
-        uint32_t fullSize = bitmapSize + (headerSize-14) + maskSize;
-        
-        if (fullSize + 1 > MAX_BUFFER)
-            return;
-
-        sendDelay();
-        remoteWrite('K');
-        remoteWrite('K'^0xFF);
-        args.bitmap.length = fullSize;
-        args.bitmap.depth = depth;
-        args.bitmap.flags = flags;
-        args.bitmap.x = x;
-        args.bitmap.y = y;
-        args.bitmap.w = w;
-        args.bitmap.h = h;
-        if (depth == 1) {
-            args.bitmap.foreColor = foreColor;
-            args.bitmap.backColor = backColor;
-        }
-        remoteWrite(&args,headerSize);
-        remoteWrite(bmp,bitmapSize);
-        uint8_t sum = sumBytes(&args, headerSize) + sumBytes((void*)bmp, bitmapSize);
-        if (maskSize > 0) {
-            remoteWrite(mask,maskSize);
-            sum += sumBytes((void*)mask, maskSize);
-        }
-        remoteWrite(sum^0xFF);
     }
     
     void utf8() {
-        fixCP437 = false;
-        args.attribute8.attr = 'i';
-        args.attribute8.value = 0;
-        sendCommand('Y', &args, 2);
     }
 
     /* The following are meant to be compatible with Adafruit GFX */
-    void cp437(bool s) {
-        // if true, activates real cp437 mode; if false, activates buggy Arduino compatible cp437 mode
-        fixCP437 = !s;
-        args.attribute8.attr = 'i';
-        args.attribute8.value = 1;
-        sendCommand('Y', &args, 2);
-    }
+    void cp437(bool s) {    }
     
-    void setRotation(uint8_t r) {
-        args.attribute8.attr = 'r';
-        args.attribute8.value = r;
-        curRotation = r & 3;
-        sendCommand('Y', &args, 2);
-    }
+    void setRotation(uint8_t r) {    }
     
-    void setTextSize(uint8_t size) {
-        gfxFontSize = size;
-        textsize = size;
-        textSize((FixedPoint32)size * 8 * 65536);
-    }
+    void setTextSize(uint8_t size) {    }
 
     void setTextDatum(uint8_t d) { }  // mockup
         
-    void setTextColor(uint16_t f, uint16_t b) {
-        textBackColor565(b);
-        textForeColor565(f);
-        textcolor = f;
-        textbgcolor = b;
-        textOpaqueBackground(true);
-    }
+    void setTextColor(uint16_t f, uint16_t b) {    }
     
-    void setTextColor(uint16_t f) {
-        textForeColor565(f);
-        textcolor = f;
-        textOpaqueBackground(false);
-    }
+    void setTextColor(uint16_t f) {    }
     
-    void setCursor(int16_t x, int16_t y) {
-        curx = x;
-        cury = y;
-    }
+    void setCursor(int16_t x, int16_t y) {    }
     
     int getTextsize() { return 0; }
     uint16_t getTextcolor() { return 0; }
     uint16_t getTextbgcolor() { return 0; }
 
-  int16_t  getCursorX(void) {
-      return curx;
-  }
+  int16_t  getCursorX(void) {  }
   
-  int16_t  getCursorY(void) {
-      return cury;
- }
+  int16_t  getCursorY(void) { }
     
-    void setTextWrap(bool w) {
-        wrap = w;
-    }
+    void setTextWrap(bool w) {    }
 
-    int16_t drawRightString(const char *string, int32_t x, int32_t y, uint8_t font) {
-        // TODO: add spaces
-        return drawString(string, x, y);
-    }
+    int16_t drawRightString(const char *string, int32_t x, int32_t y, uint8_t font) {    }
     
-    int16_t drawRightString(const String& string, int32_t x, int32_t y, uint8_t font) {
-        return drawRightString(string.c_str(), x, y, font);
-    }
+    int16_t drawRightString(const String& string, int32_t x, int32_t y, uint8_t font) {    }
     
-    int16_t drawCentreString(const char *string, int32_t x, int32_t y, uint8_t font) {
-        // TODO: add spaces
-        return drawString(string, x, y);
-    }
+    int16_t drawCentreString(const char *string, int32_t x, int32_t y, uint8_t font) {    }
     
     
-    int16_t drawCentreString(const String& string, int32_t x, int32_t y, uint8_t font) {
-        return drawCentreString(string.c_str(), x, y, font);
-    }
+    int16_t drawCentreString(const String& string, int32_t x, int32_t y, uint8_t font) {    }
     
-    int16_t drawString(const String& string, int32_t x, int32_t y) {
-        return drawString(string.c_str(), x, y);
-    }
+    int16_t drawString(const String& string, int32_t x, int32_t y) {    }
     
-    int16_t drawString(const char *string, int32_t x, int32_t y) {
-        setCursor(x, y);
-        return write(string);
-    };
+    int16_t drawString(const char *string, int32_t x, int32_t y) {    };
 
-    int16_t  drawChar2(uint16_t uniCode, int32_t x, int32_t y, uint16_t a, uint16_t b) {
-        setCursor(x, y);
-        return write(uniCode);
-    }
+    int16_t  drawChar2(uint16_t uniCode, int32_t x, int32_t y, uint16_t a, uint16_t b) {    }
                    
         // TODO: fix back color handling
-    size_t write(uint8_t c) override {
-        if (wrap && curx + 5*gfxFontSize>width()) {
-            curx = 0;
-            cury += 8*gfxFontSize;
-        }
-        text(curx, cury, (char*)&c, 1);
-        curx += 5*gfxFontSize;
-        return 0;
-    }
+    size_t write(uint8_t c) override {    }
 
         // TODO: fix back color handling
     size_t write(const char* s) /*override*/ { //ESP8266 core doesn't supply write(const char*)
-        int l = strlen(s);
-        int w = width();
-        if (!wrap || curx + 5*gfxFontSize*l <= w) {
-            text(curx, cury, s);
-            curx += 5*gfxFontSize*l;
-        }
-        else {
-            while(l>0) {
-                int end = ((int)w-curx)/(5*gfxFontSize);
-                if (end <= 0) {
-                    curx = 0;
-                    cury += 8*gfxFontSize;
-                    end = w/(5*gfxFontSize);
-                }
-                if (end > l)
-                    end = l;
-                text(curx, cury, s, end);
-                l-=end;
-                s += end;
-                curx = 5*gfxFontSize*end;
             }
-        }
-        return 0;
-    }
     
-    void drawPixel(int16_t x, int16_t y, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        point(x, y);
-    }
+    void drawPixel(int16_t x, int16_t y, uint16_t color) {    }
 
-    void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        rectangle(x,y,x+w-1,y+h-1);
-    }
+    void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {    }
 
-    void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        fillRectangle(x,y,x+w-1,y+h-1);
-    }
+    void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {    }
     
-    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        line(x,y,x+w,y);
-    }
+    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {    }
     
-    void drawLine(int16_t x, int16_t y, int16_t x2, int16_t y2, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        line(x,y,x2,y2);
-    }
+    void drawLine(int16_t x, int16_t y, int16_t x2, int16_t y2, uint16_t color) {    }
     
     
     // Draw an anti-aliased wide line from ax,ay to bx,by width wd with radiused ends (radius is wd/2)
     // If bg_color is not included the background pixel colour will be read from TFT or sprite
-    void  drawWideLine(float ax, float ay, float bx, float by, float wd, uint32_t fg_color, uint32_t bg_color = 0x00FFFFFF) {
-        drawRect(ax, ay, wd, abs(ay-by), fg_color);
-    }
+    void  drawWideLine(float ax, float ay, float bx, float by, float wd, uint32_t fg_color, uint32_t bg_color = 0x00FFFFFF) {    }
 
    // As per "drawSmoothArc" except the ends of the arc are NOT anti-aliased, this facilitates dynamic arc length changes with
    // arc segments and ensures clean segment joints.
    // The sides of the arc are anti-aliased by default. If smoothArc is false sides will NOT be anti-aliased
-    void drawArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color = 0, bool smoothArc = true){
-        // TODO
-        drawRect(x, y, r*2, ir*2, fg_color);
-    }
+    void drawArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color = 0, bool smoothArc = true){    }
 
-    void drawSmoothArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color = 0, bool roundEnds = false) {
-        drawArc(x, y, r, ir, startAngle, endAngle, fg_color, bg_color);
-    }
+    void drawSmoothArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color = 0, bool roundEnds = false) {    }
 
     // Draw an anti-aliased filled circle at x, y with radius r
     // If bg_color is not included the background pixel colour will be read from TFT or sprite
-    void fillSmoothCircle(int32_t x, int32_t y, int32_t r, uint32_t color, uint32_t bg_color = 0x00FFFFFF) {
-      fillCircle(x, y,  r,  color) ;     
-    }
+    void fillSmoothCircle(int32_t x, int32_t y, int32_t r, uint32_t color, uint32_t bg_color = 0x00FFFFFF) {    }
 
-  void   drawRoundRect(int32_t x, int32_t y, int32_t r, int32_t ir, int32_t w, int32_t h, uint32_t fg_color, uint32_t bg_color = 0x00FFFFFF, uint8_t quadrants = 0xF) {
-        drawRoundRect(x, y, w, h, r, fg_color);
-  }
+  void   drawRoundRect(int32_t x, int32_t y, int32_t r, int32_t ir, int32_t w, int32_t h, uint32_t fg_color, uint32_t bg_color = 0x00FFFFFF, uint8_t quadrants = 0xF) {  }
 
   // Draw a filled rounded rectangle , corner radius r and bounding box defined by x,y and w,h
-  void fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint32_t color, uint32_t bg_color) {
-      fillRoundRect(x, y, w, h, radius,  color);
-  }
+  void fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t radius, uint32_t color, uint32_t bg_color) {  }
 
 
-    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        line(x,y,x,y+h);
-    }
+    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) {    }
     
-    void fillScreen(uint16_t color) {
-        backColor565(color);
-        clear();
-        backColor(0xFF000000);
-    }
+    void fillScreen(uint16_t color) {    }
     
-    void drawCircle(int16_t x, int16_t y, int16_t r, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        circle(x,y,r);
-    }
+    void drawCircle(int16_t x, int16_t y, int16_t r, uint16_t color) {    }
 
-    void fillCircle(int16_t x, int16_t y, int16_t r, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        fillCircle(x,y,r);
-    }
+    void fillCircle(int16_t x, int16_t y, int16_t r, uint16_t color) {    }
     
-    void drawEllipse(int16_t x, int16_t y, int32_t rx, int32_t ry, uint16_t color) {
-        }
-    void fillEllipse(int16_t x, int16_t y, int32_t rx, int32_t ry, uint16_t color) {
-        // TODO
-        if(rx<ry) fillCircle(x, y, rx, color);
-        else  fillCircle(x, y, ry, color);
-    }
+    void drawEllipse(int16_t x, int16_t y, int32_t rx, int32_t ry, uint16_t color) {        }
+    void fillEllipse(int16_t x, int16_t y, int32_t rx, int32_t ry, uint16_t color) {    }
     
-    virtual void begin(int width=VECTOR_DISPLAY_DEFAULT_WIDTH, int height=VECTOR_DISPLAY_DEFAULT_HEIGHT) {
-        remoteFlush();
-        initialize(width, height);
-    }
+    virtual void begin(int width=VECTOR_DISPLAY_DEFAULT_WIDTH, int height=VECTOR_DISPLAY_DEFAULT_HEIGHT) {    }
     
     virtual void end() {
     }
     
     void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
       int16_t x2, int16_t y2, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        fillTriangle(x0,y0,x1,y1,x2,y2);
     }
 
     void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1,
-      int16_t x2, int16_t y2, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        line(x0,y0,x1,y1);
-        line(x1,y1,x2,y2);
-        line(x2,y2,x0,y0);
-    }
+      int16_t x2, int16_t y2, uint16_t color) {    }
 
     void drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,
-      int16_t radius, uint16_t  color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        roundedRectangle(x0,y0,w,h,radius,false);
-    }
+      int16_t radius, uint16_t  color) {    }
       
     void fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h,
       int16_t radius, uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        roundedRectangle(x0,y0,w,h,radius,true);          
     }
 
     void drawBitmap(int16_t x, int16_t y, const uint8_t bmp[],
-      int16_t w, int16_t h, uint16_t color) /* PROGMEM */ {
-        bitmap_progmem(x,y,bmp,w,h,1,0,NULL,color565To8888(color),0); // transparent background
-    }
+      int16_t w, int16_t h, uint16_t color) /* PROGMEM */ {    }
 
     void drawBitmap(int16_t x, int16_t y, uint8_t *bmp,
-      int16_t w, int16_t h, uint16_t color) {
-        bitmap(x,y,bmp,w,h,1,0,NULL,color565To8888(color),0); // transparent background
-    }
+      int16_t w, int16_t h, uint16_t color) {    }
 
     void drawBitmap(int16_t x, int16_t y, const uint8_t bmp[],
-      int16_t w, int16_t h, uint16_t color, uint16_t bg) {
-        bitmap_progmem(x,y,bmp,w,h,1,0,NULL,color565To8888(color),color565To8888(bg)); 
-    }
+      int16_t w, int16_t h, uint16_t color, uint16_t bg) {    }
     
     void drawBitmap(int16_t x, int16_t y, uint8_t *bmp,
-      int16_t w, int16_t h, uint16_t color, uint16_t bg) {
-        bitmap(x,y,bmp,w,h,1,0,NULL,color565To8888(color),color565To8888(bg));       
-    }
+      int16_t w, int16_t h, uint16_t color, uint16_t bg) {    }
 
     void drawXBitmap(int16_t x, int16_t y, const uint8_t bmp[],
-      int16_t w, int16_t h, uint16_t color) {
-        bitmap_progmem(x,y,bmp,w,h,1,FLAG_PAD_BYTE|FLAG_LOW_ENDIAN_BITS,NULL,color565To8888(color),0);               
+      int16_t w, int16_t h, uint16_t color) {     
     }
     
     void drawXBitmap(int16_t x, int16_t y, const uint8_t bmp[],
-      int16_t w, int16_t h, uint16_t color, uint16_t bgcolor) {
-          bitmap_progmem(x,y,bmp,w,h,1,FLAG_PAD_BYTE|FLAG_LOW_ENDIAN_BITS,NULL,color565To8888(color),color565To8888(bgcolor));     
-    }
+      int16_t w, int16_t h, uint16_t color, uint16_t bgcolor) {    }
 
     void drawGrayscaleBitmap(int16_t x, int16_t y, const uint8_t bmp[],
-      int16_t w, int16_t h) {
-        bitmap_progmem(x,y,bmp,w,h,8,0,NULL);               
-    }
+      int16_t w, int16_t h) {    }
     
     void drawGrayscaleBitmap(int16_t x, int16_t y, uint8_t *bmp,
-      int16_t w, int16_t h) {
-        bitmap(x,y,bmp,w,h,8,0,NULL);                         
-    }
+      int16_t w, int16_t h) {    }
 
     void drawGrayscaleBitmap(int16_t x, int16_t y,
       const uint8_t bmp[], const uint8_t mask[],
-      int16_t w, int16_t h) {
-        bitmap_progmem(x,y,bmp,w,h,8,0,mask);                         
-    }
+      int16_t w, int16_t h) {    }
     
     void drawGrayscaleBitmap(int16_t x, int16_t y,
-      uint8_t *bmp, uint8_t *mask, int16_t w, int16_t h) {
-        bitmap(x,y,bmp,w,h,8,0,mask);                         
-    }
+      uint8_t *bmp, uint8_t *mask, int16_t w, int16_t h) {    }
 
     void drawRGBBitmap(int16_t x, int16_t y, uint16_t* bmp,
-      int16_t w, int16_t h) {
-        bitmap(x,y,(uint8_t*)bmp,w,h,16,FLAG_LOW_ENDIAN_BYTES,NULL);                                   
+      int16_t w, int16_t h) {                
     }
 
     void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bmp[],
-      int16_t w, int16_t h) {
-        bitmap_progmem(x,y,(const uint8_t*)bmp,w,h,16,FLAG_LOW_ENDIAN_BYTES,NULL);                                   
+      int16_t w, int16_t h) {                           
     }
 
     void drawRGBBitmap(int16_t x, int16_t y,
       const uint16_t bmp[], const uint8_t mask[],
-      int16_t w, int16_t h) {
-        bitmap_progmem(x,y,(const uint8_t*)bmp,w,h,16,FLAG_LOW_ENDIAN_BYTES,(const uint8_t*)mask);                                   
+      int16_t w, int16_t h) {                              
     }
       
     void drawRGBBitmap(int16_t x, int16_t y,
       uint16_t *bmp, uint8_t *mask, int16_t w, int16_t h) {
-        bitmap(x,y,(uint8_t*)bmp,w,h,16,FLAG_LOW_ENDIAN_BYTES,mask);                                   
     }
 
     void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername,
       uint16_t color) {
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        if (cornername & 0x1) {
-            arc(x0,y0,r,TO_FP32(180),TO_FP32(90), false);
-        }
-        if (cornername & 0x2) {
-            arc(x0,y0,r,TO_FP32(270),TO_FP32(90), false);
-        }            
-        if (cornername & 0x4) {
-            arc(x0,y0,r,TO_FP32(0),TO_FP32(90), false);
-        }            
-        if (cornername & 0x8) {
-            arc(x0,y0,r,TO_FP32(90),TO_FP32(90), false);
-        }            
           
       }
 
     void fillCircleHelper(int16_t cx, int16_t cy, int16_t r, uint8_t corners,
       int16_t delta, uint16_t color) {
-          /* This is not efficient, but it's there just for completeness and I don't 
-          know that much code will actually call this. The Adafruit GFX library uses
-          this for rounded rectangles, but we are doing rounded rectangles directly
-          via the Android function so we don't need this. */
-        if ((corners & 3) == 0)
-            return;
-        
-        if (color != curForeColor565) {
-            foreColor565(color);
-        }
-        
-        line(cx,cy-r,cx,cy+r+delta);
-        if (corners & 2) {            
-            arc(cx,cy,r,TO_FP32(90),TO_FP32(180),false);
-            arc(cx,cy,r,TO_FP32(90),TO_FP32(180),true);
-            arc(cx,cy+delta,r,TO_FP32(90),TO_FP32(180),false);
-            arc(cx,cy+delta,r,TO_FP32(90),TO_FP32(180),true);
-            if (delta>0) {
-                rectangle(cx-r,cy,cx,cy+delta,false);
-                rectangle(cx-r,cy,cx,cy+delta,true);
-            }       
-        }
-        if (corners & 1) {
-            arc(cx,cy,r,TO_FP32(270),TO_FP32(180),false); // drawing edges separately makes things fit better
-            arc(cx,cy,r,TO_FP32(270),TO_FP32(180),true);
-            arc(cx,cy+delta,r,TO_FP32(270),TO_FP32(180),false);
-            arc(cx,cy+delta,r,TO_FP32(270),TO_FP32(180),true);
-            if (delta>0) {
-                rectangle(cx,cy,cx+r,cy+delta,false); 
-                rectangle(cx,cy,cx+r,cy+delta,true);
-            }
-        }
       }
 
   void     pushImage(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t *data) {};

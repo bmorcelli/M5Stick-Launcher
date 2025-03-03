@@ -65,6 +65,24 @@ def generate_build_flags(board_config):
         flags.append("-DTFT_COL_OFS2=0")
         flags.append("-DTFT_ROW_OFS2=0")
 
+    elif any("DISPLAY_ST7789_SPI" in flag for flag in extra_flags):
+        flags.append("-DST7789_DRIVER=1")
+        flags.append("-DTFT_MISO=ST7789_SPI_BUS_MISO_IO_NUM")
+        flags.append("-DTFT_MOSI=ST7789_SPI_BUS_MOSI_IO_NUM")
+        flags.append("-DTFT_SCLK=ST7789_SPI_BUS_SCLK_IO_NUM")
+        flags.append("-DTFT_CS=ST7789_SPI_CONFIG_CS_GPIO_NUM")
+        flags.append("-DTFT_DC=ST7789_SPI_CONFIG_DC_GPIO_NUM")
+        flags.append("-DTFT_RST=ST7789_DEV_CONFIG_RESET_GPIO_NUM")
+        flags.append("-DTFT_BL=GPIO_BCKL")
+        flags.append("-DTFT_WIDTH=DISPLAY_WIDTH")
+        flags.append("-DTFT_HEIGHT=DISPLAY_HEIGHT")
+        flags.append("-DTFT_IPS=0")
+        flags.append("-DTFT_COL_OFS1=0")
+        flags.append("-DTFT_ROW_OFS1=0")
+        flags.append("-DTFT_COL_OFS2=0")
+        flags.append("-DTFT_ROW_OFS2=0")
+
+
     elif any("DISPLAY_ST7789_I80" in flag for flag in extra_flags):
         flags.append("-DLOVYAN_BUS=Bus_Parallel8")
         flags.append("-DLOVYAN_PANEL=Panel_ST7789")

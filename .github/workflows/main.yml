@@ -275,7 +275,7 @@
                 },
               }  
             - {
-                vendor: "CYD",
+                vendor: "WIP",
                 name: "CYD-8048S043C",
                 description: "(ESP32S3, 4.3in, 800x480, Capacitive)",
                 link: "",
@@ -286,7 +286,7 @@
                 },
               }
             - {
-                vendor: "CYD",
+                vendor: "WIP",
                 name: "CYD-8048W550C",
                 description: "(ESP32S3, 5.5in, 800x480, Capacitive)",
                 link: "",

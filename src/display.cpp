@@ -134,6 +134,7 @@ void TouchFooter2(uint16_t color) {
 ** Description:   Start Display functions and display bootscreen
 ***************************************************************************************/
 void initDisplay(bool doAll) {
+  #ifndef HEADLESS
     static uint8_t _name=random(0,3);
     String name="@Pirata";
     String txt;
@@ -202,7 +203,7 @@ void initDisplay(bool doAll) {
 
   END:
     delay(50);
-    
+    #endif
 }
 /***************************************************************************************
 ** Function name: initDisplayLoop
