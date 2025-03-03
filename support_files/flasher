@@ -273,9 +273,9 @@
 	  </div>
   <h3>Select the version:</h3>
     <div class="switch">
-      <input type="radio" name="version" id="latest" value="Release" checked />
+      <input type="radio" name="version" id="latest" value="Release" checked onclick="toggleCategory('wip',0)" />
       <label for="latest">Latest Release</label>
-      <input type="radio" name="version" id="beta" value="Beta" />
+      <input type="radio" name="version" id="beta" value="Beta" onclick="toggleCategory('wip',1)" />
       <label for="beta">Beta Release</label>
     </div>
 
@@ -286,6 +286,7 @@
 		<button class="device-button" id="cyd" onclick="toggleDeviceCategory('cyd')"> CYD </button>
 		<button class="device-button" id="marauder" onclick="toggleDeviceCategory('marauder')"> Marauder </button>
 		<button class="device-button" id="esp32" onclick="toggleDeviceCategory('esp32')">ESP32</button>
+		<button class="device-button" id="wip" onclick="toggleDeviceCategory('wip')" style="display: none">WIP</button>
 	  </div>
 
 <!-- Information added by workflow -->
@@ -310,11 +311,20 @@
 
     </div>
   <script>
+	function toggleCategory(category, state) {
+		const selectedList = document.getElementById(category);
+		if(state==0) { selectedList.style.display = 'none'; }
+		else  { selectedList.style.display = 'block'; }
+		toggleDeviceCategory('none');
+		const button = document.querySelector('esp-web-install-button');
+		button.style.display = 'none';
+	}
+
 	function toggleDeviceCategory(category) {
 	  document.querySelectorAll('.device-list').forEach(function(list) {
 		list.style.display = 'none';
 	  });
-
+	  if(category=='none') { return; }
 	  const selectedList = document.querySelector('.' + category);
 	  selectedList.style.display = 'block';
 
