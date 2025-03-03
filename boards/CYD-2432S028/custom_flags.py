@@ -25,7 +25,6 @@ def generate_build_flags(board_config):
 
     # Definições gerais
     flags.append("-DDISABLE_OTA")
-    flags.append("-DPART_04MB=1")
 
     # Configurações de hardware
     flags.append("-DROTATION=3")

@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 //#include <M5-HTTPUpdate.h>
-#ifdef HEADLESS
+#if defined(HEADLESS)
 #include <VectorDisplay.h>
 #else
 #include <tft.h>
@@ -301,7 +301,7 @@ void setup() {
   String fileToCopy;
 
   //Init Display
-  #ifndef HEADLESS
+  #if !defined(HEADLESS)
     //tft->setAttribute(PSRAM_ENABLE,true);
     tft->begin();
 
