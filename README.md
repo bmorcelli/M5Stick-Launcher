@@ -64,9 +64,10 @@ Sourcecode will be released in the future..
 ## Changelog
 * 2.4.5:
      * [x] Port to CYD-2432S024R and CYD-2432W328R
-     * [x] Port to CYD-2432S022C
+     * [x] Port to CYD-2432S022C, CYD-2432S032C, CYD-2432S032R
      * [x] Fixed Marauder V4-OG device
      * [x] Removed Battery indication when it is not available
+     * [x] Now using ArduinoGFX as main graphics lib, with support to TFT_eSPI and LovyanGFX
 * 2.4.4:
      * [x] Disabled OTA menu for non M5 Stack Devices (save flash memory for CYD and Marauder, mostly), creating a new partition scheme for these devices
      * [x] Fixed T-Embed CC1101 battery value

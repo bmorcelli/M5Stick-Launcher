@@ -481,6 +481,7 @@
             esp32="\n"
             cyd="\n"
             marauder="\n"
+            wip="\n"
 
 
             # Itera sobre cada arquivo HTML na pasta de artefatos
@@ -503,6 +504,9 @@
                   "Launcher-Marauder.html")
                     marauder+="$content\n"
                     ;;
+                  "Launcher-WIP.html")
+                    wip+="$content\n"
+                    ;;
                 esac
                 echo "$file" # Exibe o caminho do arquivo processado
               fi
@@ -523,6 +527,8 @@
             html+="</ul>"
             html+="<ul class='device-list esp32'>"
             html+="$esp32"
+            html+="<ul class='device-list wip'>"
+            html+="$wip"
             html+="</ul>"
 
             # Exibe as quebras de linha
