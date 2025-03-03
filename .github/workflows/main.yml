@@ -527,6 +527,7 @@
             html+="</ul>"
             html+="<ul class='device-list esp32'>"
             html+="$esp32"
+            html+="</ul>"
             html+="<ul class='device-list wip'>"
             html+="$wip"
             html+="</ul>"
