@@ -41,7 +41,9 @@
         inline bool begin() { 
             Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
             delay(10);
-            return init();
+            bool result = init();
+            setRotation(1);
+            return result;
         }
         inline bool touched() { return read(); }
         inline TouchPoint getPointScaled() { 
