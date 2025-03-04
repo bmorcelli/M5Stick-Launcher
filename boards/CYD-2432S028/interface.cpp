@@ -15,6 +15,7 @@
     CYD28_TouchC touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
 #elif defined(TOUCH_GT911_I2C) || defined(TOUCH_AXS15231B_I2C) || defined(TOUCH_CST816S_I2C)
     #include <bb_captouch.h>
+    #include <Wire.h>
     #ifdef TOUCH_GT911_I2C
         #define TOUCH_SDA_PIN GT911_I2C_CONFIG_SDA_IO_NUM
         #define TOUCH_SCL_PIN GT911_I2C_CONFIG_SCL_IO_NUM
@@ -36,9 +37,10 @@
         public:
         TouchPoint t;
         TOUCHINFO ti;
-        CYD_Touch() { BBCapTouch(); }
+        CYD_Touch() : BBCapTouch() { }
         inline bool begin() { 
-            bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_RST_PIN, TOUCH_INT_PIN); // returns 0 if CT_SUCCESS;
+            Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN, 400000);
+            bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_RST_PIN, TOUCH_INT_PIN,400000,&Wire); // returns 0 if CT_SUCCESS;
             setOrientation(90, 320,240); // This orientation reflects the right position for the InputHandler logic.
             return result==0? true:false;
         }
