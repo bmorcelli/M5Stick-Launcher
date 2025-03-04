@@ -37,9 +37,6 @@
     a:hover {
 		text-decoration: underline;
     }
-	.invisible {
-		visibility: hidden;
-	}
 	.hidden {
 		display: none;
 	}
@@ -298,7 +295,7 @@
 	</div>
 
       <p class="button-row" align="center">
-        <esp-web-install-button class="invisible"></esp-web-install-button>
+        <esp-web-install-button style="display:none" ></esp-web-install-button>
       </p>
       </center>
       <div class="footer">
@@ -349,7 +346,7 @@
   
       const button = document.querySelector('esp-web-install-button');
       button.manifest = `${version}/Manifest-${type}.json`;
-      button.classList.remove('invisible');
+	  button.style.display = 'block';
     }
 
 
