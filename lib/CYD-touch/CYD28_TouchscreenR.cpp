@@ -255,7 +255,7 @@ void CYD28_TouchR::convertRawXY(uint16_t *x, uint16_t *y)
     if(touchCalibration_invert_x)
       xx = sizeX_px - xx;
     if(touchCalibration_invert_y)
-      yy = sizeY_px;
+      yy = sizeY_px - yy;
   }
   if(xx>sizeX_px) xx=sizeX_px-1;
   if(yy>sizeY_px) yy=sizeY_px-1;
