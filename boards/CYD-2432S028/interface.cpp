@@ -13,42 +13,74 @@
     #define CYD28_DISPLAY_HOR_RES_MAX 240
     #define CYD28_DISPLAY_VER_RES_MAX 320
     CYD28_TouchC touch(CYD28_DISPLAY_HOR_RES_MAX, CYD28_DISPLAY_VER_RES_MAX);
-#elif defined(TOUCH_GT911_I2C) || defined(TOUCH_AXS15231B_I2C) || defined(TOUCH_CST816S_I2C)
-    #include <bb_captouch.h>
-    #include <Wire.h>
+
+#elif defined(TOUCH_GT911_I2C) || defined(TOUCH_CST816S_I2C) 
     #ifdef TOUCH_GT911_I2C
+        #define TOUCH_MODULES_GT911
         #define TOUCH_SDA_PIN GT911_I2C_CONFIG_SDA_IO_NUM
         #define TOUCH_SCL_PIN GT911_I2C_CONFIG_SCL_IO_NUM
         #define TOUCH_RST_PIN GT911_TOUCH_CONFIG_RST_GPIO_NUM
         #define TOUCH_INT_PIN GT911_TOUCH_CONFIG_INT_GPIO_NUM
+        #define TOUCH_ADDR GT911_SLAVE_ADDRESS1
     #elif TOUCH_CST816S_I2C
+        #define TOUCH_MODULES_CST_SELF
         #define TOUCH_SDA_PIN CST816S_I2C_CONFIG_SDA_IO_NUM
         #define TOUCH_SCL_PIN CST816S_I2C_CONFIG_SCL_IO_NUM
         #define TOUCH_RST_PIN CST816S_TOUCH_CONFIG_RST_GPIO_NUM
         #define TOUCH_INT_PIN CST816S_TOUCH_CONFIG_INT_GPIO_NUM
-    #elif TOUCH_AXS15231B_I2C
-        #define TOUCH_SDA_PIN 41
-        #define TOUCH_SCL_PIN 42
-        #define TOUCH_RST_PIN -1
-        #define TOUCH_INT_PIN 3
+        #define TOUCH_ADDR CTS820_SLAVE_ADDRESS
     #endif
 
-    class CYD_Touch: public BBCapTouch {
+    #include <TouchLib.h>
+    #include <Wire.h>
+    class CYD_Touch: public TouchLib {
         public:
         TouchPoint t;
-        TOUCHINFO ti;
-        CYD_Touch() : BBCapTouch() { }
+        TP_Point ti;
+        CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN) { }
         inline bool begin() { 
-            Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN, 400000);
-            bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_RST_PIN, TOUCH_INT_PIN,400000,&Wire); // returns 0 if CT_SUCCESS;
-            setOrientation(90, 320,240); // This orientation reflects the right position for the InputHandler logic.
-            return result==0? true:false;
+            Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
+            delay(10);
+            return init();
         }
-        inline bool touched() { if(getSamples(&ti)) { t.x = ti.x[0]; t.y = ti.y[0]; t.pressed = true; } else { t.x=0; t.y=0; t.pressed=false; } }
-        inline TouchPoint getPointScaled() { return t; }
+        inline bool touched() { return read(); }
+        inline TouchPoint getPointScaled() { 
+            ti = getPoint(0);
+            t.x=ti.x;
+            t.y = (tftHeight+20)-ti.y;
+            t.pressed=true;
+            return t; 
+        }
 
     };
     CYD_Touch touch;
+
+#elif defined(TOUCH_AXS15231B_I2C)
+#include <bb_captouch.h>
+#include <Wire.h>
+    #define TOUCH_SDA_PIN 41
+    #define TOUCH_SCL_PIN 42
+    #define TOUCH_RST_PIN -1
+    #define TOUCH_INT_PIN 3
+
+class CYD_Touch: public BBCapTouch {
+    public:
+    TouchPoint t;
+    TOUCHINFO ti;
+    CYD_Touch() : BBCapTouch() { }
+    inline bool begin() { 
+        Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN, 400000);
+        delay(10);
+        bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_RST_PIN, TOUCH_INT_PIN,400000,&Wire); // returns 0 if CT_SUCCESS;
+        setOrientation(90, 320,240); // This orientation reflects the right position for the InputHandler logic.
+        return result==0? true:false;
+    }
+    inline bool touched() { if(getSamples(&ti)) { t.x = ti.x[0]; t.y = ti.y[0]; t.pressed = true; } else { t.x=0; t.y=0; t.pressed=false; } }
+    inline TouchPoint getPointScaled() { return t; }
+
+};
+CYD_Touch touch;
+
 #else
     #include "CYD28_TouchscreenR.h"
     #ifndef CYD28_DISPLAY_HOR_RES_MAX
