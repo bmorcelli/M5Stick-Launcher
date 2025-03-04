@@ -16,6 +16,7 @@ Ard_eSPI *tft = new Ard_eSPI();
     Arduino_DataBus *bus = new Arduino_ESP32PAR8Q(TFT_DC, TFT_CS,TFT_WR, TFT_RD, TFT_D0, TFT_D1, TFT_D2, TFT_D3, TFT_D4, TFT_D5, TFT_D6, TFT_D7);
   #elif RGB_PANEL // 16-par connections
     Arduino_ESP32RGBPanel *bus = new Arduino_ESP32RGBPanel(
+      #if defined(DISPLAY_ST7262_PAR)
       ST7262_PANEL_CONFIG_DE_GPIO_NUM /* DE */, 
       ST7262_PANEL_CONFIG_VSYNC_GPIO_NUM /* VSYNC */, 
       ST7262_PANEL_CONFIG_HSYNC_GPIO_NUM /* HSYNC */, 
@@ -37,16 +38,47 @@ Ard_eSPI *tft = new Ard_eSPI();
       ST7262_PANEL_CONFIG_DATA_GPIO_R3 /* B3 */, 
       ST7262_PANEL_CONFIG_DATA_GPIO_R4 /* B4 */,
       0 /* hsync_polarity */, 
-      1 /* hsync_front_porch */, 
-      1 /* hsync_pulse_width */, 
+      ST7262_PANEL_CONFIG_TIMINGS_HSYNC_FRONT_PORCH /* hsync_front_porch */, 
+      ST7262_PANEL_CONFIG_TIMINGS_HSYNC_PULSE_WIDTH /* hsync_pulse_width */, 
       ST7262_PANEL_CONFIG_TIMINGS_HSYNC_BACK_PORCH /* hsync_back_porch */,
       0 /* vsync_polarity */, 
-      3 /* vsync_front_porch */, 
-      1 /* vsync_pulse_width */, 
+      ST7262_PANEL_CONFIG_TIMINGS_VSYNC_FRONT_PORCH /* vsync_front_porch */, 
+      ST7262_PANEL_CONFIG_TIMINGS_VSYNC_PULSE_WIDTH /* vsync_pulse_width */, 
       ST7262_PANEL_CONFIG_TIMINGS_VSYNC_BACK_PORCH /* vsync_back_porch */,
-      1 /* pclk_active_neg */, 
-      10000000 /* prefer_speed */);
-
+      ST7262_PANEL_CONFIG_TIMINGS_FLAGS_PCLK_ACTIVE_NEG /* pclk_active_neg */, 
+      16000000 /* prefer_speed */
+      #elif defined(DISPLAY_ST7701_PAR)
+      ST7701_PANEL_CONFIG_DE_GPIO_NUM /* DE */, 
+      ST7701_PANEL_CONFIG_VSYNC_GPIO_NUM /* VSYNC */, 
+      ST7701_PANEL_CONFIG_HSYNC_GPIO_NUM /* HSYNC */, 
+      ST7701_PANEL_CONFIG_PCLK_GPIO_NUM /* PCLK */,
+      ST7701_PANEL_CONFIG_DATA_GPIO_R0 /* R0 */,
+      ST7701_PANEL_CONFIG_DATA_GPIO_R1 /* R1 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_R2 /* R2 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_R3 /* R3 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_R4 /* R4 */,
+      ST7701_PANEL_CONFIG_DATA_GPIO_G0 /* G0 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_G1 /* G1 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_G2 /* G2 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_G3 /* G3 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_G4 /* G4 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_G5 /* G5 */,
+      ST7701_PANEL_CONFIG_DATA_GPIO_B0 /* B0 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_B1 /* B1 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_B2 /* B2 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_B3 /* B3 */, 
+      ST7701_PANEL_CONFIG_DATA_GPIO_B4 /* B4 */,
+      1 /* hsync_polarity */, 
+      ST7701_PANEL_CONFIG_TIMINGS_HSYNC_FRONT_PORCH /* hsync_front_porch */, 
+      ST7701_PANEL_CONFIG_TIMINGS_HSYNC_PULSE_WIDTH /* hsync_pulse_width */, 
+      ST7701_PANEL_CONFIG_TIMINGS_HSYNC_BACK_PORCH /* hsync_back_porch */,
+      1 /* vsync_polarity */, 
+      ST7701_PANEL_CONFIG_TIMINGS_VSYNC_FRONT_PORCH /* vsync_front_porch */, 
+      ST7701_PANEL_CONFIG_TIMINGS_VSYNC_PULSE_WIDTH /* vsync_pulse_width */, 
+      ST7701_PANEL_CONFIG_TIMINGS_VSYNC_BACK_PORCH /* vsync_back_porch */,
+      ST7701_PANEL_CONFIG_TIMINGS_FLAGS_PCLK_ACTIVE_NEG /* pclk_active_neg */
+      #endif
+      );
   #else // SPI Data Bus shared with SDCard and other SPIClass devices
     Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO,&SPI);
   #endif

@@ -113,7 +113,12 @@ def generate_build_flags(board_config):
         flags.append("-DTFT_IPS=0")
         flags.append("-DTFT_COL_OFS1=0")
         flags.append("-DTFT_ROW_OFS1=0")
+
     elif any("DISPLAY_ST7262_PAR" in flag for flag in extra_flags):
+        flags.append("-DRGB_PANEL=1")
+        flags.append("-DTFT_BL=GPIO_BCKL")
+
+    elif any("DISPLAY_ST7701_PAR" in flag for flag in extra_flags):
         flags.append("-DRGB_PANEL=1")
         flags.append("-DTFT_BL=GPIO_BCKL")
 
