@@ -82,7 +82,11 @@ Ard_eSPI *tft = new Ard_eSPI();
   #else // SPI Data Bus shared with SDCard and other SPIClass devices
     Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO,&SPI);
   #endif
-  Ard_eSPI *tft = new Ard_eSPI(bus,TFT_RST,ROTATION,TFT_IPS,TFT_WIDTH,TFT_HEIGHT,TFT_COL_OFS1,TFT_ROW_OFS1,TFT_COL_OFS2,TFT_ROW_OFS2);
+  size_t gfx_size = sizeof(Arduino_RGB_Display);
+  void *gfx_memory = heap_caps_malloc(gfx_size, MALLOC_CAP_SPIRAM);
+
+  Ard_eSPI *tft = new (gfx_memory) Ard_eSPI(bus,TFT_RST,ROTATION,TFT_IPS,TFT_WIDTH,TFT_HEIGHT,TFT_COL_OFS1,TFT_ROW_OFS1,TFT_COL_OFS2,TFT_ROW_OFS2);
+  //Ard_eSPI *tft = new Ard_eSPI(bus,TFT_RST,ROTATION,TFT_IPS,TFT_WIDTH,TFT_HEIGHT,TFT_COL_OFS1,TFT_ROW_OFS1,TFT_COL_OFS2,TFT_ROW_OFS2);
 #endif
 
 /***************************************************************************************

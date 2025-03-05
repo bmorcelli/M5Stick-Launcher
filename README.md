@@ -63,10 +63,10 @@ Sourcecode will be released in the future..
 
 ## Changelog
 * 2.4.5:
-     * [x] Port to CYD-2432S024R and CYD-2432W328R
-     * [x] Port to CYD-2432S022C, CYD-2432S032C, CYD-2432S032R
+     * [x] Port to CYD-2432S024R https://github.com/bmorcelli/M5Stick-Launcher/issues/99 , CYD-2432W328R, CYD-2432S022C https://github.com/bmorcelli/M5Stick-Launcher/issues/112 , CYD-2432S032C, CYD-2432S032R
      * [x] Fixed Marauder V4-OG device
-     * [x] Removed Battery indication when it is not available
+     * [x] Removed Battery indication when it is not available (or 0%)
+     * [x] Fixed Headless 16Mb environment  https://github.com/bmorcelli/M5Stick-Launcher/issues/121 https://github.com/bmorcelli/M5Stick-Launcher/issues/120
      * [x] Now using ArduinoGFX as main graphics lib, with support to TFT_eSPI and LovyanGFX
 * 2.4.4:
      * [x] Disabled OTA menu for non M5 Stack Devices (save flash memory for CYD and Marauder, mostly), creating a new partition scheme for these devices
