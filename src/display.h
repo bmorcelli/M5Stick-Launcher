@@ -4,10 +4,8 @@
 
 #ifdef HEADLESS
 #include <VectorDisplay.h>
-#elif E_PAPER_DISPLAY
-#include <EPD_translate.h>
 #else
-#include <TFT_eSPI.h>
+#include <tft.h>
 #endif
 #include <ArduinoJson.h>
 #include <functional>
@@ -15,11 +13,9 @@
 #include <globals.h>
 // Declaração dos objetos TFT
 #if defined(HEADLESS)
-extern SerialDisplayClass tft;
-#elif E_PAPER_DISPLAY
-extern EPD_translate tft;
+extern SerialDisplayClass *tft;
 #else
-extern TFT_eSPI tft; 
+extern Ard_eSPI *tft; 
 #endif
 void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>>& options, bool bright = false);
 void loopVersions();
@@ -29,7 +25,7 @@ void initDisplayLoop();
 
 //Funções para economizar linhas nas outras funções
 void resetTftDisplay(int x = 0, int y = 0, uint16_t fc = FGCOLOR, int size = FM, uint16_t bg = BGCOLOR, uint16_t screen = BGCOLOR);
-void setTftDisplay(int x = 0, int y = 0, uint16_t fc = tft.textcolor, int size = tft.textsize, uint16_t bg = tft.textbgcolor);
+void setTftDisplay(int x = 0, int y = 0, uint16_t fc = tft->getTextcolor(), int size = tft->getTextsize(), uint16_t bg = tft->getTextbgcolor());
 
 void displayCurrentItem(JsonDocument doc, int currentIndex);
 void displayCurrentVersion(String name, String author, String version, String published_at, int versionIndex, JsonArray versions);

@@ -57,17 +57,24 @@ bool setupSdCard() {
   #if !defined(SDM_SD) // fot Lilygo T-Display S3 with lilygo shield
   if (!SD_MMC.begin("/sdcard",true)) 
   #elif (TFT_MOSI == SDCARD_MOSI)
-  if (!SDM.begin(SDCARD_CS,tft.getSPIinstance())) // https://github.com/Bodmer/TFT_eSPI/discussions/2420
+  if (!SDM.begin(SDCARD_CS)) // https://github.com/Bodmer/TFT_eSPI/discussions/2420
   #elif defined(HEADLESS)
   if(_sck==0 && _miso==0 && _mosi==0 && _cs==0) { 
     Serial.println("SdCard pins not set");
     return false;
   }
+
   sdcardSPI.begin(_sck, _miso, _mosi, _cs); // start SPI communications
   delay(10);
-  if (!SDM.begin(SDCARD_CS, sdcardSPI))  
+  if (!SDM.begin(_cs, sdcardSPI))  
   #elif defined(DONT_USE_INPUT_TASK)
-  if (!SDM.begin(SDCARD_CS))  
+    #if (TFT_MOSI != SDCARD_MOSI)
+    sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
+    if (!SDM.begin(SDCARD_CS, sdcardSPI))
+    #else
+    if (!SDM.begin(SDCARD_CS))  
+    #endif
+  
   #else
   sdcardSPI.begin(SDCARD_SCK, SDCARD_MISO, SDCARD_MOSI, SDCARD_CS); // start SPI communications
   delay(10);
@@ -210,7 +217,7 @@ bool pasteFile(String path) {
   size_t bytesRead;
   int tot=sourceFile.size();
   int prog=0;
-  //tft.drawRect(5,tftHeight-12, (tftWidth-10), 9, FGCOLOR);
+  //tft->drawRect(5,tftHeight-12, (tftWidth-10), 9, FGCOLOR);
   while ((bytesRead = sourceFile.read(buffer, bufferSize)) > 0) {
     if (destFile.write(buffer, bytesRead) != bytesRead) {
       //Serial.println("Falha ao escrever no arquivo de destino");
@@ -220,8 +227,8 @@ bool pasteFile(String path) {
     } else {
       prog+=bytesRead;
       float rad = 360*prog/tot;
-      tft.drawArc(tftWidth/2,tftHeight/2,tftHeight/4,tftHeight/5,0,int(rad),ALCOLOR,BGCOLOR,true);
-      //tft.fillRect(7,tftHeight-10, (tftWidth-14)*prog/tot, 5, FGCOLOR);
+      tft->drawArc(tftWidth/2,tftHeight/2,tftHeight/4,tftHeight/5,0,int(rad),ALCOLOR);
+      //tft->fillRect(7,tftHeight-10, (tftWidth-14)*prog/tot, 5, FGCOLOR);
     }
   }
 
@@ -390,8 +397,8 @@ String loopSD(bool filePicker) {
   int maxFiles = 0;
   String Folder = "/";
   String PreFolder = "/";
-  tft.fillScreen(BGCOLOR);
-  tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
+  tft->fillScreen(BGCOLOR);
+  tft->drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
 
   readFs(Folder, fileList);
   coord=listFiles(0, fileList);
@@ -410,8 +417,8 @@ String loopSD(bool filePicker) {
         maxFiles=0;
         for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
         reload=false;
-        tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
-        tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+        tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+        tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
       }
       coord=listFiles(index, fileList);
       redraw = false;
@@ -460,7 +467,7 @@ String loopSD(bool filePicker) {
             {"Main Menu", [=]() { returnToMenu=true; }},
           };
           loopOptions(options);
-          tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);  
+          tft->drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);  
           reload = true;     
           redraw = true;
         } else if(fileList[index][2]=="file"){
@@ -513,8 +520,8 @@ String loopSD(bool filePicker) {
         }
         redraw = true;
       }
-      tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
-      tft.drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
+      tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+      tft->drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
       redraw = true;
     }
     WAITING:
@@ -531,7 +538,7 @@ String loopSD(bool filePicker) {
   }
   closeSdCard();
   setupSdCard();  
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   return result;
 }
 /***************************************************************************************
@@ -544,7 +551,7 @@ void performUpdate(Stream &updateSource, size_t updateSize, int command) {
   // command = U_SPIFFS = 100
   // command = U_FLASH = 0
 
-  tft.fillSmoothRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+  tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
   progressHandler(0, 500);
 
   if (Update.begin(updateSize, command)) {
@@ -602,7 +609,7 @@ void updateFromSD(String path) {
     if (!file.seek(0x0)) goto Exit;
     performUpdate(file, file.size(), U_FLASH);
     file.close();
-    tft.fillScreen(BGCOLOR);
+    tft->fillScreen(BGCOLOR);
     ESP.restart();
   } else {
     if (!file.seek(0x8000)) goto Exit;
@@ -665,7 +672,7 @@ void updateFromSD(String path) {
       };
 
       loopOptions(options);
-      tft.fillSmoothRoundRect(6, 6, tftWidth - 12, tftHeight - 12, 5, BGCOLOR);
+      tft->fillRoundRect(6, 6, tftWidth - 12, tftHeight - 12, 5, BGCOLOR);
     }
 
     log_i("Appsize: %d", app_size);

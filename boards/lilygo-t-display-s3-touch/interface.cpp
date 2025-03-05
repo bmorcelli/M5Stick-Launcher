@@ -97,6 +97,8 @@ void _setBrightness(uint8_t brightval) {
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
 **********************************************************************/
 void InputHandler(void) {
+    static long tm=millis();
+    if(millis()-tm>200) {
     if (touch.read()) { //touch.tirqTouched() &&
         auto t = touch.getPoint(0);
         if(rotation==1) {
@@ -130,13 +132,12 @@ void InputHandler(void) {
         touchPoint.y = t.y;
         touchPoint.pressed=true;
         touchHeatMap(touchPoint);
-
+        tm=millis();
+    }
     }
     END:
-    if(AnyKeyPress) {
-      long tmp=millis();
-      while((millis()-tmp)<200 && touch.read());
-    }
+    delay(0);
+
 }
 /*********************************************************************
 ** Function: powerOff

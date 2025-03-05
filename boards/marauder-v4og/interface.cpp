@@ -5,6 +5,9 @@
 #include <esp_adc_cal.h>
 #include <soc/soc_caps.h>
 #include <soc/adc_channel.h>
+#include <CYD28_TouchscreenR.h>
+
+CYD28_TouchR touch(320,240);
 
 /***************************************************************************************
 ** Function name: _setup_gpio()
@@ -17,11 +20,7 @@ void _setup_gpio() {
   ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
   ledcWrite(TFT_BRIGHT_CHANNEL,255);
 
-  //uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; //org portrait
-  uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield from maruader
-  //uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY  from maruader
-
-  tft.setTouch(calData);
+  touch.begin(&SPI);
 
 }
 
@@ -42,38 +41,24 @@ void _setBrightness(uint8_t brightval) {
   ledcWrite(TFT_BRIGHT_CHANNEL,dutyCycle); // Channel 0
 }
 
-bool menuPress(int bot) {
-  //0 - prev
-  //1 - Sel
-  //2 - next
-  //3 - all
-  TouchPoint t;
-  bool touched = tft.getTouch(&t.x, &t.y, 600);
-
-  int terco=tftWidth/3;
-  if(touched) { 
-    log_i("Touchscreen Pressed at x=%d, y=%d", t.x,t.y);
-    if(rotation==3) { 
-      t.y = (tftHeight+20)-t.y;
-      t.x = tftWidth-t.x;
-    }
-
-    if(t.y>(tftHeight) && ((t.x>terco*bot && t.x<terco*(1+bot)) || bot==3)) { 
-      t.x=tftWidth+1;
-      t.y=tftHeight+11;
-      return true;
-    } else return false;
-  } else return false;
-}
-
 /*********************************************************************
 ** Function: InputHandler
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
 **********************************************************************/
 void InputHandler(void) {
-    TouchPoint t;
-    bool touched = tft.getTouch(&t.x, &t.y, 600);
-    if (touched) {
+  static long tm=0;
+    if(touch.touched()) { 
+      if(millis()-tm<200) goto END; // don´t allow multiple readings in less than 200ms
+      NextPress=false;
+      PrevPress=false;
+      UpPress=false;
+      DownPress=false;
+      SelPress=false;
+      EscPress=false;
+      AnyKeyPress=false;
+      touchPoint.pressed=false;
+      auto t = touch.getPointScaled();
+      t = touch.getPointScaled();
         if(rotation==3) {
             t.y = (tftHeight+20)-t.y;
             t.x = tftWidth-t.x;
@@ -97,12 +82,10 @@ void InputHandler(void) {
         touchPoint.y = t.y;
         touchPoint.pressed=true;
         touchHeatMap(touchPoint);
+        tm=millis();
     }
     END:
-    if(AnyKeyPress) {
-      long tmp=millis();
-      while((millis()-tmp)<200 && tft.getTouch(&t.x, &t.y, 600));
-    }
+    delay(0);
 }
 
 /*********************************************************************

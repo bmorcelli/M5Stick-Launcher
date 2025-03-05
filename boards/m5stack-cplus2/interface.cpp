@@ -119,17 +119,17 @@ void checkReboot() {
         {
             // Display poweroff bar only if holding button
             if (millis() - time_count > 500) {
-                tft.setCursor(60, 12);
-                tft.setTextSize(1);
-                tft.setTextColor(FGCOLOR, BGCOLOR);
+                tft->setCursor(60, 12);
+                tft->setTextSize(1);
+                tft->setTextColor(FGCOLOR, BGCOLOR);
                 countDown = (millis() - time_count) / 1000 + 1;
-                tft.printf(" PWR OFF IN %d/3\n", countDown);
+                tft->printf(" PWR OFF IN %d/3\n", countDown);
                 delay(10);
             }
         }
 
         // Clear text after releasing the button
         delay(30);
-        tft.fillRect(60, 12, tftWidth - 60, tft.fontHeight(1), BGCOLOR);
+        tft->fillRect(60, 12, tftWidth - 60, 8, BGCOLOR);
     }
 }

@@ -23,26 +23,6 @@ static const uint8_t MISO  = SPI_SCK_PIN;
 static const uint8_t SDA = GROVE_SDA;
 static const uint8_t SCL = GROVE_SCL;
 
-// TFT_eSPI display
-#define ST7789_DRIVER   1
-#define USER_SETUP_LOADED
-#define TFT_BACKLIGHT_ON 1
-#define USE_HSPI_PORT
-#define SMOOTH_FONT     1
-#define TFT_WIDTH       170
-#define TFT_HEIGHT      320
-#define TFT_BL          15
-#define TFT_MISO        -1   
-#define TFT_MOSI        11
-#define TFT_SCLK        12
-#define TFT_CS          10 
-#define TFT_DC          13
-#define TFT_RST         9
-#define TOUCH_CS        -1
-#define SPI_FREQUENCY   40000000
-#define SPI_READ_FREQUENCY 20000000
-#define SPI_TOUCH_FREQUENCY 2500000
-
 // Display Setup#
 #define HAS_SCREEN
 #define ROTATION        3

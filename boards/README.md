@@ -2,13 +2,16 @@
 .
 ├── platformio.ini
 ├── boards
+    ├── _JsonFiles
+    │   └── [board].json
     ├── [board]
-    │   └── interface.cpp
+    │   ├── interface.cpp
+    |   └── [board].ini
     ├── pinouts
     │   ├── pins_arduino.h
     │   └── [board].h
-    ├── [board].json
-    └── [board].ini
+    └── Readme.md
+    
 ...
 ```
 
@@ -26,10 +29,10 @@ https://github.com/espressif/arduino-esp32/blob/master/variants/esp32s3/pins_ard
 ## boards/\[board]/interface.cpp
 This is where you do the board specific setup code
 
-## boards/\[board].json
+## boards/_JsonFiles/\[board].json
 This is the board config. Look at other boards for whats needed.
 Here is an offical example and what we are actually using here:
 https://github.com/platformio/platform-espressif32/blob/master/boards/esp32-s3-devkitc-1.json
 
-## boards/\[board].ini
+## boards/\[board]\[board].ini
 This is the platformio config for the device. Look at other boards for whats needed.

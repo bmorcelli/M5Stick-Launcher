@@ -29,7 +29,7 @@
                 family: "ESP32-S3",
                 env: "m5stack-cardputer",
                 partitions: {
-                  bootloader_addr: "0x0000",
+                  bootloader_addr: "0x0",
                 },
               }
             - {
@@ -109,6 +109,17 @@
                   bootloader_addr: "0x0",
                 },
               } 
+            - {
+                vendor: "Espressif",
+                name: "Smoochie Board",
+                description: "",
+                link: "",
+                family: "ESP32-S3",
+                env: "smoochiee-board",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
             - {
                 vendor: "Espressif",
                 name: "ESP32-S3-4mb",
@@ -210,11 +221,22 @@
               } 
             - {
                 vendor: "CYD",
-                name: "CYD 2432W328R or 2432S024R",
+                name: "CYD 2432W328R",
                 description: "(Resistive)",
                 link: "",
                 family: "ESP32",
-                env: "CYD-2432W328R-or-S024R",
+                env: "CYD-2432W328R",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }  
+            - {
+                vendor: "CYD",
+                name: "CYD 2432S024R",
+                description: "(Resistive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2432S024R",
                 partitions: {
                   bootloader_addr: "0x1000",
                 },
@@ -229,7 +251,51 @@
                 partitions: {
                   bootloader_addr: "0x1000",
                 },
-              }               
+              }
+            - {
+                vendor: "CYD",
+                name: "CYD-2432S032C",
+                description: "(3.2in, Capacitive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2432S032C",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }              
+            - {
+                vendor: "CYD",
+                name: "CYD-2432S032R",
+                description: "(3.2in, Resistive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-2432S032R",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }  
+            - {
+                vendor: "WIP",
+                name: "CYD-8048S043C",
+                description: "(ESP32S3, 4.3in, 800x480, Capacitive)",
+                link: "",
+                family: "ESP32-S3",
+                env: "CYD-8048S043C",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+            - {
+                vendor: "WIP",
+                name: "CYD-8048W550C",
+                description: "(ESP32S3, 5.5in, 800x480, Capacitive)",
+                link: "",
+                family: "ESP32-S3",
+                env: "CYD-8048W550C",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }     
             - {
                 vendor: "Marauder",
                 name: "V4-OG",
@@ -415,6 +481,7 @@
             esp32="\n"
             cyd="\n"
             marauder="\n"
+            wip="\n"
 
 
             # Itera sobre cada arquivo HTML na pasta de artefatos
@@ -437,6 +504,9 @@
                   "Launcher-Marauder.html")
                     marauder+="$content\n"
                     ;;
+                  "Launcher-WIP.html")
+                    wip+="$content\n"
+                    ;;
                 esac
                 echo "$file" # Exibe o caminho do arquivo processado
               fi
@@ -457,6 +527,9 @@
             html+="</ul>"
             html+="<ul class='device-list esp32'>"
             html+="$esp32"
+            html+="</ul>"
+            html+="<ul class='device-list wip'>"
+            html+="$wip"
             html+="</ul>"
 
             # Exibe as quebras de linha

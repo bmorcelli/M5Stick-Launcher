@@ -27,9 +27,11 @@
  */
 
 #include "CYD28_TouchscreenR.h"
+#include <SPI.h>
 
 #define ISR_PREFIX IRAM_ATTR
 #define MSEC_THRESHOLD 3
+#define SPI_SETTING     SPISettings(2000000, MSBFIRST, SPI_MODE0)
 
 static CYD28_TouchR *isrPinptr;
 void isrPin(void);
@@ -47,6 +49,19 @@ bool CYD28_TouchR::begin()
   isrPinptr = this;
   return true;
 }
+
+bool CYD28_TouchR::begin(SPIClass *wspi)
+{
+  _pspi = wspi;
+  //_pspi->begin();
+  pinMode(CYD28_TouchR_CS, OUTPUT);
+  digitalWrite(CYD28_TouchR_CS, HIGH);
+  pinMode(CYD28_TouchR_IRQ, INPUT );
+  attachInterrupt(digitalPinToInterrupt(CYD28_TouchR_IRQ), isrPin, FALLING);
+  isrPinptr = this;
+
+  return true;
+}
 // ------------------------------------------------------------
 ISR_PREFIX
 void isrPin(void)
@@ -57,28 +72,33 @@ void isrPin(void)
 // ------------------------------------------------------------
 uint8_t CYD28_TouchR::transfer(uint8_t val)
 {
-  uint8_t out = 0;
-  uint8_t del = _delay >> 1;
-  uint8_t bval = 0;
-  int sck = LOW;
+  if(_pspi==nullptr) {
+    uint8_t out = 0;
+    uint8_t del = _delay >> 1;
+    uint8_t bval = 0;
+    int sck = LOW;
 
-  int8_t bit = 8;
-  while (bit)
-  {
-    bit--;
-    digitalWrite(CYD28_TouchR_MOSI, ((val & (1 << bit)) ? HIGH : LOW)); // Write bit
-    wait(del);
-    sck ^= 1u;
-    digitalWrite(CYD28_TouchR_CLK, sck);
-    /* ... Read bit */
-    bval = digitalRead(CYD28_TouchR_MISO);    
-    out <<= 1;
-    out |= bval;
-    wait(del);
-    sck ^= 1u;
-    digitalWrite(CYD28_TouchR_CLK, sck);
+    int8_t bit = 8;
+    while (bit)
+    {
+      bit--;
+      digitalWrite(CYD28_TouchR_MOSI, ((val & (1 << bit)) ? HIGH : LOW)); // Write bit
+      wait(del);
+      sck ^= 1u;
+      digitalWrite(CYD28_TouchR_CLK, sck);
+      /* ... Read bit */
+      bval = digitalRead(CYD28_TouchR_MISO);    
+      out <<= 1;
+      out |= bval;
+      wait(del);
+      sck ^= 1u;
+      digitalWrite(CYD28_TouchR_CLK, sck);
+    }
+    return out;
+  } else {
+    uint8_t out =_pspi->transfer(val);
+    return out;
   }
-  return out;
 }
 // ------------------------------------------------------------
 uint16_t CYD28_TouchR::transfer16(uint16_t data)
@@ -92,11 +112,17 @@ uint16_t CYD28_TouchR::transfer16(uint16_t data)
       uint8_t msb;
     };
   } in, out;
-
   in.val = data;
-  out.msb = transfer(in.msb);
-  out.lsb = transfer(in.lsb);
-  return out.val;
+
+  if(_pspi==nullptr) {
+    out.msb = transfer(in.msb);
+    out.lsb = transfer(in.lsb);
+    return out.val;
+  } else {
+    //out.msb =_pspi->transfer(in.msb);
+    //out.lsb =_pspi->transfer(in.lsb);
+    return _pspi->transfer16(data);
+  }
 }
 // ------------------------------------------------------------
 void CYD28_TouchR::wait(uint_fast8_t del)
@@ -110,7 +136,7 @@ void CYD28_TouchR::wait(uint_fast8_t del)
 CYD28_TS_Point CYD28_TouchR::getPointScaled()
 {
   update();
-  int16_t x = xraw, y = yraw;
+  uint16_t x = xraw, y = yraw;
   convertRawXY(&x, &y);
   return CYD28_TS_Point(x, y, zraw);
 }
@@ -164,6 +190,9 @@ void CYD28_TouchR::update()
     return;
 
   digitalWrite(CYD28_TouchR_CS, LOW);
+  
+  if(_pspi!=nullptr) _pspi->beginTransaction(SPI_SETTING);
+
   transfer(0xB1 /* Z1 */);
   int16_t z1 = transfer16(0xC1 /* Z2 */) >> 3;
   z = z1 + 4095;
@@ -180,6 +209,9 @@ void CYD28_TouchR::update()
   else  data[0] = data[1] = data[2] = data[3] = 0;
   data[4] = transfer16(0xD0 /* Y */) >> 3;
   data[5] = transfer16(0) >> 3;
+
+  if(_pspi!=nullptr) _pspi->endTransaction();
+
   digitalWrite(CYD28_TouchR_CS, HIGH);
 
   if (z < 0) z = 0;
@@ -206,32 +238,47 @@ void CYD28_TouchR::update()
   }
 }
 // ------------------------------------------------------------
-void CYD28_TouchR::convertRawXY(int16_t *x, int16_t *y)
+void CYD28_TouchR::convertRawXY(uint16_t *x, uint16_t *y)
 {
-  int16_t x_tmp = *x, y_tmp = *y, xx, yy;
-  switch (rotation)
-  {
-  case 0: // PORT0
-    xx = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    yy = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    xx = sizeY_px - xx;
-    break;
-  case 1: // LANDSC0
-    xx = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    yy = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    break;      
-  case 2: // PORT1
-    xx = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    yy = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    yy = sizeX_px - yy;
-    break;
-  default: // 3 LANDSC1
-    xx = ((x_tmp - CYD28_TouchR_CAL_XMIN) * sizeX_px) / (CYD28_TouchR_CAL_XMAX - CYD28_TouchR_CAL_XMIN);
-    yy = ((y_tmp - CYD28_TouchR_CAL_YMIN) * sizeY_px) / (CYD28_TouchR_CAL_YMAX - CYD28_TouchR_CAL_YMIN);
-    xx = sizeX_px - xx;
-    yy = sizeY_px - yy;
-    break;
-  } 
+  uint16_t x_tmp = *x, y_tmp = *y, xx, yy;
+
+  if(!touchCalibration_rotate){
+    xx=(x_tmp-touchCalibration_x0)*sizeX_px/(touchCalibration_x1-touchCalibration_x0);
+    yy=(y_tmp-touchCalibration_y0)*sizeY_px/(touchCalibration_y1-touchCalibration_y0);
+    if(touchCalibration_invert_x)
+      xx = sizeX_px - xx;
+    if(touchCalibration_invert_y)
+      yy = sizeY_px - yy;
+  } else {
+    xx=(y_tmp-touchCalibration_x0)*sizeX_px/(touchCalibration_x1-touchCalibration_x0);
+    yy=(x_tmp-touchCalibration_y0)*sizeY_px/(touchCalibration_y1-touchCalibration_y0);
+    if(touchCalibration_invert_x)
+      xx = sizeX_px - xx;
+    if(touchCalibration_invert_y)
+      yy = sizeY_px - yy;
+  }
+  if(xx>sizeX_px) xx=sizeX_px-1;
+  if(yy>sizeY_px) yy=sizeY_px-1;
   *x = xx;
   *y = yy;
+}
+
+/***************************************************************************************
+** Function name:           setTouch
+** Description:             imports calibration parameters for touchscreen. 
+***************************************************************************************/
+void CYD28_TouchR::setTouch(uint16_t *parameters){
+  touchCalibration_x0 = parameters[0];
+  touchCalibration_x1 = parameters[1];
+  touchCalibration_y0 = parameters[2];
+  touchCalibration_y1 = parameters[3];
+
+  if(touchCalibration_x0 == 0) touchCalibration_x0 = 1;
+  if(touchCalibration_x1 == 0) touchCalibration_x1 = 1;
+  if(touchCalibration_y0 == 0) touchCalibration_y0 = 1;
+  if(touchCalibration_y1 == 0) touchCalibration_y1 = 1;
+
+  touchCalibration_rotate = parameters[4] & 0x01;
+  touchCalibration_invert_x = parameters[4] & 0x02;
+  touchCalibration_invert_y = parameters[4] & 0x04;
 }

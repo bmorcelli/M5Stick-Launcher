@@ -1,3 +1,6 @@
+#ifndef _PRE_COMPILER
+#define _PRE_COMPILER
+
 #if !defined(PART_04MB) && !defined(PART_08MB) && !defined(PART_16MB) && !defined(HEADLESS)
 #define PART_04MB 1
 #endif
@@ -56,3 +59,22 @@
 #ifndef LW
   #define LW 6
 #endif
+#ifndef TFT_MISO 
+  #define TFT_MISO  -1
+#endif
+
+// Feed CYD envs with some sort of information to easily program.
+#if !defined(TFT_DC) && !defined(TFT_IPS) && !defined(TFT_COL_OFS1) && !defined(TFT_COL_OFS2) && !defined(TFT_MOSI)
+#define TFT_DC -1
+#define TFT_CS 15
+#define TFT_SCLK 14
+#define TFT_MOSI 13
+#define TFT_RST -1
+#define TFT_IPS 0
+#define TFT_COL_OFS1 0
+#define TFT_ROW_OFS1 0
+#define TFT_COL_OFS2 0
+#define TFT_ROW_OFS2 0
+
+#endif
+#endif // _PRE_COMPILER

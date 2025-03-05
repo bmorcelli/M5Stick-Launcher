@@ -26,7 +26,7 @@ struct box_t
   {
     for (int i = 0; i < 8; ++i)
     {
-      tft.fillRect(x, y, w, h,BGCOLOR);
+      tft->fillRect(x, y, w, h,BGCOLOR);
     }
   }
   void draw(bool shift)
@@ -34,10 +34,10 @@ struct box_t
     int ie = touch_id < 0 ? 4 : 8;
     for (int i = 0; i < ie; ++i)
     {
-      tft.drawRect(x, y, w, h,color);
-      tft.setTextColor(color);
-      if(shift) tft.drawChar(key_sh,x+w/2-FM*LW/2,y+h/2-FM*LH/2);
-      else tft.drawChar(key,x+w/2-FM*LW/2,y+h/2-FM*LH/2);
+      tft->drawRect(x, y, w, h,color);
+      tft->setTextColor(color);
+      if(shift) tft->drawChar2(x+w/2-FM*LW/2,y+h/2-FM*LH/2,key_sh,FGCOLOR,BGCOLOR);
+      else tft->drawChar2(x+w/2-FM*LW/2,y+h/2-FM*LH/2,key,FGCOLOR,BGCOLOR);
     }
   }
   bool contain(int x, int y)
@@ -53,7 +53,7 @@ static box_t box_list[box_count];
 
 String keyboard(String mytext, int maxSize, String msg) {
   resetTftDisplay();
-  
+  touchPoint.Clear();
   String _mytext = mytext;
   bool caps=false;
   bool redraw=true;
@@ -208,8 +208,8 @@ String keyboard(String mytext, int maxSize, String msg) {
   x2=0;
   y2=0;
 #endif
-
-  tft.fillScreen(BGCOLOR);
+  tft->drawPixel(0,0,0);
+  tft->fillScreen(BGCOLOR);
 
 #if defined(HAS_3_BUTTONS) // StickCs and Core for long press detection logic
   bool longNextPress = false;
@@ -221,92 +221,92 @@ String keyboard(String mytext, int maxSize, String msg) {
   while(1) {
     if(redraw) {
     #ifdef E_PAPER_DISPLAY
-      tft.stopCallback();
+      tft->stopCallback();
     #endif
-      tft.setCursor(0,0);
-      tft.setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
-      tft.setTextSize(FM);
+      tft->setCursor(0,0);
+      tft->setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
+      tft->setTextSize(FM);
 
       //Draw the rectangles
       if(y<0 || y2<0) {
 
-        tft.fillRect(0,1,tftWidth,KBLH,BGCOLOR);
-        tft.drawRect(ofs[0][0],2,ofs[0][1],KBLH,getComplementaryColor(BGCOLOR));       // Ok Rectangle
-        tft.drawRect(ofs[1][0],2,ofs[1][1],KBLH,getComplementaryColor(BGCOLOR));      // CAP Rectangle
-        tft.drawRect(ofs[2][0],2,ofs[2][1],KBLH,getComplementaryColor(BGCOLOR));     // DEL Rectangle
-        tft.drawRect(ofs[3][0],2,ofs[3][1],KBLH,getComplementaryColor(BGCOLOR));     // SPACE Rectangle
-        tft.drawRect(3,KBLH+12,tftWidth-3,KBLH,FGCOLOR); // mystring Rectangle
+        tft->fillRect(0,1,tftWidth,KBLH,BGCOLOR);
+        tft->drawRect(ofs[0][0],2,ofs[0][1],KBLH,getComplementaryColor(BGCOLOR));       // Ok Rectangle
+        tft->drawRect(ofs[1][0],2,ofs[1][1],KBLH,getComplementaryColor(BGCOLOR));      // CAP Rectangle
+        tft->drawRect(ofs[2][0],2,ofs[2][1],KBLH,getComplementaryColor(BGCOLOR));     // DEL Rectangle
+        tft->drawRect(ofs[3][0],2,ofs[3][1],KBLH,getComplementaryColor(BGCOLOR));     // SPACE Rectangle
+        tft->drawRect(3,KBLH+12,tftWidth-3,KBLH,FGCOLOR); // mystring Rectangle
 
 
-        if(x==0 && y==-1) { tft.setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft.fillRect(ofs[0][0],2,ofs[0][1],KBLH,getComplementaryColor(BGCOLOR)); }
-        else tft.setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
-        tft.drawString("OK",ofs[0][2], 4);
+        if(x==0 && y==-1) { tft->setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft->fillRect(ofs[0][0],2,ofs[0][1],KBLH,getComplementaryColor(BGCOLOR)); }
+        else tft->setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
+        tft->drawString("OK",ofs[0][2], 4);
 
 
-        if(x==1 && y==-1) { tft.setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft.fillRect(ofs[1][0],2,ofs[1][1],KBLH,getComplementaryColor(BGCOLOR)); }
-        else if(caps) { tft.fillRect(ofs[1][0],2,ofs[1][1],KBLH,TFT_DARKGREY); tft.setTextColor(getComplementaryColor(BGCOLOR), TFT_DARKGREY); }
-        else tft.setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
-        tft.drawString("CAP", ofs[1][2], 4);
+        if(x==1 && y==-1) { tft->setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft->fillRect(ofs[1][0],2,ofs[1][1],KBLH,getComplementaryColor(BGCOLOR)); }
+        else if(caps) { tft->fillRect(ofs[1][0],2,ofs[1][1],KBLH,DARKGREY); tft->setTextColor(getComplementaryColor(BGCOLOR), DARKGREY); }
+        else tft->setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
+        tft->drawString("CAP", ofs[1][2], 4);
 
 
-        if(x==2 && y==-1) { tft.setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft.fillRect(ofs[2][0],2,ofs[2][1],KBLH,getComplementaryColor(BGCOLOR)); }
-        else tft.setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
-        tft.drawString("DEL", ofs[2][2], 4);
+        if(x==2 && y==-1) { tft->setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft->fillRect(ofs[2][0],2,ofs[2][1],KBLH,getComplementaryColor(BGCOLOR)); }
+        else tft->setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
+        tft->drawString("DEL", ofs[2][2], 4);
 
-        if(x>2 && y==-1) { tft.setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft.fillRect(ofs[3][0],2,ofs[3][1],KBLH,getComplementaryColor(BGCOLOR)); }
-        else tft.setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
-        tft.drawString("SPACE", ofs[3][2], 4);
+        if(x>2 && y==-1) { tft->setTextColor(BGCOLOR, getComplementaryColor(BGCOLOR)); tft->fillRect(ofs[3][0],2,ofs[3][1],KBLH,getComplementaryColor(BGCOLOR)); }
+        else tft->setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
+        tft->drawString("SPACE", ofs[3][2], 4);
       }
-      tft.setTextSize(FP);
-      tft.setTextColor(getComplementaryColor(BGCOLOR), 0x5AAB);
+      tft->setTextSize(FP);
+      tft->setTextColor(getComplementaryColor(BGCOLOR), 0x5AAB);
 
-      tft.drawString(msg.substring(0,maxFPSize), 3, KBLH+4);
+      tft->drawString(msg.substring(0,maxFPSize), 3, KBLH+4);
 
-      tft.setTextSize(FM);
+      tft->setTextSize(FM);
 
 
       // reseta o quadrado do texto
-      if (mytext.length() == (maxFMSize) || mytext.length() == (maxFMSize+1) || mytext.length() == (maxFPSize) || mytext.length() == (maxFPSize+1)) tft.fillRect(3,KBLH+12,tftWidth-3,KBLH,BGCOLOR); // mystring Rectangle
+      if (mytext.length() == (maxFMSize) || mytext.length() == (maxFMSize+1) || mytext.length() == (maxFPSize) || mytext.length() == (maxFPSize+1)) tft->fillRect(3,KBLH+12,tftWidth-3,KBLH,BGCOLOR); // mystring Rectangle
       // escreve o texto
-      tft.setTextColor(getComplementaryColor(BGCOLOR));
+      tft->setTextColor(getComplementaryColor(BGCOLOR));
       if(mytext.length()>(maxFMSize)) {
-        tft.setTextSize(FP);
+        tft->setTextSize(FP);
         if(mytext.length()>maxFPSize) {
-          tft.drawString(mytext.substring(0,maxFPSize), 5, KBLH+LH+6);
-          tft.drawString(mytext.substring(maxFPSize,mytext.length()), 5, KBLH+2*LH+6);
+          tft->drawString(mytext.substring(0,maxFPSize), 5, KBLH+LH+6);
+          tft->drawString(mytext.substring(maxFPSize,mytext.length()), 5, KBLH+2*LH+6);
         }
         else {
-          tft.drawString(mytext, 5, KBLH+LH+6);
+          tft->drawString(mytext, 5, KBLH+LH+6);
         }
       } else {
-        tft.drawString(mytext, 5, KBLH+LH+6);
+        tft->drawString(mytext, 5, KBLH+LH+6);
       }
       //desenha o retangulo colorido
-      tft.drawRect(3,KBLH+12,tftWidth-3,KBLH,FGCOLOR); // mystring Rectangle
+      tft->drawRect(3,KBLH+12,tftWidth-3,KBLH,FGCOLOR); // mystring Rectangle
 
 
-      tft.setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
-      tft.setTextSize(FM);
+      tft->setTextColor(getComplementaryColor(BGCOLOR), BGCOLOR);
+      tft->setTextSize(FM);
 
       int _i=0;
       for(int i=0;i<4;i++) {
         for(int j=0;j<12;j++) {
           //use last coordenate to paint only this letter
-          if(x2==j && y2==i) { tft.setTextColor(~BGCOLOR, BGCOLOR); tft.fillRect(j*_x,i*_y+KBLH*2+14,_x,_y,BGCOLOR);}
+          if(x2==j && y2==i) { tft->setTextColor(~BGCOLOR, BGCOLOR); tft->fillRect(j*_x,i*_y+KBLH*2+14,_x,_y,BGCOLOR);}
           /* If selected, change font color and draw Rectangle*/
-          if(x==j && y==i) { tft.setTextColor(BGCOLOR, ~BGCOLOR); tft.fillRect(j*_x,i*_y+KBLH*2+14,_x,_y,~BGCOLOR);}
+          if(x==j && y==i) { tft->setTextColor(BGCOLOR, ~BGCOLOR); tft->fillRect(j*_x,i*_y+KBLH*2+14,_x,_y,~BGCOLOR);}
 
 
           /* Print the letters */
         #ifdef HAS_TOUCH
           box_list[_i++].draw(caps);
         #else
-          if(!caps) tft.drawChar(keys[i][j][0], (j*_x+_xo), (i*_y+2*KBLH+LH*FM));
-          else tft.drawChar(keys[i][j][1], (j*_x+_xo), (i*_y+2*KBLH+LH*FM));
+          if(!caps) tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][0], FGCOLOR,BGCOLOR);
+          else tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][1], FGCOLOR,BGCOLOR);
         #endif
 
           /* Return colors to normal to print the other letters */
-          if(x==j && y==i) { tft.setTextColor(~BGCOLOR, BGCOLOR); }
+          if(x==j && y==i) { tft->setTextColor(~BGCOLOR, BGCOLOR); }
         }
       }
       // save actual key coordenate
@@ -314,13 +314,13 @@ String keyboard(String mytext, int maxSize, String msg) {
       y2=y;
       redraw = false;
     #ifdef E_PAPER_DISPLAY
-      tft.startCallback();
+      tft->startCallback();
     #endif
     }
 
     //cursor handler
     if(mytext.length()>(maxFMSize)) {
-      tft.setTextSize(FP);
+      tft->setTextSize(FP);
       if(mytext.length()>(maxFPSize)) {
         cY=42;
         cX=5+(mytext.length()-maxFPSize)*LW;
@@ -337,11 +337,14 @@ String keyboard(String mytext, int maxSize, String msg) {
     if(millis()-holdCode>250) { // allow reading inputs
   
     #if defined(HAS_TOUCH) // CYD, Core2, CoreS3
+      #if defined(DONT_USE_INPUT_TASK)
+        check(AnyKeyPress);
+      #endif
       auto t = touchPoint;
       if (t.pressed)
       {
         if (box_list[48].contain(t.x, t.y)) { break; }      // Ok
-        if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft.fillRect(0,54,tftWidth,tftHeight-54,BGCOLOR); goto THIS_END; } // CAP
+        if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft->fillRect(0,54,tftWidth,tftHeight-54,BGCOLOR); goto THIS_END; } // CAP
         if (box_list[50].contain(t.x, t.y)) goto DEL;               // DEL
         if (box_list[51].contain(t.x, t.y)) { mytext += " "; goto THIS_END; } // SPACE
         for(k=0;k<48;k++){
@@ -451,7 +454,7 @@ String keyboard(String mytext, int maxSize, String msg) {
     #elif defined (HAS_KEYBOARD) // Cardputer and T-Deck
         if (KeyStroke.pressed) {
           wakeUpScreen();
-          tft.setCursor(cX,cY);
+          tft->setCursor(cX,cY);
           String keyStr = "";
           for (auto i : KeyStroke.word) {
             if (keyStr != "") {
@@ -463,9 +466,9 @@ String keyboard(String mytext, int maxSize, String msg) {
 
           if(mytext.length()<maxSize && !KeyStroke.enter && !KeyStroke.del) {
             mytext += keyStr;
-            if(mytext.length()!=(maxFMSize+1) && mytext.length()!=(maxFMSize+1)) tft.print(keyStr.c_str());
-            cX=tft.getCursorX();
-            cY=tft.getCursorY();
+            if(mytext.length()!=(maxFMSize+1) && mytext.length()!=(maxFMSize+1)) tft->print(keyStr.c_str());
+            cX=tft->getCursorX();
+            cY=tft->getCursorY();
             if(mytext.length()==(maxFMSize+1)) redraw = true;
             if(mytext.length()==(maxFPSize+1)) redraw = true;
           }
@@ -473,15 +476,15 @@ String keyboard(String mytext, int maxSize, String msg) {
             // Handle backspace key
             mytext.remove(mytext.length() - 1);
             int fS=FM;
-            if(mytext.length()>maxFPSize) { tft.setTextSize(FP); fS=FP; }
-            else tft.setTextSize(FM);
-            tft.setCursor((cX-fS*LW),cY);
-            tft.setTextColor(FGCOLOR,BGCOLOR);
-            tft.print(" "); 
-            tft.setTextColor(getComplementaryColor(BGCOLOR), 0x5AAB);
-            tft.setCursor(cX-fS*LW,cY);
-            cX=tft.getCursorX();
-            cY=tft.getCursorY();
+            if(mytext.length()>maxFPSize) { tft->setTextSize(FP); fS=FP; }
+            else tft->setTextSize(FM);
+            tft->setCursor((cX-fS*LW),cY);
+            tft->setTextColor(FGCOLOR,BGCOLOR);
+            tft->print(" "); 
+            tft->setTextColor(getComplementaryColor(BGCOLOR), 0x5AAB);
+            tft->setCursor(cX-fS*LW,cY);
+            cX=tft->getCursorX();
+            cY=tft->getCursorY();
             if(mytext.length()==maxFMSize) redraw = true;
             if(mytext.length()==maxFPSize) redraw = true;        
           }
@@ -497,7 +500,7 @@ String keyboard(String mytext, int maxSize, String msg) {
 
     if(false) { // When selecting some letter or something, use these goto addresses(ADD, DEL)
       SELECT:
-        tft.setCursor(cX,cY);
+        tft->setCursor(cX,cY);
         if(caps) z=1;
         else z=0;
         if(x==0 && y==-1) break; // Ok key,
@@ -506,23 +509,23 @@ String keyboard(String mytext, int maxSize, String msg) {
           DEL:
           mytext.remove(mytext.length()-1);
           int fS=FM;
-          if(mytext.length()>maxFPSize) { tft.setTextSize(FP); fS=FP; }
-          else tft.setTextSize(FM);
-          tft.setCursor((cX-fS*LW),cY);
-          tft.setTextColor(FGCOLOR,BGCOLOR);
-          tft.print(" ");
-          tft.setTextColor(getComplementaryColor(BGCOLOR), 0x5AAB);
-          tft.setCursor(cX-fS*LW,cY);
-          cX=tft.getCursorX();
-          cY=tft.getCursorY();
+          if(mytext.length()>maxFPSize) { tft->setTextSize(FP); fS=FP; }
+          else tft->setTextSize(FM);
+          tft->setCursor((cX-fS*LW),cY);
+          tft->setTextColor(FGCOLOR,BGCOLOR);
+          tft->print(" ");
+          tft->setTextColor(getComplementaryColor(BGCOLOR), 0x5AAB);
+          tft->setCursor(cX-fS*LW,cY);
+          cX=tft->getCursorX();
+          cY=tft->getCursorY();
         }
         else if(x>2 && y==-1 && mytext.length()<maxSize) mytext += " "; // SPACE key
         else if(y>-1 && mytext.length()<maxSize) { // Letters
           ADD:
           mytext += keys[y][x][z];
-          if(mytext.length()!=(maxFMSize+1) && mytext.length()!=(maxFMSize+1)) tft.print(keys[y][x][z]);
-          cX=tft.getCursorX();
-          cY=tft.getCursorY();
+          if(mytext.length()!=(maxFMSize+1) && mytext.length()!=(maxFMSize+1)) tft->print(keys[y][x][z]);
+          cX=tft->getCursorX();
+          cY=tft->getCursorY();
         }
         redraw = true;
         holdCode=millis();
@@ -533,7 +536,7 @@ String keyboard(String mytext, int maxSize, String msg) {
   }
 
   //Resets screen when finished writing
-  tft.fillRect(0,0,tftWidth,tftHeight,BGCOLOR);
+  tft->fillRect(0,0,tftWidth,tftHeight,BGCOLOR);
   resetTftDisplay();
 
   return mytext;

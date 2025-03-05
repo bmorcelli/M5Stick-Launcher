@@ -3,13 +3,11 @@
 #include <EEPROM.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <M5-HTTPUpdate.h>
-#ifdef HEADLESS
+//#include <M5-HTTPUpdate.h>
+#if defined(HEADLESS)
 #include <VectorDisplay.h>
-#elif E_PAPER_DISPLAY
-#include <EPD_translate.h>
 #else
-#include <TFT_eSPI.h>
+#include <tft.h>
 #endif
 #include <SPIFFS.h>
 #include "esp_ota_ops.h"
@@ -26,9 +24,9 @@ uint32_t MAX_SPIFFS = 0;
 uint32_t MAX_APP = 0;
 uint32_t MAX_FAT_vfs = 0;
 uint32_t MAX_FAT_sys = 0;
-uint16_t FGCOLOR = TFT_GREEN;
-uint16_t ALCOLOR = TFT_RED;
-uint16_t BGCOLOR = TFT_BLACK;
+uint16_t FGCOLOR = GREEN;
+uint16_t ALCOLOR = RED;
+uint16_t BGCOLOR = BLACK;
 uint16_t odd_color = 0x30c5;
 uint16_t even_color = 0x32e5;
 
@@ -163,40 +161,40 @@ void get_partition_sizes() {
     ESP_LOGI("Partition Sizes", "MAX_FAT_sys: %d", MAX_FAT_sys);
     ESP_LOGI("Partition Sizes", "MAX_FAT_vfs: %d", MAX_FAT_vfs);
 
-#if defined(HEADLESS)
-    // This piece of the code is supposed to handle the absence of APP partition tables
-    // if it doent's find App partition, means that the ESP32 can be 4, 8 or 16Mb, that must be set in platformio.ini
-    // and the partition size will be discovered using esp_flash_get_physical_size function
-    uint32_t __size;  // Variable to store the flash size from flash ID
-    //esp_err_t result = esp_flash_get_physical_size(NULL,&__size); // This guy reads the FlashID size, won't work for now, that is the true size of the chip
-                                                                    // if flashing with a 4Mb bootloader and installing 8Mb partition scheme, it breakes (bootloop) probably in this function:
-                                                                    // https://github.com/bmorcelli/esp-idf/blob/621a7fa1208ce44dbf1e0038c43587a1dc362319/components/spi_flash/esp_flash_spi_init.c#L282
-                                                                    // If i set a chip size greater than the one I have, I fall in this error:
-                                                                    // https://github.com/bmorcelli/esp-idf/blob/621a7fa1208ce44dbf1e0038c43587a1dc362319/components/spi_flash/esp_flash_spi_init.c#L317
-                                                                    // maybe commenting it in a custom fw can solve it, but will add lots of issues due to size changings and sets in this same function
+// #if defined(HEADLESS)
+//     // This piece of the code is supposed to handle the absence of APP partition tables
+//     // if it doent's find App partition, means that the ESP32 can be 4, 8 or 16Mb, that must be set in platformio.ini
+//     // and the partition size will be discovered using esp_flash_get_physical_size function
+//     uint32_t __size;  // Variable to store the flash size from flash ID
+//     //esp_err_t result = esp_flash_get_physical_size(NULL,&__size); // This guy reads the FlashID size, won't work for now, that is the true size of the chip
+//                                                                     // if flashing with a 4Mb bootloader and installing 8Mb partition scheme, it breakes (bootloop) probably in this function:
+//                                                                     // https://github.com/bmorcelli/esp-idf/blob/621a7fa1208ce44dbf1e0038c43587a1dc362319/components/spi_flash/esp_flash_spi_init.c#L282
+//                                                                     // If i set a chip size greater than the one I have, I fall in this error:
+//                                                                     // https://github.com/bmorcelli/esp-idf/blob/621a7fa1208ce44dbf1e0038c43587a1dc362319/components/spi_flash/esp_flash_spi_init.c#L317
+//                                                                     // maybe commenting it in a custom fw can solve it, but will add lots of issues due to size changings and sets in this same function
                                                                     
-    esp_err_t result = esp_flash_get_size(NULL,&__size);
-    if (result == ESP_OK) {
-        Serial.print("Flash size: ");
-        Serial.println(__size, HEX);  // Prints value in hex
-    } else {
-        Serial.print("Error: ");
-        Serial.println(result);  // Prints the errors, if any
-    }
-    if(MAX_APP==0) {
-      // Makes the arrangements
+//     esp_err_t result = esp_flash_get_size(NULL,&__size);
+//     if (result == ESP_OK) {
+//         Serial.print("Flash size: ");
+//         Serial.println(__size, HEX);  // Prints value in hex
+//     } else {
+//         Serial.print("Error: ");
+//         Serial.println(result);  // Prints the errors, if any
+//     }
+//     if(MAX_APP==0) {
+//       // Makes the arrangements
 
-      //partitionSetter(def_part, sizeof(def_part));
-      if(__size==0x400000) { partitionSetter(def_part, sizeof(def_part)); }
-      if(__size==0x800000) { partitionSetter(def_part8, sizeof(def_part8));}
-      if(__size==0x1000000) { partitionSetter(def_part16, sizeof(def_part16)); }
-      while(1) {
-        Serial.println("Turn Off and On again to apply partition changes.");
-        delay(2500);
-      }
-    }
+//       //partitionSetter(def_part, sizeof(def_part));
+//       if(__size==0x400000) { partitionSetter(def_part, sizeof(def_part)); }
+//       if(__size==0x800000) { partitionSetter(def_part8, sizeof(def_part8));}
+//       if(__size==0x1000000) { partitionSetter(def_part16, sizeof(def_part16)); }
+//       while(1) {
+//         Serial.println("Turn Off and On again to apply partition changes.");
+//         delay(2500);
+//       }
+//     }
 
-  #endif
+//   #endif
 }
 /*********************************************************************
 **  Function: _setup_gpio()
@@ -303,11 +301,16 @@ void setup() {
   String fileToCopy;
 
   //Init Display
-  #ifndef HEADLESS
-    tft.setAttribute(PSRAM_ENABLE,true);
-    tft.init();
+  #if !defined(HEADLESS)
+    //tft->setAttribute(PSRAM_ENABLE,true);
+    tft->begin();
+
+    #ifdef TFT_INVERSION_ON
+    tft->invertDisplay(true);
+    #endif
+    
   #endif
-  tft.setRotation(rotation);
+  tft->setRotation(rotation);
   if(rotation&0b1) {
     #if defined(HAS_TOUCH)
     tftHeight = TFT_WIDTH-20;
@@ -323,7 +326,7 @@ void setup() {
     #endif
     tftWidth = TFT_WIDTH;
   }
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   setBrightness(bright,false);
   initDisplay(true);  
 
@@ -342,6 +345,7 @@ void setup() {
   #endif    
 
   _post_setup_gpio();
+
 
   // This task keeps running all the time, will never stop
   #ifndef DONT_USE_INPUT_TASK
@@ -366,7 +370,7 @@ void setup() {
     }
   
     if(check(SelPress)) {
-      tft.fillScreen(BGCOLOR);
+      tft->fillScreen(BGCOLOR);
       goto Launcher;
     }
 
@@ -379,14 +383,14 @@ void setup() {
       if(check(NextPress) || check(PrevPress))
     #endif 
       {
-        tft.fillScreen(TFT_BLACK);
+        tft->fillScreen(BLACK);
         ESP.restart();
       } 
   }
   
   // If nothing is done, check if there are any app installed in the ota partition, if it does, restart device to start installed App.
   if(firstByte==0xE9) {
-    tft.fillScreen(TFT_BLACK);
+    tft->fillScreen(BLACK);
 	  ESP.restart();  
   }
   else goto Launcher;
@@ -395,7 +399,7 @@ void setup() {
   // If M5 or Enter button is pressed, continue from here
   Launcher:
   
-  tft.fillScreen(BGCOLOR);
+  tft->fillScreen(BGCOLOR);
   #if LED>0 && defined(HEADLESS)
     digitalWrite(LED, LED_ON?LOW:HIGH); // turn off the LED
   #endif
@@ -443,7 +447,7 @@ void loop() {
       if(index == 0) {  
         if(setupSdCard()) { 
           loopSD(false); 
-          tft.fillScreen(BGCOLOR);
+          tft->fillScreen(BGCOLOR);
           redraw=true;
         }
         else {
@@ -477,7 +481,7 @@ void loop() {
             closeSdCard();
             if(GetJsonFromM5()) loopFirmware();
           }
-          tft.fillScreen(BGCOLOR);
+          tft->fillScreen(BGCOLOR);
           redraw=true;
         } 
         else {
@@ -492,7 +496,7 @@ void loop() {
       }
       if(index == 2) {
         loopOptionsWebUi();
-        tft.fillScreen(BGCOLOR);
+        tft->fillScreen(BGCOLOR);
         redraw=true;        
       }
 
@@ -542,8 +546,8 @@ void loop() {
         #endif
         options.push_back({"Main Menu",  [=]() { returnToMenu=true; }});
         loopOptions(options);
-        tft.fillScreen(BGCOLOR);
-        tft.fillScreen(BGCOLOR);
+        tft->fillScreen(BGCOLOR);
+        tft->fillScreen(BGCOLOR);
         redraw=true;
       }
       returnToMenu = false;

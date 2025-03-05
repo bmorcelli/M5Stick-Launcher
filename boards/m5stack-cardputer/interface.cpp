@@ -10,11 +10,14 @@ Keyboard_Class Keyboard;
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio() {
-    Keyboard.begin();
+//    Keyboard.begin();
     pinMode(0, INPUT);
     pinMode(10, INPUT);     // Pin that reads the
 }
 
+void _post_setup_gpio() { 
+  Keyboard.begin();
+}
 #include <driver/adc.h>
 #include <esp_adc_cal.h>
 #include <soc/soc_caps.h>
@@ -93,7 +96,17 @@ void InputHandler(void) {
     if(Keyboard.isKeyPressed(KEY_ENTER) || digitalRead(0)==LOW)             SelPress = true;
     //if(Keyboard.isKeyPressed('/'))                                          NextPagePress = true;  // right arrow
     //if(Keyboard.isKeyPressed(','))                                          PrevPagePress = true;  // left arrow
-
+    if (KeyStroke.pressed) {
+      String keyStr = "";
+      for (auto i : KeyStroke.word) {
+        if (keyStr != "") {
+          keyStr = keyStr + "+" + i;
+        } else {
+          keyStr += i;
+        }
+      }
+      Serial.println(keyStr);
+    }
     END:
     if(AnyKeyPress) {
       long tmp=millis();

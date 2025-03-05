@@ -8,8 +8,17 @@
 ** Location: main.cpp
 ** Description:   initial setup for the device
 ***************************************************************************************/
-void _setup_gpio() { }
+void _setup_gpio() {  }
 
+/***************************************************************************************
+** Function name: _post_setup_gpio()
+** Location: main.cpp
+** Description:   second stage gpio setup to make a few functions work
+***************************************************************************************/
+void _post_setup_gpio() { 
+    Serial.println("Setting GPIO 0 as Input, press to access the Launcher");
+    pinMode(SEL_BTN,INPUT); 
+}
 
 /***************************************************************************************
 ** Function name: getBattery()
@@ -31,7 +40,9 @@ void _setBrightness(uint8_t brightval) { }
 ** Function: InputHandler
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
 **********************************************************************/
-void InputHandler(void) { }
+void InputHandler(void) {
+    if(digitalRead(SEL_BTN) == BTN_ACT) { SelPress=true; AnyKeyPress=true; }
+ }
 
 /*********************************************************************
 ** Function: powerOff
