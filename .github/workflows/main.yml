@@ -221,7 +221,7 @@
               } 
             - {
                 vendor: "CYD",
-                name: "CYD 2432W328R",
+                name: "CYD-2432W328R",
                 description: "(Resistive)",
                 link: "",
                 family: "ESP32",
@@ -232,7 +232,7 @@
               }  
             - {
                 vendor: "CYD",
-                name: "CYD 2432S024R",
+                name: "CYD-2432S024R",
                 description: "(Resistive)",
                 link: "",
                 family: "ESP32",
@@ -274,6 +274,28 @@
                   bootloader_addr: "0x1000",
                 },
               }  
+            - {
+                vendor: "WIP",
+                name: "CYD-3248S035R",
+                description: "(3.5in, Resistive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-3248S035R",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "WIP",
+                name: "CYD-3248S035C",
+                description: "(3.5in, Capacitive)",
+                link: "",
+                family: "ESP32",
+                env: "CYD-3248S035C",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
             - {
                 vendor: "WIP",
                 name: "CYD-8048S043C",
