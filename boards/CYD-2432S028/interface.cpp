@@ -33,26 +33,21 @@
 
     #include <TouchLib.h>
     #include <Wire.h>
+    void IRAM_ATTR isrPin(void);
+
     class CYD_Touch: public TouchLib {
         public:
         TouchPoint t;
         TP_Point ti;
-        bool get_int;
-        CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN), get_int(true) { }
-        static void interruptHandler() {
-            static long timer = 0;
-            if (millis() - timer > 200) {
-                CYD_Touch* instance = instancePtr;
-                instance->get_int = true; 
-                timer = millis();
-            }
-        }
+        bool isrWake;
+        
+        CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN), isrWake(true) { }
         inline bool begin() { 
             Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
             delay(10);
-            get_int = true;
+            isrWake = true;
             #if TOUCH_INT_PIN > 0
-            attachInterrupt(TOUCH_INT_PIN, interruptHandler, FALLING); /// Need to test CHANGE and FALLING methods
+            attachInterrupt(TOUCH_INT_PIN, isrPin, FALLING); /// Need to test CHANGE and FALLING methods
             #endif
             bool result = init();
             setRotation(1);
@@ -60,9 +55,9 @@
         }
         inline bool touched() { 
             bool result = false;
-            if(get_int) {
+            if(isrWake) {
                 #if TOUCH_INT_PIN > 0
-                get_int = false; // resets interrupt if enabled
+                isrWake = false; // resets interrupt if enabled
                 #endif
                 result = read(); 
             }
@@ -75,10 +70,13 @@
             t.pressed=true;
             return t; 
         }
-        private:
-        static CYD_Touch* instancePtr;
     };
-    CYD_Touch* CYD_Touch::instancePtr = nullptr;
+    static CYD_Touch *isrPinptr;
+    void IRAM_ATTR isrPin(void)
+    {
+        CYD_Touch *o = isrPinptr;
+        o->isrWake = true;
+    }
     CYD_Touch touch;
 
 #elif defined(TOUCH_AXS15231B_I2C)
