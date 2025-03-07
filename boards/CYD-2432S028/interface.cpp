@@ -37,23 +37,22 @@
         public:
         TouchPoint t;
         TP_Point ti;
-        static bool get_int;
-        CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN) { }
+        bool get_int;
+        CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN), get_int(true) { }
+        static void interruptHandler() {
+            static long timer = 0;
+            if (millis() - timer > 200) {
+                CYD_Touch* instance = instancePtr;
+                instance->get_int = true; 
+                timer = millis();
+            }
+        }
         inline bool begin() { 
             Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
             delay(10);
             get_int = true;
             #if TOUCH_INT_PIN > 0
-            attachInterrupt(
-                TOUCH_INT_PIN,
-                [] {
-                    static long timer=0;
-                    if(millis()-timer>200) {
-                        get_int = true;
-                        timer = millis();
-                    }
-                },
-                FALLING); // Need to test CHANGE and FALLING methods
+            attachInterrupt(TOUCH_INT_PIN, interruptHandler, FALLING); /// Need to test CHANGE and FALLING methods
             #endif
             bool result = init();
             setRotation(1);
@@ -76,8 +75,10 @@
             t.pressed=true;
             return t; 
         }
-
+        private:
+        static CYD_Touch* instancePtr;
     };
+    CYD_Touch* CYD_Touch::instancePtr = nullptr;
     CYD_Touch touch;
 
 #elif defined(TOUCH_AXS15231B_I2C)
