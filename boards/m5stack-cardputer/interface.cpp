@@ -70,10 +70,13 @@ void _setBrightness(uint8_t brightval) {
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
 **********************************************************************/
 void InputHandler(void) {
-    Keyboard.update();
+  static long tmp=0;
+  Keyboard.update();
+  if (millis() - tmp>200) {
     if(Keyboard.isPressed() || digitalRead(0)==LOW) {
-        if(!wakeUpScreen()) AnyKeyPress = true;
-        else goto END;
+        tmp = millis();
+        if(!wakeUpScreen()) yield();
+        else return;
 
         keyStroke key;
         Keyboard_Class::KeysState status = Keyboard.keysState();
@@ -88,31 +91,26 @@ void InputHandler(void) {
         if (status.fn)      key.fn=true;
         key.pressed=true;
         KeyStroke = key;
-    } else KeyStroke.pressed=false;
-
-    if(Keyboard.isKeyPressed(',') || Keyboard.isKeyPressed(';'))            PrevPress = true;
-    if(Keyboard.isKeyPressed('`') || Keyboard.isKeyPressed(KEY_BACKSPACE))  EscPress = true;
-    if(Keyboard.isKeyPressed('/') || Keyboard.isKeyPressed('.'))            NextPress = true;
-    if(Keyboard.isKeyPressed(KEY_ENTER) || digitalRead(0)==LOW)             SelPress = true;
-    //if(Keyboard.isKeyPressed('/'))                                          NextPagePress = true;  // right arrow
-    //if(Keyboard.isKeyPressed(','))                                          PrevPagePress = true;  // left arrow
-    if (KeyStroke.pressed) {
-      String keyStr = "";
-      for (auto i : KeyStroke.word) {
-        if (keyStr != "") {
-          keyStr = keyStr + "+" + i;
-        } else {
-          keyStr += i;
+        if(Keyboard.isKeyPressed(',') || Keyboard.isKeyPressed(';'))            PrevPress = true;
+        if(Keyboard.isKeyPressed('`') || Keyboard.isKeyPressed(KEY_BACKSPACE))  EscPress = true;
+        if(Keyboard.isKeyPressed('/') || Keyboard.isKeyPressed('.'))            NextPress = true;
+        if(Keyboard.isKeyPressed(KEY_ENTER) || digitalRead(0)==LOW)             SelPress = true;
+        //if(Keyboard.isKeyPressed('/'))                                          NextPagePress = true;  // right arrow
+        //if(Keyboard.isKeyPressed(','))                                          PrevPagePress = true;  // left arrow
+        if (KeyStroke.pressed) {
+          String keyStr = "";
+          for (auto i : KeyStroke.word) {
+            if (keyStr != "") {
+              keyStr = keyStr + "+" + i;
+            } else {
+              keyStr += i;
+            }
+          }
+          //Serial.println(keyStr);
         }
-      }
-      Serial.println(keyStr);
-    }
-    END:
-    if(AnyKeyPress) {
-      long tmp=millis();
-      Keyboard.update();
-      while((millis()-tmp)<200 && (Keyboard.isPressed() || digitalRead(0)==LOW)) { Keyboard.update(); delay(10); }
-    }
+    } else KeyStroke.Clear();
+  }
+
 }
 
 /*********************************************************************

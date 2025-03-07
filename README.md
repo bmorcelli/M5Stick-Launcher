@@ -55,20 +55,23 @@ Application Launcher for M5Stack, Lilygo, CYDs, Marauder and ESP32 devices.
 * Choose OTA to install new binaries from M5Burner repo
 * After installed, when turn on the device, if you don't press anything, the installed program will be launched.
 
-## Install from source
-Sourcecode will be released in the future..
 
 ## Known Issues
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
+## To-Do list
+Things that needs to be done in next updates
+     * [ ] OTA Pagination (multiple firmware list files)
+
 ## Changelog
 * 2.4.6: 
-     * [ ] Port to CYD-3248S035C and CYD-3248S035R
-     * [ ] OTA Pagination (multiple firmware list files)
+     * [x] split webui files
      * [x] Compressed WebUI with gzip
-     * [ ] split webui files
+     * [x] Port to CYD-3248S035C and CYD-3248S035R https://github.com/bmorcelli/M5Stick-Launcher/issues/125
+     * [x] Interfaces skipping options (multiple clicks) https://github.com/bmorcelli/M5Stick-Launcher/issues/127 https://github.com/bmorcelli/M5Stick-Launcher/issues/126 [comment](https://github.com/bmorcelli/M5Stick-Launcher/issues/125#issuecomment-2705628306) 
      * [x] Fixed StickCPlus keyboard colors
-     * [x] Fixed Back to list on OTA
+     * [x] Fixed Back to list on OTA (will be enhanced when having multiple lists)
+     * [x] (rollback) Use http download/update for OTA to reduce flash memory.
 * 2.4.5:
      * [x] Port to CYD-2432S024R https://github.com/bmorcelli/M5Stick-Launcher/issues/99 , CYD-2432W328R, CYD-2432S022C https://github.com/bmorcelli/M5Stick-Launcher/issues/112 , CYD-2432S032C, CYD-2432S032R
      * [x] Fixed Marauder V4-OG device
@@ -77,8 +80,7 @@ Sourcecode will be released in the future..
      * [x] Now using ArduinoGFX as main graphics lib, with support to TFT_eSPI and LovyanGFX
 * 2.4.4:
      * [x] Disabled OTA menu for non M5 Stack Devices (save flash memory for CYD and Marauder, mostly), creating a new partition scheme for these devices
-     * [x] Fixed T-Embed CC1101 battery value
-     * [ ] Use http download/update for OTA to reduce flash memory.
+     * [x] Fixed T-Embed CC1101 battery value     
 
 * 2.4.3:
      * [x] Fixed buttons on Core devices

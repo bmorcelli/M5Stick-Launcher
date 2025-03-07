@@ -154,7 +154,7 @@ void InputHandler(void) {
         if (digitalRead(SEL_BTN)==BTN_ACT)      KeyStroke.fn=true;
         KeyStroke.word.push_back(keyValue);
         KeyStroke.pressed=true;
-    } else KeyStroke.pressed=false;
+    } else KeyStroke.Clear();
 
     if(digitalRead(SEL_BTN)==BTN_ACT || KeyStroke.enter) {
         if(!wakeUpScreen()) { SelPress = true; AnyKeyPress = true; }

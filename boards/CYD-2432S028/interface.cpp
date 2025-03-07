@@ -155,8 +155,8 @@ void _setBrightness(uint8_t brightval) {
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
 **********************************************************************/
 void InputHandler(void) {
-    static long d_tmp=0;
-    if (millis()-d_tmp>200) { // I know R3CK.. I Should NOT nest if statements..
+    static long d_tmp=millis();
+    if (millis()-d_tmp>250) { // I know R3CK.. I Should NOT nest if statements..
                             // but it is needed to not keep SPI bus used without need, it save resources
         TouchPoint t;
         #ifdef DONT_USE_INPUT_TASK
@@ -165,6 +165,7 @@ void InputHandler(void) {
         if(touch.touched()) { 
             auto t = touch.getPointScaled();
             t = touch.getPointScaled();
+            d_tmp=millis();
           #ifdef DONT_USE_INPUT_TASK // need to reset the variables to avoid ghost click
             NextPress=false;
             PrevPress=false;
@@ -201,19 +202,15 @@ void InputHandler(void) {
         //Serial.printf("\nTouch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
 
         if(!wakeUpScreen()) AnyKeyPress = true;
-        else goto END;
+        else return;
 
         // Touch point global variable
         touchPoint.x = t.x;
         touchPoint.y = t.y;
         touchPoint.pressed=true;
         touchHeatMap(touchPoint);
-
-        d_tmp=millis();
       }
     }
-    END:
-    delay(0);
 }
 
 /*********************************************************************

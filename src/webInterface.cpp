@@ -283,34 +283,49 @@ void configureWebServer() {
   server->onFileUpload(handleUpload);
 
 
-  server->on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
+  server->on("/scripts.js", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if (checkUserWebAuth(request)) {
+      AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", scripts_js, scripts_js_size);
+      response->addHeader("Content-Encoding", "gzip");
+      request->send(response);
+    } else {
+      return request->requestAuthentication();
+    }
+  });
+  server->on("/style.css", HTTP_GET, [](AsyncWebServerRequest * request) {
     if (checkUserWebAuth(request)) {
       #ifdef PART_04MB
-      AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_4mb_html, index_html_size);
+      AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", style_4mb_css, style_4mb_css_size);
       #else
+      AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", style_css, style_css_size);
+      #endif
+      response->addHeader("Content-Encoding", "gzip");
+      request->send(response);
+    } else {
+      return request->requestAuthentication();
+    }
+  });
+  server->on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if (checkUserWebAuth(request)) {
       AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html, index_html_size);
       response->addHeader("Content-Encoding", "gzip");
-      #endif
       request->send(response);
     } else {
       return request->requestAuthentication();
     }
   });
   server->on("/systeminfo", HTTP_GET,[](AsyncWebServerRequest * request) {
-    char response_body[250];
+    char response_body[300];
     size_t LittleFSTotalBytes = LittleFS.totalBytes();
     size_t LittleFSUsedBytes = LittleFS.usedBytes();
     size_t SDTotalBytes = SD.totalBytes();
     size_t SDUsedBytes = SD.usedBytes();
     sprintf(response_body,
-      "{\"%s\":\"%s\",\"SD\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"},\"LittleFS\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}",
+      "{\"%s\":\"%s\",\"SD\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}",
       "VERSION", LAUNCHER,
       "free", humanReadableSize(SDTotalBytes - SDUsedBytes).c_str(),
       "used", humanReadableSize(SDUsedBytes).c_str(),
-      "total", humanReadableSize(SDTotalBytes).c_str(),
-      "free", humanReadableSize(LittleFSTotalBytes - LittleFSUsedBytes).c_str(),
-      "used", humanReadableSize(LittleFSUsedBytes).c_str(),
-      "total", humanReadableSize(LittleFSTotalBytes).c_str()
+      "total", humanReadableSize(SDTotalBytes).c_str()
     );
     request->send(200, "application/json", response_body);
   });

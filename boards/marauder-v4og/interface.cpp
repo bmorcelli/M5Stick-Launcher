@@ -46,19 +46,12 @@ void _setBrightness(uint8_t brightval) {
 ** Handles the variables PrevPress, NextPress, SelPress, AnyKeyPress and EscPress
 **********************************************************************/
 void InputHandler(void) {
-  static long tm=0;
+  static long tm=millis();
+  if(millis()-tm>200) { // don´t allow multiple readings in less than 200ms
     if(touch.touched()) { 
-      if(millis()-tm<200) goto END; // don´t allow multiple readings in less than 200ms
-      NextPress=false;
-      PrevPress=false;
-      UpPress=false;
-      DownPress=false;
-      SelPress=false;
-      EscPress=false;
-      AnyKeyPress=false;
-      touchPoint.pressed=false;
       auto t = touch.getPointScaled();
       t = touch.getPointScaled();
+      tm=millis();
         if(rotation==3) {
             t.y = (tftHeight+20)-t.y;
             t.x = tftWidth-t.x;
@@ -75,17 +68,15 @@ void InputHandler(void) {
         }
 
         if(!wakeUpScreen()) AnyKeyPress = true;
-        else goto END;
+        else return;
 
         // Touch point global variable
         touchPoint.x = t.x;
         touchPoint.y = t.y;
         touchPoint.pressed=true;
         touchHeatMap(touchPoint);
-        tm=millis();
-    }
-    END:
-    delay(0);
+    } else touchPoint.pressed=false;
+  }
 }
 
 /*********************************************************************

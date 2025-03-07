@@ -58,15 +58,15 @@ TaskHandle_t xHandle;
 void __attribute__((weak)) taskInputHandler(void *parameter) {
     while (true) { 
       checkPowerSaveTime();
-      NextPress=false;
-      PrevPress=false;
-      UpPress=false;
-      DownPress=false;
-      SelPress=false;
+      //NextPress=false;
+      //PrevPress=false;
+      //UpPress=false;
+      //DownPress=false;
+      //SelPress=false;
       EscPress=false;
-      AnyKeyPress=false;
-      touchPoint.pressed=false;
-      KeyStroke.Clear();
+      //AnyKeyPress=false;
+      //touchPoint.pressed=false;
+      //KeyStroke.Clear();
       InputHandler();
       vTaskDelay(10 / portTICK_PERIOD_MS);
     }

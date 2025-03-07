@@ -101,6 +101,7 @@ void InputHandler(void) {
     if(millis()-tm>200) {
     if (touch.read()) { //touch.tirqTouched() &&
         auto t = touch.getPoint(0);
+        tm=millis();
         if(rotation==1) {
             t.y = (tftHeight+20)-t.y;
             //t.x = tftWidth-t.x;
@@ -125,18 +126,16 @@ void InputHandler(void) {
         //Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, rotation);
 
         if(!wakeUpScreen()) AnyKeyPress = true;
-        else goto END;
+        else return;
 
         // Touch point global variable
         touchPoint.x = t.x;
         touchPoint.y = t.y;
         touchPoint.pressed=true;
         touchHeatMap(touchPoint);
-        tm=millis();
+        
     }
     }
-    END:
-    delay(0);
 
 }
 /*********************************************************************

@@ -1,80 +1,3 @@
-<!DOCTYPE HTML>
-<html lang="en">
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta charset="UTF-8">
-
-<!-- CSS sample thanks to @im.nix (Discord) -->
-<style>
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;	margin: 0; padding: 5px; color: #00dd00; background-color: #202124; }
-.container { max-width: 800px; margin: 5px auto; padding: 0 5px;	}
-h3 { margin: 0; padding: 10px 0; border-bottom: 1px solid #00cc00;}
-table {	width: 100%; border-collapse: collapse; border-bottom: 1px solid #00cc00;}
-th, td {padding: 5px; border-bottom: 1px solid #00cc00;}
-th { text-align: left; }
-a {	color: #e0d204;	text-decoration: none;}
-a:hover { text-decoration: underline; cursor:pointer; }
-button { background-color: #303134; color: #00dd00; border: 2px solid; padding: 4px 8px; border-radius: 4px; border-color: #00dd00; cursor: pointer; margin: 5px; }
-button:hover { background-color: #292a2c; }
-#detailsheader, #updetailsheader { display: flex; justify-content: space-between; }
-@media (max-width: 768px) { body { font-size: 14px; }  table { font-size: 12px; } th, td { padding: 5px; } button { font-size: 12px; padding: 6px 12px; } }
-th:first-child, td:first-child { width: 65%; }
-th:last-child, td:last-child { width: 100px; text-align: center; }
-.float-element { position: absolute; top: 10px; right: 10px; font-size: 16px; }
-.drop-area { border: 2px dashed #00dd00; padding: 100px; margin-top: 50px; display: none; }
-.highlight { background-color: #303134; color: #ad007c65; }
-
-</style>
-</head>
-<body>
-<div class="container">
-<div class="float-element"><a onclick="logoutButton()" href='javascript:void(0);'>[X]</a></div>
-<h1 align="center">-= Launcher =-</h1>
-<p>Firmware version: <span id="firmwareVersion">...</span></p>
-<p>SD Free Storage: <span id="freeSD">...</span> | Used: <span id="usedSD">...</span> | Total: <span id="totalSD">...</span></p>
-<p><a href="https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html" target="_blank" rel="noopener noreferrer">Online Firmware list from M5Burner (Need Internet)</a></p>
-<p>
-<form id="save" enctype="multipart/form-data" method="post"><input type="hidden" id="actualFolder" name="actualFolder" value="/"></form>
-<button onclick="rebootButton()">Reboot</button>
-<button onclick="SDConfig()">SD pins</button>
-<button onclick="WifiConfig('ssid')">WiFi</button>
-<button onclick="WifiConfig('usr')">Usr/Pass</button>
-<button onclick="callOTA()">OTA Update</button>
-<button onclick="listFilesButton('/')">SD Files</button>
-
-</p>
-<p id="detailsheader"></p>
-<p id="status"></p>
-<p id="details"></p>
-<p id="OTAdetails" style="display:none;">
-Select a .bin file to install <br><br>
-<input type="file" id="fileInput" onchange="analyzeFile()">
-<div id="analysisOutput"></div>
-
-<!-- Botões para upload das faixas de arquivo -->
-<br><br>
-<button id="uploadApp" style="display:none;">Start Update</button>
-<button id="uploadSpiffs" style="display:none;">SPIFFS Update</button>
-<div id="spiffsInfo"style="display:none;">
-<br>
-<p>
-<b>SPIFFS</b>: The SPIFFS (Serial Peripheral Interface Flash File System) is a file system designed to be 
-used with NOR flash memory devices and microcontrollers that support the Serial Peripheral Interface 
-(SPI) protocol such as the ESP32
-<br>
-<br>
-Most of the apps over the internet don't need SPIFFS to work, but there are some exceptions like <b>OrcaOne</b>.
-</p>
-</div>
-</p>
-<p id="updetailsheader"></p>
-<p id="updetails"></p>
-<div id="drop-area" class="drop-area" ondrop="drop(event, document.getElementById('actualFolder').value)">
-<p style="text-align: center;">Drag and drop files here</p>
-</div>
-</div>
-
-<script>
 function WifiConfig(target) {
 let wifiSsid;
 let wifiPwd;
@@ -186,7 +109,7 @@ const byte3 = slice[3];
 const byte6 = slice[6];
 
 if ([0x00, 0x10, 0x20].includes(byte3) && byte6 === 0x01) {
-				
+                
 app_size = (slice[10] << 16) | (slice[11] << 8) | 0x00;
 if (data.length < (app_size + 0x10000)) app_size = data.length - 0x10000;
 if (app_size > MAX_APP) app_size = MAX_APP;
@@ -202,7 +125,7 @@ spiffs = true;
 if (spiffs && data.length < (spiffs_offset + spiffs_size)) spiffs_size = data.length - spiffs_offset;
 }}}
 else if (pass === true){
-		pass = false;
+        pass = false;
 start_point = 0x0;
 app_size = data.length;
 spiffs = false;			
@@ -282,7 +205,7 @@ if (xmlhttp.status === 200) {
 var responseText = xmlhttp.responseText;
 var lines = responseText.split('\n');
 var tableContent = "<table><tr><th align='left'>Name</th><th style=\"text-align=center;\">Size</th><th></th></tr>\n";
-	tableContent+="<tr><th align='left'><a onclick=\"listFilesButton('"+ PreFolder + "')\" href='javascript:void(0);'>... </a></th><th align='left'></th><th></th></tr>\n"
+    tableContent+="<tr><th align='left'><a onclick=\"listFilesButton('"+ PreFolder + "')\" href='javascript:void(0);'>... </a></th><th align='left'></th><th></th></tr>\n"
 
 var folder = "";
 
@@ -293,23 +216,23 @@ var path = line.substring(3,line.lastIndexOf(':'));
 var filename = line.substring(3, line.lastIndexOf(':'));
 var size = line.substring(line.lastIndexOf(':')+1);
 if (type === "pa") {
-	  if (path !== "") folder = path + "/"; 
+      if (path !== "") folder = path + "/"; 
 } else if (type === "Fo") {
-			tableContent += "<tr align='left'><td><a onclick=\"listFilesButton('"+ folder + path + "')\" href='javascript:void(0);'>" + filename + "</a></td>";
-			tableContent += "<td></td>";
-			tableContent += "<td><a style=\"color: #e0d204;\" onclick=\"listFilesButton('" + folder + path + "')\">Opn</a>&nbsp";
-			tableContent += "<a style=\"color: #e0d204;\" class=\"gg-rename\"onclick=\"renameFile(\'" + folder + path + "\', \'" + filename + "\')\">Ren</a>&nbsp";
-			tableContent += "<a style=\"color: #e0d204;\" class=\"gg-trash\"onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'delete\')\">Del</a></td></tr>";
+tableContent += "<tr align='left'><td><a onclick=\"listFilesButton('"+ folder + path + "')\" href='javascript:void(0);'>\n" + filename + "</a></td>";
+tableContent += "<td></td>\n";
+tableContent += "<td><i style=\"color: #e0d204;\" class=\"gg-folder\" onclick=\"listFilesButton('" + folder + path + "')\"></i>&nbsp&nbsp";
+tableContent += "<i style=\"color: #e0d204;\" class=\"gg-rename\"onclick=\"renameFile(\'" + folder + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
+tableContent += "<i style=\"color: #e0d204;\" class=\"gg-trash\"onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'delete\')\"></i></td></tr>\n\n";
 } else if (type === "Fi") {
-			tableContent += "<tr align='left'><td>" + filename;
-			if (filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() === "bin") {
-				tableContent+= "&nbsp<a onclick=\"startUpdate(\'" + folder + path + "\')\">(Install)</a>";
-			}
-			tableContent += "</td>";
-			tableContent += "<td style=\"font-size: 10px; text-align=center;\">" + size + "</td>";
-			tableContent += "<td><a onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'download\')\">Dwl</a>&nbsp";
-			tableContent += "<a onclick=\"renameFile(\'" + folder + path + "\', \'" + filename + "\')\">RN</a>&nbsp";
-			tableContent += "<a onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'delete\')\">Del</a></td></tr>";			
+tableContent += "<tr align='left'><td>" + filename;
+if (filename.substring(filename.lastIndexOf('.') + 1).toLowerCase() === "bin") {
+    tableContent+= "&nbsp<i class=\"rocket\" onclick=\"startUpdate(\'" + folder + path + "\')\"></i>";
+}
+tableContent += "</td>\n";
+tableContent += "<td style=\"font-size: 10px; text-align=center;\">" + size + "</td>\n";
+tableContent += "<td><i class=\"gg-arrow-down-r\" onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'download\')\"></i>&nbsp&nbsp\n";
+tableContent += "<i class=\"gg-rename\"onclick=\"renameFile(\'" + folder + path + "\', \'" + filename + "\')\"></i>&nbsp&nbsp\n";
+tableContent += "<i class=\"gg-trash\"onclick=\"downloadDeleteButton(\'" + folder + path + "\', \'delete\')\"></i></td></tr>\n\n";			
 }
 }
 });
@@ -540,15 +463,10 @@ function systemInfo() {
     if (xmlhttp.status === 200) {
       try {
         const data = JSON.parse(xmlhttp.responseText);
-
         document.getElementById("firmwareVersion").innerHTML = data.VERSION;
         document.getElementById("freeSD").innerHTML = data.SD.free;
         document.getElementById("usedSD").innerHTML = data.SD.used;
-        document.getElementById("totalSD").innerHTML = data.SD.total;
-        document.getElementById("freeLittleFS").innerHTML = data.LittleFS.free;
-        document.getElementById("usedLittleFS").innerHTML = data.LittleFS.used;
-        document.getElementById("totalLittleFS").innerHTML = data.LittleFS.total;
-
+        document.getElementById("totalSD").innerHTML = data.SD.total;    
       } catch (error) {
         console.error("JSON Parsing Error: ", error);
       }
@@ -564,6 +482,3 @@ function systemInfo() {
   xmlhttp.open("GET", "/systeminfo", true);
   xmlhttp.send();
 }
-</script>
-</body>
-</html>

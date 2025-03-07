@@ -137,6 +137,7 @@ void InputHandler(void) {
     TouchPointPro t;
     if(millis() - tm>200) {
     if (touch.getPoint(t.x, t.y, touch.getSupportTouchPoint()) && touch.isPressed()) {
+        tm=millis();
         if(rotation==1) {
             t.y[0] = TFT_WIDTH-t.y[0];
         }
@@ -158,18 +159,15 @@ void InputHandler(void) {
         Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x[0], t.y[0], rotation);
 
         if(!wakeUpScreen()) AnyKeyPress = true;
-        else goto END;
+        else return;
 
         // Touch point global variable
         touchPoint.x = t.x[0];
         touchPoint.y = t.y[0];
         touchPoint.pressed=true;
         touchHeatMap(touchPoint);
-        tm=millis();
     }
     }
-    END:
-    delay(0);
 }
 
 /*********************************************************************
