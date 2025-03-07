@@ -37,15 +37,38 @@
         public:
         TouchPoint t;
         TP_Point ti;
+        static bool get_int;
         CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN) { }
         inline bool begin() { 
             Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
             delay(10);
+            get_int = true;
+            #if TOUCH_INT_PIN > 0
+            attachInterrupt(
+                TOUCH_INT_PIN,
+                [] {
+                    static long timer=0;
+                    if(millis()-timer>200) {
+                        get_int = true;
+                        timer = millis();
+                    }
+                },
+                FALLING); // Need to test CHANGE and FALLING methods
+            #endif
             bool result = init();
             setRotation(1);
             return result;
         }
-        inline bool touched() { return read(); }
+        inline bool touched() { 
+            bool result = false;
+            if(get_int) {
+                #if TOUCH_INT_PIN > 0
+                get_int = false; // resets interrupt if enabled
+                #endif
+                result = read(); 
+            }
+            return result;
+        }
         inline TouchPoint getPointScaled() { 
             ti = getPoint(0);
             t.x=ti.x;
