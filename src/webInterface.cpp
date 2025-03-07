@@ -222,7 +222,13 @@ void configureWebServer() {
   server->on("/logged-out", HTTP_GET, [](AsyncWebServerRequest * request) {
     String logmessage = "Client:" + request->client()->remoteIP().toString() + " " + request->url();
     Serial.println(logmessage);
-    request->send_P(401, "text/html", logout_html, processor);
+    #ifdef PART_04MB
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", "", 0);
+    #else
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", logout_html, logout_html_size);
+    response->addHeader("Content-Encoding", "gzip");
+    #endif
+    request->send(response);
 
   });
 
@@ -279,12 +285,35 @@ void configureWebServer() {
 
   server->on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
     if (checkUserWebAuth(request)) {
-      request->send_P(200, "text/html", index_html, processor);
+      #ifdef PART_04MB
+      AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_4mb_html, index_html_size);
+      #else
+      AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html, index_html_size);
+      response->addHeader("Content-Encoding", "gzip");
+      #endif
+      request->send(response);
     } else {
       return request->requestAuthentication();
     }
   });
-
+  server->on("/systeminfo", HTTP_GET,[](AsyncWebServerRequest * request) {
+    char response_body[250];
+    size_t LittleFSTotalBytes = LittleFS.totalBytes();
+    size_t LittleFSUsedBytes = LittleFS.usedBytes();
+    size_t SDTotalBytes = SD.totalBytes();
+    size_t SDUsedBytes = SD.usedBytes();
+    sprintf(response_body,
+      "{\"%s\":\"%s\",\"SD\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"},\"LittleFS\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}",
+      "VERSION", LAUNCHER,
+      "free", humanReadableSize(SDTotalBytes - SDUsedBytes).c_str(),
+      "used", humanReadableSize(SDUsedBytes).c_str(),
+      "total", humanReadableSize(SDTotalBytes).c_str(),
+      "free", humanReadableSize(LittleFSTotalBytes - LittleFSUsedBytes).c_str(),
+      "used", humanReadableSize(LittleFSUsedBytes).c_str(),
+      "total", humanReadableSize(LittleFSTotalBytes).c_str()
+    );
+    request->send(200, "application/json", response_body);
+  });
   server->on("/reboot", HTTP_GET, [](AsyncWebServerRequest * request) {
     if (checkUserWebAuth(request)) {
       shouldReboot = true;

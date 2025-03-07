@@ -9,6 +9,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
+#include <webFiles.h>
 
 
 // function defaults
@@ -28,6 +29,7 @@ void webUIMyNet();
 
 void loopOptionsWebUi() ;
 
+#if 0
 #ifndef PART_04MB
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
@@ -1390,4 +1392,5 @@ border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 )rawliteral";
 #endif
 
+#endif
 #endif /*__WEBINTERFACE_H*/

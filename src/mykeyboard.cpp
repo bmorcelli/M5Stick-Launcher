@@ -301,8 +301,8 @@ String keyboard(String mytext, int maxSize, String msg) {
         #ifdef HAS_TOUCH
           box_list[_i++].draw(caps);
         #else
-          if(!caps) tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][0], FGCOLOR,BGCOLOR);
-          else tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][1], FGCOLOR,BGCOLOR);
+          if(!caps) tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][0], x==j && y==i? BGCOLOR : FGCOLOR, x==j && y==i? ~BGCOLOR : BGCOLOR);
+          else tft->drawChar2((j*_x+_xo), (i*_y+2*KBLH+LH*FM),keys[i][j][1], x==j && y==i? BGCOLOR : FGCOLOR, x==j && y==i? ~BGCOLOR : BGCOLOR);
         #endif
 
           /* Return colors to normal to print the other letters */

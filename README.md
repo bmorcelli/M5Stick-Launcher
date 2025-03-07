@@ -62,6 +62,13 @@ Sourcecode will be released in the future..
 * UiFlow 1 doesn´t work with Launcher.. it uses an old MicroPython distro, that uses an old ESP-IDF distro with lots os secrets that I couldn´t figure out.
 
 ## Changelog
+* 2.4.6: 
+     * [ ] Port to CYD-3248S035C and CYD-3248S035R
+     * [ ] OTA Pagination (multiple firmware list files)
+     * [x] Compressed WebUI with gzip
+     * [ ] split webui files
+     * [x] Fixed StickCPlus keyboard colors
+     * [x] Fixed Back to list on OTA
 * 2.4.5:
      * [x] Port to CYD-2432S024R https://github.com/bmorcelli/M5Stick-Launcher/issues/99 , CYD-2432W328R, CYD-2432S022C https://github.com/bmorcelli/M5Stick-Launcher/issues/112 , CYD-2432S032C, CYD-2432S032R
      * [x] Fixed Marauder V4-OG device
