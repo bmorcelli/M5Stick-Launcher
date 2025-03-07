@@ -56,6 +56,8 @@ struct TouchPoint {
 extern TouchPoint touchPoint;
 extern keyStroke KeyStroke;
 // Navigation Variables
+extern long LongPressTmp;
+extern volatile bool LongPress;
 extern volatile bool NextPress;
 extern volatile bool PrevPress;
 extern volatile bool UpPress;

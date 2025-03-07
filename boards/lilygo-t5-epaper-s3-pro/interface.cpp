@@ -164,7 +164,7 @@ void InputHandler(void) {
     TouchPointPro t;
     uint8_t touched = 0;
     touched = touch.getPoint(&t.x, &t.y);
-    if((millis()-_tmptmp)>150) { // one reading each 500ms
+    if((millis()-_tmptmp)>150 || LongPress) { // one reading each 500ms
         
         //Serial.printf("\nPressed x=%d , y=%d, rot: %d",t.x, t.y, rotation);
         if (touched) {

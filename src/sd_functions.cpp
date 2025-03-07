@@ -404,8 +404,7 @@ String loopSD(bool filePicker) {
   coord=listFiles(0, fileList);
 
   for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
-  bool longSelPress = false;
-  long longSelTmp=millis();
+  LongPressTmp=millis();
   while(1){
     if(returnToMenu) break; // stop this loop and retur to the previous loop
 
@@ -440,13 +439,13 @@ String loopSD(bool filePicker) {
 
     /* Select to install */
     #ifndef E_PAPER_DISPLAY
-    if(longSelPress || SelPress) {
-      if(!longSelPress) {
-        longSelPress = true;
-        longSelTmp = millis();
+    if(LongPress || SelPress) {
+      if(!LongPress) {
+        LongPress = true;
+        LongPressTmp = millis();
       }
-      if(longSelPress && millis()-longSelTmp<200) goto WAITING;
-      longSelPress=false;
+      if(LongPress && millis()-LongPressTmp<200) goto WAITING;
+      LongPress=false;
 
       if(check(SelPress))
       {

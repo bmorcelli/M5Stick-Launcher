@@ -422,13 +422,17 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
 ** Dependencia: prog_handler =>>    0 - Flash, 1 - SPIFFS
 ***************************************************************************************/
 void progressHandler(int progress, size_t total) {
-#if TFT_HEIGHT>200
+
   int barWidth = map(progress, 0, total, 0, tftWidth-40);
   if(progress == 0) {
     tft->setTextSize(FM);
     tft->setTextColor(ALCOLOR);
     tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
-    tft->drawCentreString("-=Launcher=-",tftWidth/2,20,1);    
+#if TFT_HEIGHT>200
+    tft->drawCentreString("-=Launcher=-",tftWidth/2,20,1);   
+#else
+    tft->drawCentreString("-=Launcher=-",tftWidth/2,10,1); 
+#endif
     tft->drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, FGCOLOR);
     if (prog_handler == 1) { 
       tft->drawRect(18, tftHeight - 28, tftWidth-36, 17, ALCOLOR);
@@ -453,35 +457,6 @@ void progressHandler(int progress, size_t total) {
   
   if (prog_handler == 1) tft->fillRect(20, tftHeight - 26, barWidth, 13, ALCOLOR);
   else tft->fillRect(20, tftHeight - 45, barWidth, 13, FGCOLOR);
-
-
-#else
-  
-  int barWidth = map(progress, 0, total, 0, 100);
-  if(barWidth <=1) {
-    tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
-    tft->drawRect(6, 6, tftWidth-12, tftHeight-12, BGCOLOR);
-    if (prog_handler == 1) tft->drawRect(28, tftHeight - 28, 104, 17, ALCOLOR);
-    else tft->drawRect(28, tftHeight - 47, 104, 17, FGCOLOR);
-    
-    String txt;
-    switch(prog_handler) {
-      case 0: 
-          txt = "Installing FW";
-          break;
-      case 1: 
-          txt = "Installing SPIFFS";
-          break;
-      case 2: 
-          txt = "Downloading";
-          break;              
-    }
-    displayRedStripe(txt);
-  }
-  if (prog_handler == 1) tft->fillRect(30, tftHeight - 26, barWidth, 13, ALCOLOR);
-  else tft->fillRect(30, tftHeight - 45, barWidth, 13, FGCOLOR);
-
-#endif
 
 }
 
@@ -718,8 +693,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   int numOpt = options.size()-1;
   Opt_Coord coord;
   coord=drawOptions(0,options, ALCOLOR, BGCOLOR);
-  bool longPrevPress = false;
-  long longPrevTmp=millis();
+  LongPressTmp=millis();
   while(1){
     if (redraw) { 
       coord=drawOptions(index,options, ALCOLOR, BGCOLOR);
@@ -740,21 +714,21 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
       else if(index>0) index--;
       redraw = true;
     #else
-    if(longPrevPress || PrevPress) {
-      if(!longPrevPress) {
-        longPrevPress = true;
-        longPrevTmp = millis();
+    if(LongPress || PrevPress) {
+      if(!LongPress) {
+        LongPress = true;
+        LongPressTmp = millis();
       }
-      if(longPrevPress && millis()-longPrevTmp<700) { 
+      if(LongPress && millis()-LongPressTmp<700) { 
         if(!PrevPress) {
           AnyKeyPress=false;
           if(index==0) index = options.size() - 1;
           else if(index>0) index--;
-          longPrevPress=false;
+          LongPress=false;
           redraw = true;
         }
-        if(millis()-longPrevTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111);
-        if(millis()-longPrevTmp>700) { // longpress detected to exit
+        if(millis()-LongPressTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(LongPressTmp+200))/500,FGCOLOR-0x1111);
+        if(millis()-LongPressTmp>700) { // longpress detected to exit
           break;
         } else goto WAITING;
 
@@ -794,8 +768,7 @@ void loopVersions() {
   JsonArray versions = item["versions"];
   bool redraw = true;
   
-  bool longPrevPress = false;
-  long longPrevTmp=millis();
+  LongPressTmp=millis();
   while(1) {
     if(returnToMenu) break; // Stops the loop to get back to Main menu
 
@@ -843,29 +816,29 @@ void loopVersions() {
       goto SAIR;
     } 
     #else // Esc logic is holding previous btn fot 1 second +-
-    if(longPrevPress || PrevPress) {
-      if(!longPrevPress) {
-        longPrevPress = true;
-        longPrevTmp = millis();
+    if(LongPress || PrevPress) {
+      if(!LongPress) {
+        LongPress = true;
+        LongPressTmp = millis();
       }
-      if(longPrevPress && millis()-longPrevTmp<800) { 
+      if(LongPress && millis()-LongPressTmp<800) { 
         WAITING:
         vTaskDelay(10/portTICK_PERIOD_MS);
-        if(!PrevPress && millis()-longPrevTmp<200) {
+        if(!PrevPress && millis()-LongPressTmp<200) {
           AnyKeyPress=false;
           if(versionIndex==0) versionIndex = versions.size() - 1;
           else if(versionIndex>0) versionIndex--;
-          longPrevPress=false;
+          LongPress=false;
           redraw = true;
         }
-        if(!PrevPress && millis()-longPrevTmp>200) {
+        if(!PrevPress && millis()-LongPressTmp>200) {
           check(PrevPress);
           redraw=true;
-          longPrevPress=false;
+          LongPress=false;
           goto EXIT_CHECK;
         }
-        if(millis()-longPrevTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(longPrevTmp+200))/500,FGCOLOR-0x1111);
-        if(millis()-longPrevTmp>700) { // longpress detected to exit
+        if(millis()-LongPressTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(LongPressTmp+200))/500,FGCOLOR-0x1111);
+        if(millis()-LongPressTmp>700) { // longpress detected to exit
           returnToMenu=true;
           check(PrevPress);
           goto SAIR;
@@ -907,8 +880,7 @@ void loopVersions() {
 **  Where you choose which Firmware to see more data   
 **********************************************************************/
 void loopFirmware(){  
-  bool longSelPress = false;
-  long longSelTmp=millis();
+  LongPressTmp=millis();
   currentIndex=0;
   displayCurrentItem(doc, currentIndex);
 
@@ -943,13 +915,13 @@ void loopFirmware(){
           returnToMenu=false;
         }
         #else
-        if(longSelPress || SelPress) {
-          if(!longSelPress) {
-            longSelPress = true;
-            longSelTmp = millis();
+        if(LongPress || SelPress) {
+          if(!LongPress) {
+            LongPress = true;
+            LongPressTmp = millis();
           }
-          if(longSelPress && millis()-longSelTmp<250) goto WAITING;
-          longSelPress=false;
+          if(LongPress && millis()-LongPressTmp<250) goto WAITING;
+          LongPress=false;
           if(check(SelPress)) {
             bool exit=false;
             options = {

@@ -213,7 +213,6 @@ String keyboard(String mytext, int maxSize, String msg) {
 
 #if defined(HAS_3_BUTTONS) // StickCs and Core for long press detection logic
   bool longNextPress = false;
-  bool longPrevPress = false;
   long longPressTmp=millis();
 #endif  
   const int maxFMSize = tftWidth/(LW*FM)-1;
@@ -380,13 +379,13 @@ String keyboard(String mytext, int maxSize, String msg) {
         redraw = true;
       }
       /* UP Btn to move in Y axis (Downwards) */
-      if(longPrevPress || PrevPress) {
-        if(!longPrevPress) {
-          longPrevPress = true;
+      if(LongPress || PrevPress) {
+        if(!LongPress) {
+          LongPress = true;
           longPressTmp = millis();
         }
-        if(longPrevPress && millis()-longPressTmp<200) goto WAITING;
-        longPrevPress=false;
+        if(LongPress && millis()-longPressTmp<200) goto WAITING;
+        LongPress=false;
 
         if(check(PrevPress)) { y--; /* delay(250); */ } // Long press
         else y++; // short press

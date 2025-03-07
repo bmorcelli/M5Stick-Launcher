@@ -72,7 +72,7 @@ void _setBrightness(uint8_t brightval) {
 void InputHandler(void) {
   static long tmp=0;
   Keyboard.update();
-  if (millis() - tmp>200) {
+  if (millis() - tmp>200 || LongPress) {
     if(Keyboard.isPressed() || digitalRead(0)==LOW) {
         tmp = millis();
         if(!wakeUpScreen()) yield();
@@ -108,7 +108,10 @@ void InputHandler(void) {
           }
           //Serial.println(keyStr);
         }
-    } else KeyStroke.Clear();
+    } else { 
+      KeyStroke.Clear();
+      LongPressTmp = false;
+    }
   }
 
 }

@@ -47,7 +47,7 @@ void _setBrightness(uint8_t brightval) {
 **********************************************************************/
 void InputHandler(void) {
   static long tm=millis();
-  if(millis()-tm>200) { // don´t allow multiple readings in less than 200ms
+  if(millis()-tm>200 || LongPress) { // don´t allow multiple readings in less than 200ms
     if(touch.touched()) { 
       auto t = touch.getPointScaled();
       t = touch.getPointScaled();

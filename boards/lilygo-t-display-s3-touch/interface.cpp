@@ -99,7 +99,7 @@ void _setBrightness(uint8_t brightval) {
 void InputHandler(void) {
     static long tm=millis();
     if(millis()-tm>200) {
-    if (touch.read()) { //touch.tirqTouched() &&
+    if (touch.read() || LongPress) { //touch.tirqTouched() &&
         auto t = touch.getPoint(0);
         tm=millis();
         if(rotation==1) {

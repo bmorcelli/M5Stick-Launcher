@@ -38,6 +38,8 @@ uint8_t _cs=0;
 #endif
 
 // Navigation Variables
+long LongPressTmp=0;
+volatile bool LongPress=false;
 volatile bool NextPress=false;
 volatile bool PrevPress=false;
 volatile bool UpPress=false;
@@ -58,15 +60,15 @@ TaskHandle_t xHandle;
 void __attribute__((weak)) taskInputHandler(void *parameter) {
     while (true) { 
       checkPowerSaveTime();
-      //NextPress=false;
-      //PrevPress=false;
-      //UpPress=false;
-      //DownPress=false;
-      //SelPress=false;
+      NextPress=false;
+      PrevPress=false;
+      UpPress=false;
+      DownPress=false;
+      SelPress=false;
       EscPress=false;
-      //AnyKeyPress=false;
-      //touchPoint.pressed=false;
-      //KeyStroke.Clear();
+      AnyKeyPress=false;
+      touchPoint.pressed=false;
+      KeyStroke.Clear();
       InputHandler();
       vTaskDelay(10 / portTICK_PERIOD_MS);
     }
@@ -361,6 +363,7 @@ void setup() {
   //Start Bootscreen timer
   int i = millis();
   int j = 0;
+  LongPress = true;
   while(millis()<i+5000) { // increased from 2500 to 5000
     initDisplay();        //Inicia o display 
     
@@ -398,7 +401,7 @@ void setup() {
 
   // If M5 or Enter button is pressed, continue from here
   Launcher:
-  
+  LongPress = false;
   tft->fillScreen(BGCOLOR);
   #if LED>0 && defined(HEADLESS)
     digitalWrite(LED, LED_ON?LOW:HIGH); // turn off the LED

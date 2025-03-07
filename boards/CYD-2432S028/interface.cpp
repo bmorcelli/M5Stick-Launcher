@@ -156,7 +156,7 @@ void _setBrightness(uint8_t brightval) {
 **********************************************************************/
 void InputHandler(void) {
     static long d_tmp=millis();
-    if (millis()-d_tmp>250) { // I know R3CK.. I Should NOT nest if statements..
+    if (millis()-d_tmp>250 || LongPress) { // I know R3CK.. I Should NOT nest if statements..
                             // but it is needed to not keep SPI bus used without need, it save resources
         TouchPoint t;
         #ifdef DONT_USE_INPUT_TASK

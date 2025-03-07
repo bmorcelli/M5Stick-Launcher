@@ -41,7 +41,7 @@ void _setBrightness(uint8_t brightval) {
 **********************************************************************/
 void InputHandler(void) {
   static long tm=millis();
-  if(millis()-tm > 200) {
+  if(millis()-tm > 200 || LongPress) {
     M5.update();
     auto t = M5.Touch.getDetail();
     if (t.isPressed() || t.isHolding()) {

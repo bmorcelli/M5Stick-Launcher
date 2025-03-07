@@ -135,7 +135,7 @@ struct TouchPointPro {
 void InputHandler(void) {
     static long tm=0;
     TouchPointPro t;
-    if(millis() - tm>200) {
+    if(millis() - tm>200 || LongPress) {
     if (touch.getPoint(t.x, t.y, touch.getSupportTouchPoint()) && touch.isPressed()) {
         tm=millis();
         if(rotation==1) {
