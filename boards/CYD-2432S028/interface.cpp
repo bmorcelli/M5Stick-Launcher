@@ -47,6 +47,7 @@
             delay(10);
             isrWake = true;
             #if TOUCH_INT_PIN > 0
+            pinMode(TOUCH_INT_PIN,INPUT);
             attachInterrupt(TOUCH_INT_PIN, isrPin, FALLING); /// Need to test CHANGE and FALLING methods
             #endif
             bool result = init();
@@ -76,6 +77,7 @@
     {
         CYD_Touch *o = isrPinptr;
         o->isrWake = true;
+        Serial.println("triggered");
     }
     CYD_Touch touch;
 
@@ -186,7 +188,6 @@ void InputHandler(void) {
         #endif
         if(touch.touched()) { 
             auto t = touch.getPointScaled();
-            t = touch.getPointScaled();
             d_tmp=millis();
           #ifdef DONT_USE_INPUT_TASK // need to reset the variables to avoid ghost click
             NextPress=false;
