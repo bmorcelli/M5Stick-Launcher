@@ -65,7 +65,9 @@ Things that needs to be done in next updates
 
 ## Changelog
 * 2.4.6: 
+     * [x] UiFlow2 v2.2.3 and restored StickCPlus2 compatibility
      * [x] split webui files
+     * [x] USB Interface to manage SD files on ESP32S3 devices (ESP32 can't do it)
      * [x] Compressed WebUI with gzip
      * [x] Port to CYD-3248S035C and CYD-3248S035R https://github.com/bmorcelli/M5Stick-Launcher/issues/125
      * [x] Interfaces skipping options (multiple clicks) https://github.com/bmorcelli/M5Stick-Launcher/issues/127 https://github.com/bmorcelli/M5Stick-Launcher/issues/126 [comment](https://github.com/bmorcelli/M5Stick-Launcher/issues/125#issuecomment-2705628306) 

@@ -8,6 +8,7 @@
     "core": "esp32",
     "extra_flags": [
       "-DT_DISPLAY_S3_TOUCH=1",
+      "-DARDUINO_USB_MODE=1",
       "-DBOARD_HAS_PSRAM"
     ],
     "f_cpu": "240000000L",

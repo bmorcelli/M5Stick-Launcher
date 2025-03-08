@@ -534,23 +534,30 @@ void drawMainMenu(int index) {
   int offset=0;
   if(index>2) offset=index-2;
   const int border = 10;
-  const uint16_t colors[4] = {
+  bool usb_av = false;
+  #ifdef ARDUINO_USB_MODE
+  if(sdcardMounted) usb_av = true;
+  #endif
+  const uint16_t colors[5] = {
       static_cast<uint16_t>(sdcardMounted ? FGCOLOR : DARKGREY), 
       static_cast<uint16_t>(!stopOta ? FGCOLOR : DARKGREY), 
       static_cast<uint16_t>(FGCOLOR),
+      static_cast<uint16_t>(usb_av ? FGCOLOR : DARKGREY),
       static_cast<uint16_t>(FGCOLOR)
   };
 
-    const char* texts[4] = { "SD", "OTA", "WUI","CFG" };
+    const char* texts[5] = { "SD", "OTA", "WUI", "USB", "CFG" };
 #if TFT_HEIGHT<200
-    const char* messages[4] = { "Launch from SDCard", 
+    const char* messages[5] = { "Launch from SDCard", 
                                 "Online Installer", 
                                 "Start WebUI",
+                                "SD->USB Interface",
                                 "Launcher settings." };
 #else
-    const char* messages[4] = { "Launch from or mng SDCard", 
+    const char* messages[5] = { "Launch from or mng SDCard", 
                                 "Install/download from M5Burner", 
                                 "Start Web User Interface",
+                                "Manage SD files through USB",
                                 "Change Launcher settings." };
 #endif
     tft->fillRoundRect(6,26,tftWidth-12,tftHeight-12,5,BGCOLOR);

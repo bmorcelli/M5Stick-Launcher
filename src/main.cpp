@@ -116,6 +116,7 @@ uint8_t buff[1024] = {0};
 #include "webInterface.h"
 #include "partitioner.h"
 #include "settings.h"
+#include "massStorage.h"
 
 
 
@@ -416,7 +417,7 @@ void setup() {
 void loop() {
   bool redraw = true;
   int index = 0;
-  int opt = 4; // there are 3 options> 1 list SD files, 2 OTA and 3 Config
+  int opt = 5; // there are 3 options> 1 list SD files, 2 OTA, 3 USB and 4 Config
   stopOta = false; // variable used in WebUI, and to prevent open OTA after webUI without restart
   getBrightness();
   if(!sdcardMounted) index=1; //if SD card is not present, paint SD square grey and auto select OTA
@@ -503,7 +504,24 @@ void loop() {
         redraw=true;        
       }
 
-      if(index == 3) {  
+      if(index == 3) {
+        #ifdef ARDUINO_USB_MODE
+        if(setupSdCard()) { 
+          MassStorage(); 
+          MassStorage().~MassStorage();
+        } 
+        else {
+          displayRedStripe("Insert SD Card");
+          delay(3000);
+        }
+        
+        #else
+          displayRedStripe("Only for ESP32-S3");
+          delay(2000);
+        #endif
+      }
+
+      if(index == 4) {  
         options = {
           #ifndef E_PAPER_DISPLAY
           {"Charge Mode", [=](){ chargeMode(); }},
