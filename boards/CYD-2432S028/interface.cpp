@@ -33,52 +33,29 @@
 
     #include <TouchLib.h>
     #include <Wire.h>
-    void IRAM_ATTR isrPin(void);
-
     class CYD_Touch: public TouchLib {
         public:
         TouchPoint t;
         TP_Point ti;
-        bool isrWake;
-        
-        CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN), isrWake(true) { }
+        CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN) { }
         inline bool begin() { 
             Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
             delay(10);
-            isrWake = true;
-            #if TOUCH_INT_PIN > 0
-            pinMode(TOUCH_INT_PIN,INPUT);
-            attachInterrupt(TOUCH_INT_PIN, isrPin, FALLING); /// Need to test CHANGE and FALLING methods
-            #endif
             bool result = init();
             setRotation(1);
             return result;
         }
-        inline bool touched() { 
-            bool result = false;
-            if(isrWake) {
-                #if TOUCH_INT_PIN > 0
-                isrWake = false; // resets interrupt if enabled
-                #endif
-                result = read(); 
-            }
-            return result;
-        }
+        inline bool touched() { return read(); }
         inline TouchPoint getPointScaled() { 
             ti = getPoint(0);
             t.x=ti.x;
             t.y = (tftHeight+20)-ti.y;
             t.pressed=true;
+            TouchLib::raw_data[0] = 0; // resets the read raw reading, that triggers TouchLib::read() to true, and is not resetted at the lib
             return t; 
         }
+
     };
-    static CYD_Touch *isrPinptr;
-    void IRAM_ATTR isrPin(void)
-    {
-        CYD_Touch *o = isrPinptr;
-        o->isrWake = true;
-        Serial.println("triggered");
-    }
     CYD_Touch touch;
 
 #elif defined(TOUCH_AXS15231B_I2C)
