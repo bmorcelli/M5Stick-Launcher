@@ -211,6 +211,9 @@ void InputHandler(void) {
         touchHeatMap(touchPoint);
       }
     }
+    #ifdef TOUCH_GT911_I2C
+        else touch.touched(); // keep calling it to keep refreshing raw readings for when needed it will be ok
+    #endif
 }
 
 /*********************************************************************
