@@ -6,6 +6,10 @@
 #define BLACK TFT_BLACK
 #define RED TFT_RED
 #define GREEN TFT_GREEN
+#define DARKCYAN TFT_DARKCYAN
+#define LIGHTGREY TFT_LIGHTGREY
+
+
 class Ard_eSPI: public EPD_translate {
     public:
     inline int getTextsize() { return textsize; };
