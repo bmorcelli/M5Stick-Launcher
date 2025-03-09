@@ -78,7 +78,7 @@ static const uint8_t ADC = 10;
 
 // Screen Setup
 #define HAS_SCREEN
-#define ROTATION 1
+#define ROTATION 2
 
 
 #define BTN_ALIAS '"Ok"'

@@ -4,3 +4,5 @@
 .vscode/launch.json
 .vscode/ipch
 *.bin
+include/webFiles.h
+.vscode/extensions.json
