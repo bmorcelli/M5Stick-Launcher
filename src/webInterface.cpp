@@ -128,16 +128,6 @@ String listFiles(String folder) {
   return returnText;
 }
 
-// parses and processes webpages
-// if the webpage has %SOMETHING% or %SOMETHINGELSE% it will replace those strings with the ones defined
-String processor(const String& var) {
-  if (var == "FIRMWARE") return String(LAUNCHER);
-  else if (var == "FREESD") return humanReadableSize(SDM.totalBytes() - SDM.usedBytes());
-  else if (var == "USEDSD") return humanReadableSize(SDM.usedBytes());
-  else if (var == "TOTALSD") return humanReadableSize(SDM.totalBytes());
-  else return "Attribute not configured"; 
-}
-
 // used by server.on functions to discern whether a user has the correct httpapitoken OR is authenticated by username and password
 bool checkUserWebAuth(AsyncWebServerRequest * request) {
   bool isAuthenticated = false;
@@ -316,10 +306,8 @@ void configureWebServer() {
   });
   server->on("/systeminfo", HTTP_GET,[](AsyncWebServerRequest * request) {
     char response_body[300];
-    size_t LittleFSTotalBytes = LittleFS.totalBytes();
-    size_t LittleFSUsedBytes = LittleFS.usedBytes();
-    size_t SDTotalBytes = SD.totalBytes();
-    size_t SDUsedBytes = SD.usedBytes();
+    uint64_t SDTotalBytes = SDM.totalBytes();
+    uint64_t SDUsedBytes = SDM.usedBytes();
     sprintf(response_body,
       "{\"%s\":\"%s\",\"SD\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}",
       "VERSION", LAUNCHER,
