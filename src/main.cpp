@@ -509,6 +509,8 @@ void loop() {
         if(setupSdCard()) { 
           MassStorage(); 
           MassStorage().~MassStorage();
+          tft->fillScreen(BGCOLOR);
+          tft->fillScreen(BGCOLOR);
         } 
         else {
           displayRedStripe("Insert SD Card");
