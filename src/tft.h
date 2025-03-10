@@ -138,6 +138,8 @@ class Ard_eSPI : public lgfx::LGFX_Device {
 
 #ifdef RGB_PANEL
     #define TFT_BUS_TYPE Arduino_ESP32RGBPanel
+#elif AXS15231B_QSPI
+    #define TFT_BUS_TYPE Arduino_AXS15231B
 #else 
     #define TFT_BUS_TYPE Arduino_DataBus
 #endif 
@@ -162,8 +164,9 @@ class Ard_eSPI : public lgfx::LGFX_Device {
 #define _TFT_DRV Arduino_RGB_Display
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_RGB_Display(e,f,a,0,true)
 #elif AXS15231B_QSPI
-#define _TFT_DRV Arduino_AXS15231B
-#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_AXS15231B(a,b,c,d,e,f)
+#define CANVAS
+#define _TFT_DRV Arduino_Canvas
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_Canvas(e , f , a, 0 , 0 , c)
 #else
 // CYD Default to not shoot errors on screen
 #define _TFT_DRV Arduino_ILI9341
@@ -174,7 +177,7 @@ class Ard_eSPI: public _TFT_DRV {
     public:
     // Driver initilizer
     Ard_eSPI(TFT_BUS_TYPE *bus, int8_t rst, uint8_t rotation, bool ips, uint16_t w, uint16_t h, uint16_t co1, uint16_t ro1 ,uint16_t co2, uint16_t ro2)
-        : _TFT_DRVF(bus, rst, rotation, ips, w, h,co1,ro1,co2,ro2) {}
+        : _TFT_DRVF(bus, rst, rotation, ips, w, h,co1,ro1,co2,ro2) { }
     
     inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { drawChar(x, y, c, a, b); };
     void drawString(String s, uint16_t x, uint16_t y);

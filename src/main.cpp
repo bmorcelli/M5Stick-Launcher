@@ -432,6 +432,7 @@ void loop() {
       #ifdef E_PAPER_DISPLAY
         delay(200);
       #endif
+      tft_flush();
     }
 
     if(check(PrevPress)) {

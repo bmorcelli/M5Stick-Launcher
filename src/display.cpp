@@ -80,7 +80,8 @@ Ard_eSPI *tft = new Ard_eSPI();
       #endif
       );
   #elif AXS15231B_QSPI
-    Arduino_DataBus *bus = new Arduino_ESP32QSPI(TFT_CS, TFT_SCLK, TFT_D0, TFT_D1, TFT_D2, TFT_D3);
+    Arduino_DataBus *g = new Arduino_ESP32QSPI(TFT_CS, TFT_SCLK, TFT_D0, TFT_D1, TFT_D2, TFT_D3);
+    Arduino_AXS15231B *bus = new Arduino_AXS15231B(g,TFT_RST,ROTATION,TFT_IPS,TFT_WIDTH,TFT_HEIGHT);
   #else // SPI Data Bus shared with SDCard and other SPIClass devices
     Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO,&SPI);
   #endif
@@ -113,6 +114,7 @@ void displayScrollingText(const String& text, Opt_Coord& coord) {
     i++;
     if(i==1) _lastmillis=millis()+1000;
   }
+  tft_flush();
 }
 
 /***************************************************************************************
@@ -124,6 +126,7 @@ void resetTftDisplay(int x, int y, uint16_t fc, int size, uint16_t bg, uint16_t 
     tft->fillScreen(screen);
     tft->setTextSize(size);
     tft->setTextColor(fc,bg);
+    tft_flush();
 }
 
 /***************************************************************************************
@@ -149,6 +152,7 @@ void TouchFooter(uint16_t color) {
   tft->drawCentreString("PREV",tftWidth/6,tftHeight+4,1);
   tft->drawCentreString("SEL",tftWidth/2,tftHeight+4,1);
   tft->drawCentreString("NEXT",5*tftWidth/6,tftHeight+4,1);
+  tft_flush();
 }
 
 /***************************************************************************************
@@ -162,6 +166,7 @@ void TouchFooter2(uint16_t color) {
   tft->drawCentreString("Skip",tftWidth/6,tftHeight+4,1);
   tft->drawCentreString("LAUNCHER",tftWidth/2,tftHeight+4,1);
   tft->drawCentreString("Skip",5*tftWidth/6,tftHeight+4,1);
+  tft_flush();
 }
 
 /***************************************************************************************
@@ -221,6 +226,7 @@ void initDisplay(bool doAll) {
         if(_x>=(tftWidth-(LW+4))) { _x=10; _y+=LH; }
         }
         tft->setCursor(_x,_y); 
+        tft_flush();
     }
     tft->setTextSize(FG);
     tft->setTextColor(FGCOLOR);
@@ -238,6 +244,7 @@ void initDisplay(bool doAll) {
 
   END:
     delay(50);
+    tft_flush();
     #endif
 }
 /***************************************************************************************
@@ -318,6 +325,7 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   #ifdef E_PAPER_DISPLAY
     tft->startCallback();
   #endif
+  tft_flush();
 
 }
 
@@ -381,6 +389,7 @@ void displayCurrentVersion(String name, String author, String version, String pu
     #ifdef E_PAPER_DISPLAY
     tft->startCallback();
     #endif
+    tft_flush();
 }
 
 /***************************************************************************************
@@ -415,6 +424,7 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
   tft->setTextSize(_size);
   tft->setTextColor(_color, _bgcolor);
   tft->setCursor(_x,_y);    
+  tft_flush();
 
 }
 
@@ -459,7 +469,7 @@ void progressHandler(int progress, size_t total) {
   
   if (prog_handler == 1) tft->fillRect(20, tftHeight - 26, barWidth, 13, ALCOLOR);
   else tft->fillRect(20, tftHeight - 45, barWidth, 13, FGCOLOR);
-
+  tft_flush();
 }
 
 
@@ -687,6 +697,7 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
     #ifdef E_PAPER_DISPLAY
     tft->startCallback();
     #endif
+    tft_flush();
     return coord;
 }
 
@@ -713,6 +724,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
       #ifdef E_PAPER_DISPLAY
       delay(200);
       #endif
+      tft_flush();
     }
     String txt=options[index].first.c_str();
     displayScrollingText(txt, coord);

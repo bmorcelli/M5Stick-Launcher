@@ -315,6 +315,7 @@ String keyboard(String mytext, int maxSize, String msg) {
     #ifdef E_PAPER_DISPLAY
       tft->startCallback();
     #endif
+    tft_flush();
     }
 
     //cursor handler
@@ -528,6 +529,7 @@ String keyboard(String mytext, int maxSize, String msg) {
         }
         redraw = true;
         holdCode=millis();
+        tft_flush();
     }
     WAITING: // Used in long press detection
     yield();

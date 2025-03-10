@@ -421,6 +421,7 @@ String loopSD(bool filePicker) {
       }
       coord=listFiles(index, fileList);
       redraw = false;
+      tft_flush();
     }
 
     displayScrollingText(fileList[index][0], coord);

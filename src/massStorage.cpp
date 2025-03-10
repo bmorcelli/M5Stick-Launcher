@@ -49,6 +49,7 @@ void MassStorage::beginUsb() {
     setupUsbEvent();
     drawUSBStickIcon(false);
     USB.begin();
+    tft_flush();
 }
 
 
@@ -89,6 +90,7 @@ void MassStorage::setupUsbEvent() {
                 default:
                     break;
             }
+            tft_flush();
         }
     });
 }
