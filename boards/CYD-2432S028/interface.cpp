@@ -208,8 +208,8 @@ void InputHandler(void) {
             t.y = (tftHeight+20)-tmp;
         }
         Serial.printf("\nTouch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
-        #ifdef CYD28_DISPLAY_VER_RES_MAX
-            #if CYD28_DISPLAY_VER_RES_MAX>300
+        #if  defined(CYD28_DISPLAY_VER_RES_MAX) && !defined(HAS_CAPACITIVE_TOUCH)
+            #if CYD28_DISPLAY_VER_RES_MAX>340
                 auto t2 = touch.getPointRaw();
                 Serial.printf("RAW d Pressed on x=%d, y=%d\n",t2.x, t2.y);
             #endif
