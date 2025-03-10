@@ -71,9 +71,10 @@ class CYD_Touch: public BBCapTouch {
     inline bool begin() { 
         const char *szNames[] = {"Unknown", "FT6x36", "GT911", "CST820", "CST226", "MXT144", "AXS15231"};
         Wire.end();
+        Serial.println("Starting Touch Sensor");
         bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_RST_PIN, TOUCH_INT_PIN); // returns 0 if CT_SUCCESS;
         setOrientation(90, TFT_WIDTH,TFT_HEIGHT); // This orientation reflects the right position for the InputHandler logic.
-        int iType = bbct.sensorType();
+        int iType = sensorType();
         Serial.printf("Sensor type = %s\n", szNames[iType]);
         return result==0? true:false;
     }
@@ -106,7 +107,7 @@ CYD_Touch touch;
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio() { 
-#if defined(TOUCH_GT911_I2C) || defined(TOUCH_CST816S_I2C)  || defined(TOUCH_AXS15231B_I2C)
+#if !defined(HAS_CAPACITIVE_TOUCH) && (defined(TOUCH_GT911_I2C) || defined(TOUCH_CST816S_I2C)  || defined(TOUCH_AXS15231B_I2C))
     Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
 #endif
 #if !defined(HAS_CAPACITIVE_TOUCH) && defined(CYD)
