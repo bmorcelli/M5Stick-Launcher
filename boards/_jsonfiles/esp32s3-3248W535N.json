@@ -11,7 +11,7 @@
       "'-D ARDUINO_USB_MODE=1'",
       "'-D ARDUINO_RUNNING_CORE=1'",
       "'-D ARDUINO_EVENT_RUNNING_CORE=1'",
-      "'-D ARDUINO_USB_CDC_ON_BOOT=0'",
+      "'-D ARDUINO_USB_CDC_ON_BOOT=1'",
       "'-D JC3248W535'",
       "'-D DISPLAY_WIDTH=320'",
       "'-D DISPLAY_HEIGHT=480'",
