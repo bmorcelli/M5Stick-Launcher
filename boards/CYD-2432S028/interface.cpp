@@ -199,7 +199,8 @@ void InputHandler(void) {
             t.x = t.y;
             t.y = (tftHeight+20)-tmp;
         }
-        //Serial.printf("\nTouch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
+        Serial.printf("\nTouch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
+        
 
         if(!wakeUpScreen()) AnyKeyPress = true;
         else return;
