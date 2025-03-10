@@ -319,6 +319,17 @@
                 },
               }     
             - {
+                vendor: "WIP",
+                name: "CYD-3248W535C",
+                description: "(ESP32S3, 3.5in, 320x480, Capacitive)",
+                link: "",
+                family: "ESP32-S3",
+                env: "CYD-3248W535C",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+            - {
                 vendor: "Marauder",
                 name: "V4-OG",
                 description: "",

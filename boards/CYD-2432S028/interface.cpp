@@ -1,5 +1,6 @@
 #include <interface.h>
 #include "powerSave.h"
+#include <Wire.h>
 
 #ifndef TFT_BRIGHT_CHANNEL
     #define TFT_BRIGHT_CHANNEL 0
@@ -32,15 +33,12 @@
     #endif
 
     #include <TouchLib.h>
-    #include <Wire.h>
     class CYD_Touch: public TouchLib {
         public:
         TouchPoint t;
         TP_Point ti;
         CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN) { }
         inline bool begin() { 
-            Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
-            delay(10);
             bool result = init();
             setRotation(1);
             return result;
@@ -60,11 +58,10 @@
 
 #elif defined(TOUCH_AXS15231B_I2C)
 #include <bb_captouch.h>
-#include <Wire.h>
-    #define TOUCH_SDA_PIN 41
-    #define TOUCH_SCL_PIN 42
-    #define TOUCH_RST_PIN -1
-    #define TOUCH_INT_PIN 3
+    #define TOUCH_SDA_PIN AXS15231B_TOUCH_I2C_SDA
+    #define TOUCH_SCL_PIN AXS15231B_TOUCH_I2C_SCL
+    #define TOUCH_RST_PIN AXS15231B_TOUCH_I2C_RST
+    #define TOUCH_INT_PIN AXS15231B_TOUCH_I2C_IRQ
 
 class CYD_Touch: public BBCapTouch {
     public:
@@ -72,13 +69,20 @@ class CYD_Touch: public BBCapTouch {
     TOUCHINFO ti;
     CYD_Touch() : BBCapTouch() { }
     inline bool begin() { 
-        Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN, 400000);
-        delay(10);
-        bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_RST_PIN, TOUCH_INT_PIN,400000,&Wire); // returns 0 if CT_SUCCESS;
-        setOrientation(90, 320,240); // This orientation reflects the right position for the InputHandler logic.
+        const char *szNames[] = {"Unknown", "FT6x36", "GT911", "CST820", "CST226", "MXT144", "AXS15231"};
+        Wire.end();
+        bool result = init(TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_RST_PIN, TOUCH_INT_PIN); // returns 0 if CT_SUCCESS;
+        setOrientation(90, TFT_WIDTH,TFT_HEIGHT); // This orientation reflects the right position for the InputHandler logic.
+        int iType = bbct.sensorType();
+        Serial.printf("Sensor type = %s\n", szNames[iType]);
         return result==0? true:false;
     }
-    inline bool touched() { if(getSamples(&ti)) { t.x = ti.x[0]; t.y = ti.y[0]; t.pressed = true; } else { t.x=0; t.y=0; t.pressed=false; } }
+    inline bool touched() { 
+        if(getSamples(&ti)) 
+        { t.x = ti.x[0]; t.y = ti.y[0]; t.pressed = true; } 
+        else { t.x=0; t.y=0; t.pressed=false; } 
+        return t.pressed;
+    }
     inline TouchPoint getPointScaled() { return t; }
 
 };
@@ -102,7 +106,10 @@ CYD_Touch touch;
 ** Description:   initial setup for the device
 ***************************************************************************************/
 void _setup_gpio() { 
-#if !defined(HAS_CAPACITIVE_TOUCH)
+#if defined(TOUCH_GT911_I2C) || defined(TOUCH_CST816S_I2C)  || defined(TOUCH_AXS15231B_I2C)
+    Wire.begin(TOUCH_SDA_PIN, TOUCH_SCL_PIN);
+#endif
+#if !defined(HAS_CAPACITIVE_TOUCH) && defined(CYD)
     pinMode(33, OUTPUT);
 #endif
 

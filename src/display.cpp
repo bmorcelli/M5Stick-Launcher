@@ -79,6 +79,8 @@ Ard_eSPI *tft = new Ard_eSPI();
       ST7701_PANEL_CONFIG_TIMINGS_FLAGS_PCLK_ACTIVE_NEG /* pclk_active_neg */
       #endif
       );
+  #elif AXS15231B_QSPI
+    Arduino_DataBus *bus = new Arduino_ESP32QSPI(TFT_CS, TFT_SCLK, TFT_D0, TFT_D1, TFT_D2, TFT_D3);
   #else // SPI Data Bus shared with SDCard and other SPIClass devices
     Arduino_DataBus *bus = new Arduino_HWSPI(TFT_DC, TFT_CS, TFT_SCLK, TFT_MOSI, TFT_MISO,&SPI);
   #endif
