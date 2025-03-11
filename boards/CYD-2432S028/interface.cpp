@@ -40,7 +40,7 @@
         CYD_Touch() : TouchLib(Wire, TOUCH_SDA_PIN, TOUCH_SCL_PIN, TOUCH_ADDR, TOUCH_RST_PIN) { }
         inline bool begin() { 
             bool result = init();
-            setRotation(1);
+            setRotation(ROTATION);
             return result;
         }
         inline bool touched() { return read(); }
