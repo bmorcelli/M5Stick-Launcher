@@ -357,7 +357,7 @@
                 description: "",
                 link: "https://lilygo.cc/products/t-dongle-s3?srsltid=AfmBOopwCcPQTTC4wTNi3rNZHn8W6g8Yo_ShcrfDiAfECS6tGq59vWo7",
                 family: "ESP32-S3",
-                env: "lilygo-t-dongle-S3-tft",
+                env: "lilygo-t-dongle-s3-tft",
                 partitions: {
                   bootloader_addr: "0x0",
                 },
