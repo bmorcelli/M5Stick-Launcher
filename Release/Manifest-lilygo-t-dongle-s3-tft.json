@@ -1,0 +1,1 @@
+{"name":"T-Dongle S3 (tft)","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-lilygo-t-dongle-s3-tft.bin","offset":0}]}]}
