@@ -32,7 +32,7 @@
 #include "marauder-mini.h"
 #elif MARAUDERV4
 #include "marauder-v4og.h"
-#elif T_DISPLAY_S3_TOUCH
+#elif defined (T_DISPLAY_S3_TOUCH) || defined (T_DONGLE_S3)
 #include "lilygo-t-display-s3-touch.h"
 #elif T_DISPLAY_S3_PRO
 #include "lilygo-t-display-s3-pro.h"

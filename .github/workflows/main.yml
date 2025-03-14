@@ -353,6 +353,17 @@
               }     
             - {
                 vendor: "Lilygo",
+                name: "T-Dongle S3 (tft)",
+                description: "",
+                link: "https://lilygo.cc/products/t-dongle-s3?srsltid=AfmBOopwCcPQTTC4wTNi3rNZHn8W6g8Yo_ShcrfDiAfECS6tGq59vWo7",
+                family: "ESP32-S3",
+                env: "lilygo-t-dongle-S3-tft",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              } 
+            - {
+                vendor: "Lilygo",
                 name: "T-Display_S3_Touch",
                 description: "",
                 link: "https://lilygo.cc/products/t-display-s3?_pos=1&_sid=d7b2ebc22&_ss=r&variant=42589373268149",
