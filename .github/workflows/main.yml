@@ -354,7 +354,7 @@
             - {
                 vendor: "Lilygo",
                 name: "T-Dongle S3 (tft)",
-                description: "",
+                description: "(single press, double press and long press logic)",
                 link: "https://lilygo.cc/products/t-dongle-s3?srsltid=AfmBOopwCcPQTTC4wTNi3rNZHn8W6g8Yo_ShcrfDiAfECS6tGq59vWo7",
                 family: "ESP32-S3",
                 env: "lilygo-t-dongle-s3-tft",
@@ -364,8 +364,8 @@
               } 
             - {
                 vendor: "Lilygo",
-                name: "T-Display_S3_Touch",
-                description: "",
+                name: "T-Display-S3",
+                description: "Touch and no touch (single press and longpress logic on both buttons )",
                 link: "https://lilygo.cc/products/t-display-s3?_pos=1&_sid=d7b2ebc22&_ss=r&variant=42589373268149",
                 family: "ESP32-S3",
                 env: "lilygo-t-display-S3-touch",

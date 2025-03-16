@@ -66,6 +66,7 @@ Things that needs to be done in next updates
 ## Changelog
 * 2.4.7:
      * [x] [T-Dongle-S3 (tft)](https://lilygo.cc/products/t-dongle-s3?srsltid=AfmBOopwCcPQTTC4wTNi3rNZHn8W6g8Yo_ShcrfDiAfECS6tGq59vWo7) port
+     * [x] [T-Display-S3](https://lilygo.cc/products/t-display-s3?variant=42284559827125) port
 * 2.4.6: 
      * [x] UiFlow2 v2.2.3 and restored StickCPlus2 compatibility
      * [x] split webui files

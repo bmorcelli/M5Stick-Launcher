@@ -11,6 +11,36 @@
 #include <esp_adc_cal.h>
 TouchLib touch(Wire, 18, 17, CTS820_SLAVE_ADDRESS, 21);
 
+#include <Button.h>
+volatile bool nxtPress=false;
+volatile bool prvPress=false;
+volatile bool ecPress=false;
+volatile bool slPress=false;
+static void onButtonSingleClickCb1(void *button_handle, void *usr_data) {
+  nxtPress = true;
+}
+static void onButtonDoubleClickCb1(void *button_handle, void *usr_data) {
+  slPress=true;
+}
+static void onButtonHoldCb1(void *button_handle, void *usr_data)
+{
+  slPress=true;
+}
+
+
+static void onButtonSingleClickCb2(void *button_handle, void *usr_data) {
+  prvPress=true;
+}
+static void onButtonDoubleClickCb2(void *button_handle, void *usr_data) {
+  ecPress=true;
+}
+static void onButtonHoldCb2(void *button_handle, void *usr_data)
+{
+  ecPress=true;
+}
+
+Button *btn1;
+Button *btn2;
 
 /***************************************************************************************
 ** Function name: _setup_gpio()
@@ -33,9 +63,41 @@ void _setup_gpio() {
     
     touch.setRotation(1);
     // PWM backlight setup
-    ledcSetup(TFT_BRIGHT_CHANNEL,TFT_BRIGHT_FREQ, TFT_BRIGHT_Bits); //Channel 0, 10khz, 8bits
-    ledcAttachPin(TFT_BL, TFT_BRIGHT_CHANNEL);
-    ledcWrite(TFT_BRIGHT_CHANNEL,255);
+          // setup buttons
+          button_config_t bt1 = {
+            .type = BUTTON_TYPE_GPIO,
+            .long_press_time = 600,
+            .short_press_time = 120,
+            .gpio_button_config = {
+                .gpio_num = DW_BTN,
+                .active_level = 0,
+            },
+        };
+        button_config_t bt2 = {
+            .type = BUTTON_TYPE_GPIO,
+            .long_press_time = 600,
+            .short_press_time = 120,
+            .gpio_button_config = {
+                .gpio_num = SEL_BTN,
+                .active_level = 0,
+            },
+        };
+        pinMode(SEL_BTN, INPUT_PULLUP);
+    
+        btn1 = new Button(bt1);
+    
+        //btn->attachPressDownEventCb(&onButtonPressDownCb, NULL);
+        btn1->attachSingleClickEventCb(&onButtonSingleClickCb1,NULL);
+        btn1->attachDoubleClickEventCb(&onButtonDoubleClickCb1,NULL);
+        btn1->attachLongPressStartEventCb(&onButtonHoldCb1,NULL);
+        
+        btn2 = new Button(bt2);
+    
+        //btn->attachPressDownEventCb(&onButtonPressDownCb, NULL);
+        btn2->attachSingleClickEventCb(&onButtonSingleClickCb2,NULL);
+        btn2->attachDoubleClickEventCb(&onButtonDoubleClickCb2,NULL);
+        btn2->attachLongPressStartEventCb(&onButtonHoldCb2,NULL);  
+    
 }
 
 /***************************************************************************************
@@ -98,7 +160,10 @@ void _setBrightness(uint8_t brightval) {
 **********************************************************************/
 void InputHandler(void) {
     static long tm=millis();
-    if(millis()-tm>200) {
+    static bool btn_pressed=false;
+    if(nxtPress || prvPress || ecPress || slPress) btn_pressed=true;
+
+  if(millis()-tm>200) {
     if (touch.read() || LongPress) { //touch.tirqTouched() &&
         auto t = touch.getPoint(0);
         tm=millis();
@@ -135,7 +200,22 @@ void InputHandler(void) {
         touchHeatMap(touchPoint);
         
     }
+    if(btn_pressed) {
+        btn_pressed=false;
+        if(!wakeUpScreen()) AnyKeyPress = true;
+        else return;
+        SelPress = slPress;
+        EscPress = ecPress;
+        NextPress = nxtPress;
+        PrevPress = prvPress;
+        
+        nxtPress=false;
+        prvPress=false;
+        ecPress=false;
+        slPress=false;
+
     }
+  }
 
 }
 /*********************************************************************
