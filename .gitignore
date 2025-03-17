@@ -6,3 +6,4 @@
 *.bin
 include/webFiles.h
 .vscode/extensions.json
+checksum.sha256

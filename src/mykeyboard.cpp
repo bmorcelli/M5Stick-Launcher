@@ -339,15 +339,21 @@ String keyboard(String mytext, int maxSize, String msg) {
       #if defined(DONT_USE_INPUT_TASK)
         check(AnyKeyPress);
       #endif
-      auto t = touchPoint;
-      if (t.pressed)
+      if (touchPoint.pressed)
       {
-        if (box_list[48].contain(t.x, t.y)) { break; }      // Ok
-        if (box_list[49].contain(t.x, t.y)) { caps=!caps; tft->fillRect(0,54,tftWidth,tftHeight-54,BGCOLOR); goto THIS_END; } // CAP
-        if (box_list[50].contain(t.x, t.y)) goto DEL;               // DEL
-        if (box_list[51].contain(t.x, t.y)) { mytext += " "; goto THIS_END; } // SPACE
+        SelPress = false;
+        EscPress = false;
+        NextPress = false;
+        PrevPress = false;
+        DownPress = false;
+        UpPress = false;
+
+        if (box_list[48].contain(touchPoint.x, touchPoint.y)) { break; }      // Ok
+        if (box_list[49].contain(touchPoint.x, touchPoint.y)) { caps=!caps; tft->fillRect(0,54,tftWidth,tftHeight-54,BGCOLOR); goto THIS_END; } // CAP
+        if (box_list[50].contain(touchPoint.x, touchPoint.y)) goto DEL;               // DEL
+        if (box_list[51].contain(touchPoint.x, touchPoint.y)) { mytext += " "; goto THIS_END; } // SPACE
         for(k=0;k<48;k++){
-          if (box_list[k].contain(t.x, t.y)) {
+          if (box_list[k].contain(touchPoint.x, touchPoint.y)) {
             if(caps) mytext += box_list[k].key_sh;
             else mytext += box_list[k].key;
           }
@@ -357,8 +363,9 @@ String keyboard(String mytext, int maxSize, String msg) {
         touchPoint.Clear();
         redraw=true;
       }
+    #endif
 
-    #elif defined(HAS_3_BUTTONS) // StickCs and Core
+    #if defined(HAS_3_BUTTONS) // StickCs and Core
       if(check(SelPress))  {
         goto SELECT;
       }
