@@ -50,7 +50,7 @@ def load_checksum_file(input_file):
 def prepare_www_files():
     HEADER_FILE = join(env.get("PROJECT_DIR"), "include", "webFiles.h")
     filetypes_to_gzip = ["html", "css", "js"]
-    data_src_dir = join(env.get("PROJECT_DIR"), "embedded_resources/web_interface")
+    data_src_dir = join(env.get("PROJECT_DIR"), "webUi")
     checksum_file = join(data_src_dir, "checksum.sha256")
     checksum = ""
 
@@ -91,7 +91,7 @@ def prepare_www_files():
                 compressed_data = gz.read()
                 var_name = basename(file).replace(".", "_")
 
-                header.write(f"const char {var_name}[] PROGMEM = {{\n")
+                header.write(f"const uint8_t {var_name}[] PROGMEM = {{\n")
 
                 # Write hex values, inserting a newline every 15 bytes
                 for i in range(0, len(compressed_data), 15):

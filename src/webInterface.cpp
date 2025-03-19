@@ -140,7 +140,7 @@ bool runOnce = false;
 // handles uploads to the filserver
 void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
   // make sure authenticated before allowing upload
-  Serial.println("Folder: " + uploadFolder);  
+  //Serial.println("Folder: " + uploadFolder);  
   if (uploadFolder=="/") uploadFolder = "";
 
   if (checkUserWebAuth(request)) {
@@ -167,7 +167,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
       if(!update) {
         request->_tempFile.write(data, len);
       } else {
-        if(!Update.write(data,len)) displayRedStripe("FAIL 172");
+        if(!Update.write(data,len)) displayRedStripe("FAIL 170");
       }
     }
 
@@ -178,7 +178,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
         request->redirect("/");
       } else {
 
-        if(!Update.end()) { displayRedStripe("Fail 183: " + String(Update.getError())); delay(3000); }
+        if(!Update.end()) { displayRedStripe("Fail 181: " + String(Update.getError())); delay(3000); }
         else displayRedStripe("Restart your device");
       }
     }
