@@ -6,10 +6,8 @@
 #include "settings.h"
 
 #if defined(HEADLESS)
-SerialDisplayClass *tft;
-#elif defined(E_PAPER_DISPLAY) || defined(USE_TFT_ESPI)
-Ard_eSPI *tft;
-#elif defined(USE_LOVYANGFX) 
+SerialDisplayClass *tft= new SerialDisplayClass();
+#elif defined(E_PAPER_DISPLAY) || defined(USE_TFT_ESPI) || defined(USE_LOVYANGFX) 
 Ard_eSPI *tft = new Ard_eSPI();
 #else
   #ifdef TFT_PARALLEL_8_BIT

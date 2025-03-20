@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 import glob
 import gzip
+import os
 from os import makedirs, remove, rename
 from os.path import basename, dirname, exists, isfile, join
 
