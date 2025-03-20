@@ -136,6 +136,32 @@ bool checkUserWebAuth(AsyncWebServerRequest * request) {
   }
   return isAuthenticated;
 }
+
+// Função auxiliar para criar diretórios recursivamente
+void createDirRecursive(String path) {
+  String currentPath = "";
+  int startIndex = 0;
+  Serial.print("Verifying folder: "); Serial.println(path);
+
+  while (startIndex < path.length()) {
+    int endIndex = path.indexOf("/", startIndex);
+    if (endIndex == -1) endIndex = path.length();
+
+    currentPath += path.substring(startIndex, endIndex);
+    if (currentPath.length() > 0) {
+      if (!SDM.exists(currentPath)) {
+        SDM.mkdir(currentPath);
+        Serial.print("Creating folder: "); Serial.println(currentPath);
+      }
+    }
+
+    if (endIndex < path.length()) {
+      currentPath += "/";
+    }
+    startIndex = endIndex + 1;
+  }
+}
+
 bool runOnce = false;
 // handles uploads to the filserver
 void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
@@ -146,8 +172,17 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
   if (checkUserWebAuth(request)) {
     if (!index || runOnce) {
       if(!update) {
-        // open the file on first call and store the file handle in the request object
-        request->_tempFile = SDM.open(uploadFolder + "/" + filename, "w");
+        // Verifica se é um upload de pasta
+          Serial.println("File: " + uploadFolder + "/" + filename); 
+          String relativePath = filename;
+          String fullPath = uploadFolder + "/" + relativePath;
+          // Cria diretórios necessários
+          String dirPath = fullPath.substring(0, fullPath.lastIndexOf("/"));
+          if (dirPath.length() > 0) {
+            createDirRecursive(dirPath);
+          }
+          // Upload de arquivo único
+          request->_tempFile = SDM.open(uploadFolder + "/" + filename, "w");
       } else {
         runOnce=false;
         // open the file on first call and store the file handle in the request object
@@ -196,7 +231,7 @@ void configureWebServer() {
   // configure web server
   
   MDNS.begin(host);
-  
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   // if url isn't found
   server->onNotFound([](AsyncWebServerRequest * request) {
     request->redirect("/");
@@ -268,7 +303,6 @@ void configureWebServer() {
         }
       }
   });
-
   // run handleUpload function when any file is uploaded
   server->onFileUpload(handleUpload);
 
