@@ -174,8 +174,8 @@ border-collapse: collapse;
 border-bottom: 1px solid #00cc00;
 }
 p {
-    margin-block-start: 3px;
-    margin-block-end: 3px;
+margin-block-start: 3px;
+margin-block-end: 3px;
 }
 th, td {
 padding: 5px;
