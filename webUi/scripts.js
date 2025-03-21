@@ -253,7 +253,15 @@ function listFilesButton(folders) {
   xmlhttp.open("GET", "/listfiles?folder=" + folders, true);
   xmlhttp.send();
   _("detailsheader").innerHTML = "<h3>Files<h3>";
-  _("updetailsheader").innerHTML = "<h3>Folder Actions: <button onclick=\"showUploadButtonFancy('" + folders + "')\">Upload Files</button><button onclick=\"showCreateFolder('" + folders + "')\">Create Folder</button><h3>"
+  _("updetailsheader").innerHTML = "<h3>Folder Actions: " + 
+  "<input type='file' id='fa' multiple style='display:none'>" + 
+  "<input type='file' id='fol' webkitdirectory directory multiple style='display:none'>" +
+  "<button onclick=\"_('fa').click()\">Send Files</button>" +
+  "<button onclick=\"_('fol').click()\">Send Folders</button>" +
+  "<button onclick=\"showCreateFolder('" + folders + "')\">Create Folder</button><h3>" +
+  "<div id='file-progress-container'></div>";
+  _("fa").onchange = e => handleFileForm(e.target.files, folders);
+  _("fol").onchange = e => handleFileForm(e.target.files, folders);
   _("updetails").innerHTML = "";
   _("OTAdetails").style.display = 'none';
   _("analysisOutput").style.display = 'none';
@@ -261,6 +269,7 @@ function listFilesButton(folders) {
   _("uploadApp").style.display = 'none';
   _("uploadSpiffs").style.display = 'none';
 }
+
 function renameFile(filePath, oldName) {
   var actualFolder = _("actualFolder").value;
   let fileName = prompt("Enter the new name: ", oldName);
@@ -312,41 +321,23 @@ function CreateFolder() {
   folderName = _("folder").value + "/" + _("foldername").value;
   downloadDeleteButton(folderName, 'create');
 }
-function showUploadButtonFancy(folders) {
-  _("status").innerHTML = "";
-  var uploadform =
-    "<p>Send file to " + folders + "</p>" +
-    "<form id=\"upload_form\" enctype=\"multipart/form-data\" method=\"post\">" +
-    "<input type=\"hidden\" id=\"folder\" name=\"folder\" value=\"" + folders + "\">" +
-    "<input type=\"file\" name=\"file1\" id=\"file1\" multiple>" + 
-    "<input type=\"file\" name=\"folder1\" id=\"folder1\" webkitdirectory directory><br>" +
-    "<progress id=\"progressBar\" value=\"0\" max=\"100\" style=\"width:100%;\"></progress>" +
-    "<h3 id=\"status\"></h3>" +
-    "<p id=\"loaded_n_total\"></p>" +
-    "</form>";
-  _("updetails").innerHTML = uploadform;
-  _("file1").addEventListener("change", function(event) {
-    var files = event.target.files;
-    handleFileForm(files, folders); // Chama handleFiles com os arquivos e a pasta
-  });
-  _("file1").addEventListener("change", function(event) {
-    var files = event.target.files;
-    handleFileForm(files, folders); // Chama handleFiles com os arquivos e a pasta
-  });
-}
+
 function handleFileForm(files, folder) {
-  writeSendForm();
-  for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+   writeSendForm();
+   currentFileIndex=0;
+   totalFiles=0;
+   for (const file of files) {
+    totalFiles++;
+   }
+
+  for (const file of files) {
+    const progressBarId = `${file.name}-progressBar`;
+    if (!_(progressBarId)) {
       var fileProgressDiv = document.createElement("div");
       fileProgressDiv.innerHTML = `<p>${file.name}: <progress id="${file.name}-progressBar" value="0" max="100" style="width:100%;"></progress></p>`;
-      console.log(`${file.name}-progressBar`);
       _("file-progress-container").appendChild(fileProgressDiv);
-
-      console.log("Arquivo:", file.name);
-      console.log("Caminho relativo (se tiver):", file.webkitRelativePath || "Sem caminho relativo");
-      
-      uploadNextFile(folder,file,file.webkitRelativePath);
+    }
+      uploadNextFile(folder,file);
   }
 }
 
@@ -395,7 +386,7 @@ function traverseFileTree(item, folder, path = "") {
   } 
   
   if (item.isDirectory) {
-      //console.log(path + item.name);
+      console.log(path + item.name);
       let dirReader = item.createReader();
       dirReader.readEntries((entries) => {
           entries.forEach((entry) => {
@@ -433,7 +424,7 @@ function drop(event) {
   handleFiles(fileQueue, _("actualFolder").value);
 }
 
-async function uploadNextFile(folder, file, path) {
+async function uploadNextFile(folder, file, path = "") {
   // Create progress bar for each file
   var fileProgressDiv = document.createElement("div");
   fileProgressDiv.innerHTML = `<p>${file.name}: <progress id="${file.name}-progressBar" value="0" max="100" style="width:100%;"></progress></p>`;
@@ -441,7 +432,7 @@ async function uploadNextFile(folder, file, path) {
   _("file-progress-container").appendChild(fileProgressDiv); 
 
   var formdata = new FormData();
-  formdata.append("file", file, path + file.name);
+  formdata.append("file", file, file.webkitRelativePath || path + file.name);
   formdata.append("folder", folder);
   var ajax = new XMLHttpRequest();
   ajax.upload.addEventListener("progress", function (event) {
@@ -457,7 +448,7 @@ async function uploadNextFile(folder, file, path) {
 
 function progressHandler(event, fileName) {
   var percent = (event.loaded / event.total) * 100;
-  if(percent<100) { _(fileName + "-progressBar").value = Math.round(percent); }
+  _(fileName + "-progressBar").value = Math.round(percent);
 }
 
 function completeHandler(event) {
