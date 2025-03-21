@@ -555,6 +555,7 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   while (!check(SelPress))
   {
     if (shouldReboot) {
+      FREE_TFT
       ESP.restart();
     }    
     //Perform installation from SD Card
@@ -616,6 +617,7 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   while (1)
   {
     if (shouldReboot) {
+      FREE_TFT
       ESP.restart();
     }    
     //Perform installation from SD Card

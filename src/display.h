@@ -17,6 +17,9 @@ extern SerialDisplayClass *tft;
 #else
 extern Ard_eSPI *tft; 
 #endif
+
+#define FREE_TFT delete tft; 
+
 void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>>& options, bool bright = false);
 void loopVersions();
 void loopFirmware();

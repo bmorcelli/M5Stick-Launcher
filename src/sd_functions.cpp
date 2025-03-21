@@ -609,6 +609,7 @@ void updateFromSD(String path) {
     performUpdate(file, file.size(), U_FLASH);
     file.close();
     tft->fillScreen(BGCOLOR);
+    FREE_TFT
     ESP.restart();
   } else {
     if (!file.seek(0x8000)) goto Exit;
@@ -706,6 +707,7 @@ void updateFromSD(String path) {
     }
     displayRedStripe("Complete");
     delay(1000);
+    FREE_TFT
     ESP.restart();
   }
 Exit:

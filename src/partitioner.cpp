@@ -192,6 +192,7 @@ void partitioner() {
 
     while (!check(SelPress)) yield();
     while (check(SelPress)) yield();
+    FREE_TFT
     ESP.restart();
 Exit:
     Serial.print("Desistiu");

@@ -388,6 +388,7 @@ void setup() {
     #endif 
       {
         tft->fillScreen(BLACK);
+        FREE_TFT
         ESP.restart();
       } 
   }
@@ -395,6 +396,7 @@ void setup() {
   // If nothing is done, check if there are any app installed in the ota partition, if it does, restart device to start installed App.
   if(firstByte==0xE9) {
     tft->fillScreen(BLACK);
+    FREE_TFT
 	  ESP.restart();  
   }
   else goto Launcher;
@@ -561,7 +563,7 @@ void loop() {
 
         if(dev_mode) options.push_back({"Boot Animation",  [=]() { initDisplayLoop(); }});
 
-        options.push_back({"Restart",  [=]() { ESP.restart(); }});
+        options.push_back({"Restart",  [=]() { FREE_TFT ESP.restart(); }});
 
         #if defined(STICK_C_PLUS2) || defined(T_EMBED) || defined(STICK_C_PLUS)
         options.push_back({"Turn-off",  [=]() { powerOff(); }});
