@@ -173,7 +173,10 @@ width: 100%;
 border-collapse: collapse;
 border-bottom: 1px solid #00cc00;
 }
-    
+p {
+    margin-block-start: 3px;
+    margin-block-end: 3px;
+}
 th, td {
 padding: 5px;
 border-bottom: 1px solid #00cc00;
@@ -209,7 +212,6 @@ background-color: #292a2c;
 }
     
 #detailsheader, #updetailsheader {
-display: flex;
 justify-content: space-between;
 }
     
@@ -247,8 +249,8 @@ font-size: 16px;
 
 .drop-area {
 border: 2px dashed #00dd00;
-padding: 100px;
-margin-top: 50px;
+padding: 3px;
+margin-top: 2px;
 display: none;
 }
 

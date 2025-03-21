@@ -214,7 +214,10 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
       } else {
 
         if(!Update.end()) { displayRedStripe("Fail 181: " + String(Update.getError())); delay(3000); }
-        else displayRedStripe("Restart your device");
+        else { 
+          request->send(200, "text/plain", "OK");
+          displayRedStripe("Restart your device");
+        }
       }
     }
   } else {
