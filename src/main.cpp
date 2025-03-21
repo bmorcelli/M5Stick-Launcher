@@ -508,8 +508,7 @@ void loop() {
         #ifdef ARDUINO_USB_MODE
         if(setupSdCard()) { 
           MassStorage(); 
-          MassStorage().~MassStorage();
-          tft->fillScreen(BGCOLOR);
+          tft->drawPixel(0,0,0);
           tft->fillScreen(BGCOLOR);
         } 
         else {
