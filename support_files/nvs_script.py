@@ -19,5 +19,3 @@ def after_upload(source, target, env):
     os.system(command)
 
 env.AddPreAction("upload", before_upload)
-
-
