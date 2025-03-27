@@ -23,6 +23,9 @@
         #define TOUCH_RST_PIN GT911_TOUCH_CONFIG_RST_GPIO_NUM
         #define TOUCH_INT_PIN GT911_TOUCH_CONFIG_INT_GPIO_NUM
         #define TOUCH_ADDR GT911_SLAVE_ADDRESS1
+        #ifndef TOUCH_INVERTED
+            #define TOUCH_INVERTED 0
+        #endif
     #elif TOUCH_CST816S_I2C
         #define TOUCH_MODULES_CST_SELF
         #define TOUCH_SDA_PIN CST816S_I2C_CONFIG_SDA_IO_NUM
@@ -46,8 +49,13 @@
         inline bool touched() { return read(); }
         inline TouchPoint getPointScaled() { 
             ti = getPoint(0);
-            t.x=ti.x;
-            t.y = (tftHeight+20)-ti.y;
+            #if TOUCH_INVERTED
+                t.x=ti.y;
+                t.y =TFT_WIDTH-ti.x;
+            #else
+                t.x=ti.x;
+                t.y = (tftHeight+20)-ti.y;
+            #endif
             t.pressed=true;
             TouchLib::raw_data[0] = 0; // resets the read raw reading, that triggers TouchLib::read() to true, and is not resetted at the lib
             return t; 
@@ -208,6 +216,7 @@ void InputHandler(void) {
             t.y = (tftHeight+20)-tmp;
         }
         Serial.printf("\nTouch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
+        log_i("\nTouch Pressed on x=%d, y=%d, rot=%d\n",t.x, t.y,rotation);
         #if  defined(CYD28_DISPLAY_VER_RES_MAX) && !defined(HAS_CAPACITIVE_TOUCH)
             #if CYD28_DISPLAY_VER_RES_MAX>340
                 auto t2 = touch.getPointRaw();

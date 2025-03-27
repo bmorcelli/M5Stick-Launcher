@@ -57,7 +57,10 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "codecvt": "cpp",
+        "csignal": "cpp",
+        "future": "cpp"
     },
     "cmake.sourceDirectory": "C:/Projetos/M5Stick-Launcher/lib/M5GFX"
 }
