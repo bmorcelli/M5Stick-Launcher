@@ -39,7 +39,7 @@ void _post_setup_gpio() {
 ***************************************************************************************/
 int getBattery() { 
   int percent=0;
-  percent=amoled.BQ.getNTCPercentage();
+  //percent=amoled.BQ.getNTCPercentage();
 
   return  (percent < 0) ? 0
         : (percent >= 100) ? 100
@@ -53,7 +53,7 @@ int getBattery() {
 ** set brightness value
 **********************************************************************/
 void _setBrightness(uint8_t brightval) { 
-    amoled.setBrightness(brightval*254/100);
+    //amoled.setBrightness(brightval*254/100);
 }
 
 struct TouchPointPro {
