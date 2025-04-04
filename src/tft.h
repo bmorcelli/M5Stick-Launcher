@@ -164,6 +164,9 @@ class Ard_eSPI : public lgfx::LGFX_Device {
 #elif AXS15231B_QSPI
 #define _TFT_DRV Arduino_AXS15231B
 #define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j) Arduino_AXS15231B(a,b,c,d,e,f)
+#elif DRIVER_RM67162
+#define _TFT_DRV  Arduino_RM67162
+#define _TFT_DRVF(a,b,c,d,e,f,g,h,i,j)  Arduino_RM67162(a,b,c,d)
 #else
 // CYD Default to not shoot errors on screen
 #define _TFT_DRV Arduino_ILI9341
