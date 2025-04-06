@@ -42,4 +42,6 @@
 #include "esp32s3.h"
 #elif LYLYGO_T5
 #include "esp32dev.h"
+#elif ELECROW
+#include "elecrow-esp32-24B.h"
 #endif
