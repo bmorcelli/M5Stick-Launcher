@@ -1,0 +1,1 @@
+{"name":"Elecrow ESP32 2.4in","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-elecrow-24B.bin","offset":0}]}]}
