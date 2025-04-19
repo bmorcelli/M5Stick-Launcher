@@ -3,7 +3,7 @@ Application Launcher for M5Stack, Lilygo, CYDs, Marauder and ESP32 devices.
 
 
 <p align="center" width="100%">
-    <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/M5Launcher.png?raw=true"> <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/New Launcher.jpg?raw=true" width="240" height="135"> <img src="https://github.com/bmorcelli/M5Stick-Launcher/blob/main/Launcher_anim.webp?raw=true" width="auto" height="135">
+    <img src="https://github.com/bmorcelli/Launcher/blob/main/M5Launcher.png?raw=true"> <img src="https://github.com/bmorcelli/Launcher/blob/main/New Launcher.jpg?raw=true" width="240" height="135"> <img src="https://github.com/bmorcelli/Launcher/blob/main/Launcher_anim.webp?raw=true" width="auto" height="135">
 </p>
 
 ## With Launcher you'll be able to:
@@ -40,12 +40,12 @@ Application Launcher for M5Stack, Lilygo, CYDs, Marauder and ESP32 devices.
 
 ## tips
 * Having an SD card is good for better experience, but not really needed. [SDCard Hat for M5StickCs](https://www.thingiverse.com/thing:6459069) 
-* You can learn more about how it works o [Launcher Wiki](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Explaining-the-project).
-* Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/M5Stick-Launcher/wiki/Obtaining-binaries-to-launch)
-* Now you can download binaries from [HERE!](https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html)
+* You can learn more about how it works o [Launcher Wiki](https://github.com/bmorcelli/Launcher/wiki/Explaining-the-project).
+* Where/How do I find Binaries to launch -> [Obtaining binaries to launch](https://github.com/bmorcelli/Launcher/wiki/Obtaining-binaries-to-launch)
+* Now you can download binaries from [HERE!](https://bmorcelli.github.io/Launcher/m5lurner.html)
 
 ## How to Install
-* Use the Flasher: [Launcher Flasher](https://bmorcelli.github.io/M5Stick-Launcher/).
+* Use the Flasher: [Launcher Flasher](https://bmorcelli.github.io/Launcher/).
 * Use M5Burner, or
 * Download the .bin file from Releases for your device and use https://web.esphome.io/ or esptool.py and flash the file: `Launcher-{ver}-{YourDevice}.bin` into your device.
 
@@ -74,16 +74,16 @@ Things that needs to be done in next updates
      * [x] split webui files
      * [x] USB Interface to manage SD files on ESP32S3 devices (ESP32 can't do it)
      * [x] Compressed WebUI with gzip
-     * [x] Port to CYD-3248S035C and CYD-3248S035R https://github.com/bmorcelli/M5Stick-Launcher/issues/125
-     * [x] Interfaces skipping options (multiple clicks) https://github.com/bmorcelli/M5Stick-Launcher/issues/127 https://github.com/bmorcelli/M5Stick-Launcher/issues/126 [comment](https://github.com/bmorcelli/M5Stick-Launcher/issues/125#issuecomment-2705628306) 
+     * [x] Port to CYD-3248S035C and CYD-3248S035R https://github.com/bmorcelli/Launcher/issues/125
+     * [x] Interfaces skipping options (multiple clicks) https://github.com/bmorcelli/Launcher/issues/127 https://github.com/bmorcelli/Launcher/issues/126 [comment](https://github.com/bmorcelli/Launcher/issues/125#issuecomment-2705628306) 
      * [x] Fixed StickCPlus keyboard colors
      * [x] Fixed Back to list on OTA (will be enhanced when having multiple lists)
      * [x] (rollback) Use http download/update for OTA to reduce flash memory.
 * 2.4.5:
-     * [x] Port to CYD-2432S024R https://github.com/bmorcelli/M5Stick-Launcher/issues/99 , CYD-2432W328R, CYD-2432S022C https://github.com/bmorcelli/M5Stick-Launcher/issues/112 , CYD-2432S032C, CYD-2432S032R
+     * [x] Port to CYD-2432S024R https://github.com/bmorcelli/Launcher/issues/99 , CYD-2432W328R, CYD-2432S022C https://github.com/bmorcelli/Launcher/issues/112 , CYD-2432S032C, CYD-2432S032R
      * [x] Fixed Marauder V4-OG device
      * [x] Removed Battery indication when it is not available (or 0%)
-     * [x] Fixed Headless 16Mb environment  https://github.com/bmorcelli/M5Stick-Launcher/issues/121 https://github.com/bmorcelli/M5Stick-Launcher/issues/120
+     * [x] Fixed Headless 16Mb environment  https://github.com/bmorcelli/Launcher/issues/121 https://github.com/bmorcelli/Launcher/issues/120
      * [x] Now using ArduinoGFX as main graphics lib, with support to TFT_eSPI and LovyanGFX
 * 2.4.4:
      * [x] Disabled OTA menu for non M5 Stack Devices (save flash memory for CYD and Marauder, mostly), creating a new partition scheme for these devices
@@ -96,29 +96,29 @@ Things that needs to be done in next updates
      * [x] Fixed T-Embed return from deepSleep
 
 * 2.4.2:
-     * [x] UiFlow2 v2.2.0 compatibility https://github.com/bmorcelli/M5Stick-Launcher/issues/92 for Cardputer, Removed from StickCPlus2 due to lack of storage
-     * [x] Fix for https://github.com/bmorcelli/M5Stick-Launcher/issues/93 https://github.com/bmorcelli/M5Stick-Launcher/issues/97 https://github.com/bmorcelli/M5Stick-Launcher/issues/95
-     * [x] Possibility to connect to Hidden Networks https://github.com/bmorcelli/M5Stick-Launcher/issues/89 by typing the SSID and Pwd
+     * [x] UiFlow2 v2.2.0 compatibility https://github.com/bmorcelli/Launcher/issues/92 for Cardputer, Removed from StickCPlus2 due to lack of storage
+     * [x] Fix for https://github.com/bmorcelli/Launcher/issues/93 https://github.com/bmorcelli/Launcher/issues/97 https://github.com/bmorcelli/Launcher/issues/95
+     * [x] Possibility to connect to Hidden Networks https://github.com/bmorcelli/Launcher/issues/89 by typing the SSID and Pwd
      * [x] Changed porting system, reading inputs on a background task (same as Bruce)
      * [x] Enhanced Keyboard
      * [x] Added Portrait rotation for bigger screens (bigger than 200x200px, such as CYD, Core devices)
      
 * 2.4.1: 
-     * [x] T-Deck SD Card fix (Disable LoRa Chip, CS pin to High state, to avoid conflicts) https://github.com/bmorcelli/M5Stick-Launcher/issues/86
-     * [x] Lilygo T-Display-S3-Pro port https://github.com/bmorcelli/M5Stick-Launcher/issues/73
+     * [x] T-Deck SD Card fix (Disable LoRa Chip, CS pin to High state, to avoid conflicts) https://github.com/bmorcelli/Launcher/issues/86
+     * [x] Lilygo T-Display-S3-Pro port https://github.com/bmorcelli/Launcher/issues/73
 
 * 2.4.0:
-     * [x] CYD-2432W328C port https://github.com/bmorcelli/M5Stick-Launcher/issues/80
+     * [x] CYD-2432W328C port https://github.com/bmorcelli/Launcher/issues/80
      * [x] Rolling texts for large SSIDs and large filenames
-     * [x] Added ways to return from menu after wrong WIFI passwords and other menus (Exit from keyboard itself won't be available) https://github.com/bmorcelli/M5Stick-Launcher/issues/82 https://github.com/bmorcelli/M5Stick-Launcher/issues/81
-     * [x] Fixed Orientation issues (not saving in the SD Card) https://github.com/bmorcelli/M5Stick-Launcher/issues/84
+     * [x] Added ways to return from menu after wrong WIFI passwords and other menus (Exit from keyboard itself won't be available) https://github.com/bmorcelli/Launcher/issues/82 https://github.com/bmorcelli/Launcher/issues/81
+     * [x] Fixed Orientation issues (not saving in the SD Card) https://github.com/bmorcelli/Launcher/issues/84
      * [x] Dim Screen now turns the screen off
      * [x] Renamed project to "Launcher" and add my nickname in the boot animation
-     * [x] Changed interfacing code, preparing for new ports https://github.com/bmorcelli/M5Stick-Launcher/issues/83
+     * [x] Changed interfacing code, preparing for new ports https://github.com/bmorcelli/Launcher/issues/83
 * 2.3.2: 
      * [x] T-Embed CC1101 power chip management fix
 * 2.3.1:
-     * [x] Fox for https://github.com/bmorcelli/M5Stick-Launcher/issues/77
+     * [x] Fox for https://github.com/bmorcelli/Launcher/issues/77
      * [x] Fixed screen direction for T-Deck devices
      * [x] Fixed Json handling and config.conf random fails
 * 2.3.0:
@@ -128,7 +128,7 @@ Things that needs to be done in next updates
      * [x] Headless version for ESP32 and ESP32-S3
      * [x] StickCs Power Btn and Prev butn now act to go upwards on Menus... long press to exit menu
 * 2.2.5: 
-     * [x] Changed framework to remove all Watchdog Timers https://github.com/bmorcelli/M5Stick-Launcher/issues/61 https://github.com/bmorcelli/M5Stick-Launcher/issues/63 and solve some SD related issues
+     * [x] Changed framework to remove all Watchdog Timers https://github.com/bmorcelli/Launcher/issues/61 https://github.com/bmorcelli/Launcher/issues/63 and solve some SD related issues
      * [x] Set Grove pins to LOW state on StickCs and Cardputer to avoid 433Mhz jamming while RF433T is connected
 * 2.2.4: 
      * [x] Finally ported to CoreS3 and CoreS3-SE
@@ -149,10 +149,10 @@ Things that needs to be done in next updates
      * [x] Fixed problem when firmware names have "/" that prevent downloading
      * [x] Appended firmware Version into download Name.
      * [x] Added Dim time to lower brightness and CPU freq while idle
-     * [x] Added "Chage Mode" on settings, reducing CPU fre to 80Mhz and brightness to 5%, https://github.com/bmorcelli/M5Stick-Launcher/issues/40
-     * [x] Fixed Download progressbar https://github.com/bmorcelli/M5Stick-Launcher/issues/41
-     * [x] Change default folder for download (manually on /config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/15     
-     * [x] Save more SSIDs and pwd, connect automatically if is a known network (config.conf) https://github.com/bmorcelli/M5Stick-Launcher/issues/30
+     * [x] Added "Chage Mode" on settings, reducing CPU fre to 80Mhz and brightness to 5%, https://github.com/bmorcelli/Launcher/issues/40
+     * [x] Fixed Download progressbar https://github.com/bmorcelli/Launcher/issues/41
+     * [x] Change default folder for download (manually on /config.conf) https://github.com/bmorcelli/Launcher/issues/15     
+     * [x] Save more SSIDs and pwd, connect automatically if is a known network (config.conf) https://github.com/bmorcelli/Launcher/issues/30
      * [x] Slightlty increased Wifi Download/OTA Speed, using a customized framework.
 * 2.1.2:
      * [x] Fixed OTA error message
@@ -160,23 +160,23 @@ Things that needs to be done in next updates
 * 2.1.1:
      * [x] Fixed UIFlow Compatibility
      * [x] Fixed SD card issues
-     * [x] Small Fixes https://github.com/bmorcelli/M5Stick-Launcher/issues/37
+     * [x] Small Fixes https://github.com/bmorcelli/Launcher/issues/37
 * 2.1.0:
      * [x] Core Fire (all 16Mb Core devices) and Core2 compatibility
      * [x] Turn SPIFFs update optional (turne off by default) (config.conf)
-     * [x] De-Sprite-fied the screens for Core devices (No PSRam, unable to handle huge Sprites) https://github.com/bmorcelli/M5Stick-Launcher/issues/34
+     * [x] De-Sprite-fied the screens for Core devices (No PSRam, unable to handle huge Sprites) https://github.com/bmorcelli/Launcher/issues/34
      * [x] Make keyboard work with touchscreen capture in Core devices
-     * [x] Dedicated btn for WebUI on main screen https://github.com/bmorcelli/M5Stick-Launcher/issues/22
-     * [x] Multiple files upload on WebUI https://github.com/bmorcelli/M5Stick-Launcher/issues/28
-     * [x] Update FAT vfs partition to make compatible with UIFlow2 https://github.com/bmorcelli/M5Stick-Launcher/issues/29
+     * [x] Dedicated btn for WebUI on main screen https://github.com/bmorcelli/Launcher/issues/22
+     * [x] Multiple files upload on WebUI https://github.com/bmorcelli/Launcher/issues/28
+     * [x] Update FAT vfs partition to make compatible with UIFlow2 https://github.com/bmorcelli/Launcher/issues/29
      * [x] Partition changer, to allow running DOOM and UIFlow on Cardputer and StickC
-     * [x] Fixed (increased number of files) https://github.com/bmorcelli/M5Stick-Launcher/issues/33
+     * [x] Fixed (increased number of files) https://github.com/bmorcelli/Launcher/issues/33
      * [x] Backup and Restore FAT and SPIFFS Filesystems. If you use UIFlow, you can save all sketches into your device and make a backup to restore after reinstall UIFlow or MicroHydra or CircuitPython
 * 2.0.1:
-     * Fixed UIFlow Instalation https://github.com/bmorcelli/M5Stick-Launcher/issues/20
-     * Fixed Folder creation on WebUI https://github.com/bmorcelli/M5Stick-Launcher/issues/18
-     * Fexed problem that preven webUI to open in some cases https://github.com/bmorcelli/M5Stick-Launcher/issues/16
-     * Now M5Launcher formats FAT vfs partition, so make sure you have saved your data into SDCard when using MicroPython, UIFlow or MicroHydra https://github.com/bmorcelli/M5Stick-Launcher/issues/19
+     * Fixed UIFlow Instalation https://github.com/bmorcelli/Launcher/issues/20
+     * Fixed Folder creation on WebUI https://github.com/bmorcelli/Launcher/issues/18
+     * Fexed problem that preven webUI to open in some cases https://github.com/bmorcelli/Launcher/issues/16
+     * Now M5Launcher formats FAT vfs partition, so make sure you have saved your data into SDCard when using MicroPython, UIFlow or MicroHydra https://github.com/bmorcelli/Launcher/issues/19
 * 2.0.0:
      * SD: added Folder creation, delete an rename files and folders, copy and paste files
      * OTA (Over-The-Air update): Added feature to list the programs available in M5Burner and install it fro the internet.
