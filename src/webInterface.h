@@ -307,7 +307,7 @@ color: #ad007c65;
 <h1 align="center">-= Launcher =-</h1>
 <p>Firmware version: %FIRMWARE%</p>
 <p>Free Storage: <span id="freeSD">%FREESD%</span> | Used: <span id="usedSD">%USEDSD%</span> | Total: <span id="totalSD">%TOTALSD%</span></p>
-<p><a href="https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html" target="_blank" rel="noopener noreferrer">Online Firmware list from M5Burner (Need Internet)</a></p>
+<p><a href="https://bmorcelli.github.io/Launcher/m5lurner.html" target="_blank" rel="noopener noreferrer">Online Firmware list from M5Burner (Need Internet)</a></p>
 <p>
 <form id="save" enctype="multipart/form-data" method="post"><input type="hidden" id="actualFolder" name="actualFolder" value="/"></form>
 <button onclick="rebootButton()">Reboot</button>
@@ -849,7 +849,7 @@ th:last-child, td:last-child { width: 100px; text-align: center; }
 <h1 align="center">-= Launcher =-</h1>
 <p>Firmware version: %FIRMWARE%</p>
 <p>Free Storage: <span id="freeSD">%FREESD%</span> | Used: <span id="usedSD">%USEDSD%</span> | Total: <span id="totalSD">%TOTALSD%</span></p>
-<p><a href="https://bmorcelli.github.io/M5Stick-Launcher/m5lurner.html" target="_blank" rel="noopener noreferrer">Online Firmware list from M5Burner (Need Internet)</a></p>
+<p><a href="https://bmorcelli.github.io/Launcher/m5lurner.html" target="_blank" rel="noopener noreferrer">Online Firmware list from M5Burner (Need Internet)</a></p>
 <p>
 <form id="save" enctype="multipart/form-data" method="post"><input type="hidden" id="actualFolder" name="actualFolder" value="/"></form>
 <button onclick="rebootButton()">Reboot</button>
