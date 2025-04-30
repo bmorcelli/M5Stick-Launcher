@@ -314,6 +314,7 @@ String keyboard(String mytext, int maxSize, String msg) {
       redraw = false;
     #ifdef E_PAPER_DISPLAY
       tft->startCallback();
+      tft->display(false);
     #endif
     }
 

@@ -1,6 +1,6 @@
 #ifndef __TFT_H
 #define __TFT_H
-#if defined(E_PAPER_DISPLAY)
+#if defined(E_PAPER_DISPLAY) && !defined(GxEPD2_DISPLAY)
 #include <EPD_translate.h>
 #define DARKGREY TFT_DARKGREY
 #define BLACK TFT_BLACK
@@ -18,9 +18,49 @@ class Ard_eSPI: public EPD_translate {
     inline void drawChar2( uint32_t x, uint32_t y, char c,uint16_t a, uint16_t b) { EPD_translate::drawChar(c,x,y); };
     inline void drawArc(int a, int b, int c, int d, int e, int f, int g) { };
     inline void begin() {EPD_translate::init(); };
+    void setFullWindow() { };
+    void display(bool a) { };
     private:
 
 };
+#elif defined(GxEPD2_DISPLAY)
+#include <GxEPD2_BW.h>
+//#include <Fonts/FreeMonoBold9pt7b.h>
+#define BOARD_SPI_CS    34
+#define BOARD_SPI_DC    35
+#define BOARD_SPI_RST  -1
+#define BOARD_SPI_BUSY 37
+#define BOARD_SPI_SCK  36
+#define BOARD_SPI_MOSI 33
+
+#define DARKGREY GxEPD_DARKGREY
+#define BLACK GxEPD_BLACK
+#define RED GxEPD_RED
+#define GREEN GxEPD_GREEN
+#define DARKCYAN GxEPD_GREEN
+#define LIGHTGREY GxEPD_LIGHTGREY
+
+class Ard_eSPI : public GxEPD2_BW<GxEPD2_310_GDEQ031T10, GxEPD2_310_GDEQ031T10::HEIGHT> {
+    public:
+    Ard_eSPI() : GxEPD2_BW<GxEPD2_310_GDEQ031T10, GxEPD2_310_GDEQ031T10::HEIGHT>(GxEPD2_310_GDEQ031T10(BOARD_SPI_CS, BOARD_SPI_DC, BOARD_SPI_RST, BOARD_SPI_BUSY)) { }
+    void begin() {
+        init(115200, true, 2, false); // USE THIS for Waveshare boards with "clever" reset circuit, 2ms reset pulse
+        setFullWindow();
+    }
+    inline void drawChar2(int16_t x, int16_t y, char c, int16_t a, int16_t b) { drawChar(x, y, c, a, b,textsize_x); };
+    void drawString(String s, uint16_t x, uint16_t y);
+    void drawCentreString(String s, uint16_t x, uint16_t y, int f);
+    void drawRightString(String s, uint16_t x, uint16_t y, int f);
+    void drawArc(int16_t x, int16_t y, int16_t r, int16_t ir, int16_t sA, int16_t eA, int16_t fg) { };
+    inline int getTextsize() { return textsize_x; };
+    inline uint16_t getTextcolor() { return textcolor; };
+    inline uint16_t getTextbgcolor() { return textbgcolor; };
+
+    void stopCallback() { setFullWindow(); };
+    void startCallback() { };
+
+};
+
 #elif defined (HEADLESS)
 // do nothing
 

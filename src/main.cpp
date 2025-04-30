@@ -432,6 +432,7 @@ void loop() {
       redraw = false; 
       returnToMenu = false;
       #ifdef E_PAPER_DISPLAY
+        tft->display(false); 
         delay(200);
       #endif
     }

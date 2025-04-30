@@ -1,6 +1,6 @@
 #include "tft.h"
 
-#if defined(E_PAPER_DISPLAY)
+#if defined(E_PAPER_DISPLAY) && !defined(GxEPD2_DISPLAY)
 
 #elif defined(HEADLESS)
 

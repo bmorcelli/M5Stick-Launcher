@@ -7,7 +7,7 @@
 
 #if defined(HEADLESS)
 SerialDisplayClass *tft= new SerialDisplayClass();
-#elif defined(E_PAPER_DISPLAY) || defined(USE_TFT_ESPI) || defined(USE_LOVYANGFX) 
+#elif defined(E_PAPER_DISPLAY) || defined(USE_TFT_ESPI) || defined(USE_LOVYANGFX) || defined(GxEPD2_DISPLAY)
 Ard_eSPI *tft = new Ard_eSPI();
 #else
   #ifdef TFT_PARALLEL_8_BIT
@@ -231,6 +231,7 @@ void initDisplay(bool doAll) {
     tft->setTextColor(FGCOLOR);
   
   #ifdef E_PAPER_DISPLAY // epaper display draws only once
+    tft->display(false);
     tft->startCallback();
   #endif
 
@@ -314,6 +315,7 @@ void displayCurrentItem(JsonDocument doc, int currentIndex) {
   tft->fillRect((tftWidth*currentIndex)/doc.size(),tftHeight-5,bar,5,FGCOLOR);
 
   #ifdef E_PAPER_DISPLAY
+    tft->display(false);
     tft->startCallback();
   #endif
 
@@ -377,6 +379,7 @@ void displayCurrentVersion(String name, String author, String version, String pu
     tft->fillRect((tftWidth*versionIndex)/div,tftHeight-5,bar,5,ALCOLOR);
 
     #ifdef E_PAPER_DISPLAY
+    tft->display(false);
     tft->startCallback();
     #endif
 }
@@ -518,6 +521,7 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
     if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
     tft->drawRoundRect(tftWidth*0.10,tftHeight/2-menuSize*FONT_S/2 -5,tftWidth*0.8,FONT_S*menuSize+10,5,fgcolor);
   #ifdef E_PAPER_DISPLAY
+    tft->display(false);
     tft->startCallback();
   #endif
     return coord;
@@ -530,6 +534,7 @@ Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::fu
 void drawMainMenu(int index) {
   #ifdef E_PAPER_DISPLAY
     tft->stopCallback();
+    tft->setFullWindow();
   #endif
   int offset=0;
   if(index>2) offset=index-2;
@@ -590,6 +595,7 @@ void drawMainMenu(int index) {
     int bat = getBattery();
     if(bat>0) drawBatteryStatus(bat);
   #ifdef E_PAPER_DISPLAY
+    tft->display(false);
     tft->startCallback();
   #endif
 }
@@ -683,6 +689,7 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
     TouchFooter();
     #endif
     #ifdef E_PAPER_DISPLAY
+    tft->display(false);
     tft->startCallback();
     #endif
     return coord;
@@ -709,6 +716,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
       }
       redraw=false;
       #ifdef E_PAPER_DISPLAY
+      tft->display(false);
       delay(200);
       #endif
     }
@@ -799,6 +807,7 @@ void loopVersions() {
       displayCurrentVersion(String(name), String(author), String(version), String(published_at), versionIndex, versions);
       redraw = false;
       #ifdef E_PAPER_DISPLAY
+        tft->display(false); 
         delay(200);
       #endif
     }
@@ -899,6 +908,7 @@ void loopFirmware(){
         else if(currentIndex>0) currentIndex--;
         displayCurrentItem(doc, currentIndex);
         #ifdef E_PAPER_DISPLAY
+        tft->display(false);
         delay(200);
         #endif
       }
@@ -908,6 +918,7 @@ void loopFirmware(){
         if((currentIndex+1)>doc.size()) currentIndex = 0;
         displayCurrentItem(doc, currentIndex);
         #ifdef E_PAPER_DISPLAY	
+        tft->display(false);
         delay(200);
         #endif
       }
