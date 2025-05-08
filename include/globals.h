@@ -13,7 +13,40 @@
     #define SDM SD
     #define SDM_SD
 #endif
+struct MenuOptions {
+    String name;
+    String text;
+    std::function<void()> action;
+    bool active;
+    bool selected;
+    uint16_t x;
+    uint16_t y;
+    uint16_t w;
+    uint16_t h;
 
+    MenuOptions(String name, String text, std::function<void()> action, bool active=true, bool selected=false, uint16_t x=0, uint16_t y=0, uint16_t w=0, uint16_t h=0) : name(name), text(text), action(action), active(active), selected(selected), x(x), y(y), w(w), h(h) {}
+    MenuOptions() : name(""), text(""), action(nullptr), active(true), selected(false), x(0), y(0), w(0), h(0) {}
+
+    bool contain(int x, int y)
+    {
+      return this->x <= x && x < (this->x + this->w)
+          && this->y <= y && y < (this->y + this->h);
+    }
+    void resetCoords()
+    {
+      x=0;
+      y=0;
+      w=0;
+      h=0;
+    }
+    void setCoords(int x, int y, int w, int h)
+    {
+      this->x = x;
+      this->y = y;
+      this->w = w;
+      this->h = h;
+    }
+};
 struct keyStroke { // DO NOT CHANGE IT!!!!!
     bool pressed=false;
     bool exit_key=false;

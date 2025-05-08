@@ -34,6 +34,7 @@ config.conf JSON structure
 ]
 
 */
+void settings_menu();
 void _setBrightness(uint8_t brightval) __attribute__((weak));
 void setBrightnessMenu();
 void setBrightness(int bright, bool save = true);

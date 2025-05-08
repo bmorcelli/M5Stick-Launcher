@@ -505,6 +505,9 @@ String readLineFromFile(File myFile) {
 
 #ifndef HEADLESS
 void startWebUi(String ssid, int encryptation, bool mode_ap) {
+  #ifdef E_PAPER_DISPLAY
+    tft->stopCallback();
+  #endif
   file_size = 0;
   //log_i("Recovering User info from config.conf");
   getConfigs();
@@ -551,6 +554,11 @@ void startWebUi(String ssid, int encryptation, bool mode_ap) {
   setTftDisplay(7,tftHeight-39,ALCOLOR,FP);
 
   tft->drawCentreString("press " + String(BTN_ALIAS) + " to stop", tftWidth/2,tftHeight-15,1);
+
+#ifdef E_PAPER_DISPLAY
+  tft->display(false);
+  tft->startCallback();
+#endif
 
   while (!check(SelPress))
   {

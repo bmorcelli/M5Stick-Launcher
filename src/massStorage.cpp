@@ -153,6 +153,9 @@ bool usbStartStopCallback(uint8_t power_condition, bool start, bool load_eject) 
 
 
 void drawUSBStickIcon(bool plugged) {
+    #ifdef E_PAPER_DISPLAY
+    tft->stopCallback();
+    #endif
     MassStorage::displayMessage("");
 
     float scale;
@@ -201,6 +204,11 @@ void drawUSBStickIcon(bool plugged) {
     );
     // Led
     tft->fillRoundRect(ledX, ledY, ledW, ledH, radius, plugged ? GREEN : RED);
+
+    #ifdef E_PAPER_DISPLAY
+    tft->display(false);
+    tft->startCallback();
+    #endif
 }
 
 #endif // ARDUINO_USB_MODE

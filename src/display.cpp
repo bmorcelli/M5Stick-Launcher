@@ -425,7 +425,10 @@ void displayRedStripe(String text, uint16_t fgcolor, uint16_t bgcolor) {
 ** Dependencia: prog_handler =>>    0 - Flash, 1 - SPIFFS
 ***************************************************************************************/
 void progressHandler(int progress, size_t total) {
-
+#ifdef GxEPD2_DISPLAY
+static unsigned long lastUpdate = 0;
+tft->setFullWindow();
+#endif
   int barWidth = map(progress, 0, total, 0, tftWidth-40);
   if(progress == 0) {
     tft->setTextSize(FM);
@@ -461,6 +464,12 @@ void progressHandler(int progress, size_t total) {
   if (prog_handler == 1) tft->fillRect(20, tftHeight - 26, barWidth, 13, ALCOLOR);
   else tft->fillRect(20, tftHeight - 45, barWidth, 13, FGCOLOR);
 
+  #ifdef GxEPD2_DISPLAY
+  if(millis() - lastUpdate > 3000) {
+    tft->display();
+    lastUpdate = millis();
+  }
+#endif
 }
 
 
@@ -469,151 +478,187 @@ void progressHandler(int progress, size_t total) {
 ** Function name: drawOptions
 ** Description:   Função para desenhar e mostrar as opçoes de contexto
 ***************************************************************************************/
-#ifdef E_PAPER_DISPLAY
+#if defined(E_PAPER_DISPLAY) && !defined(GxEPD2_DISPLAY)
   #define MAX_MENU_SIZE 13
   #define FONT_S (FM*(LH+3)+4)
 #else
   #define FONT_S (FM*LH+4)
   #define MAX_MENU_SIZE (int)(tftHeight/25)
 #endif
-Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor) {
+Opt_Coord drawOptions(int idx, std::vector<MenuOptions>& opt, uint16_t fgcolor, uint16_t bgcolor) {
+      int index = idx;
   #ifdef E_PAPER_DISPLAY
-    tft->stopCallback();
+      tft->stopCallback();
   #endif
-    Opt_Coord coord;
-    int menuSize = options.size();
-    if(options.size()>MAX_MENU_SIZE) { 
-      menuSize = MAX_MENU_SIZE; 
-      } 
+  
+      Opt_Coord coord;
+      int realSize = opt.size();
+      int init = 0;
+      int num_pages=0;
+      int show_page=0;
+      #ifndef HAS_TOUCH  
+      num_pages = 1 + realSize/MAX_MENU_SIZE;
+      show_page = index/MAX_MENU_SIZE;
+      #else
+      if(realSize<=MAX_MENU_SIZE) num_pages=1;
+      else {
+        int firstPage = realSize - (MAX_MENU_SIZE - 1); // Primeira pagina tem MAX_MENU_SIZE-1 de tamanho, pois substitui o ultimo por "..."
+        int nextPages = (realSize - firstPage)/(MAX_MENU_SIZE-2); // O restante do menu tem MAX_MENU_SIZE-2 de tamanho, pois substitui o primeiro e o ultimo por "..."
+        int lastPage = (realSize - firstPage - nextPages) > 0? 1 : 0; // A ultima pagina tem o restante do menu, que pode ser menor que MAX_MENU_SIZE-2
+        num_pages = 1 + nextPages + lastPage;
+        //Serial.printf("\nnum_pages: %d, firstPage: %d, nextPages: %d, lastPage: %d\n", num_pages, firstPage, nextPages, lastPage);
+        //Serial.printf("realSize: %d, MAX_MENU_SIZE: %d, index: %d\n", realSize, MAX_MENU_SIZE, index);
 
-    if(index==0) tft->fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*FONT_S/2 -5,tftWidth*0.8,FONT_S*menuSize+10,5,bgcolor);
-    
-    tft->setTextColor(fgcolor,bgcolor);
-    tft->setTextSize(FM);
-    tft->setCursor(tftWidth*0.10+5,tftHeight/2-menuSize*FONT_S/2);
-    
-    int i=0;
-    int init = 0;
-    int cont = 1;
-    if(index==0) tft->fillRoundRect(tftWidth*0.10,tftHeight/2-menuSize*FONT_S/2 -5,tftWidth*0.8,FONT_S*menuSize+10,5,bgcolor);
-    menuSize = options.size();
-    if(index>=MAX_MENU_SIZE) init=index-MAX_MENU_SIZE+1;
-    for(i=0;i<menuSize;i++) {
-      if(i>=init) {
-        String text="";
-        if(i==index) { 
-          text+=">";
-          coord.x=tftWidth*0.10+5+FM*LW;
-          coord.y=tft->getCursorY()+4;
-          coord.size=(tftWidth*0.8 - 10)/(LW*FM) - 1;
-          coord.fgcolor=fgcolor;
-          coord.bgcolor=bgcolor;
+        int num_adds = 2*(1 + nextPages);
+
+        opt.insert(opt.begin() + MAX_MENU_SIZE - 1, MenuOptions("...", "+", nullptr));
+        opt.insert(opt.begin() + MAX_MENU_SIZE, MenuOptions("...", "--", nullptr));
+        for(int i = 2; i <= nextPages; i++) {
+          opt.insert(opt.begin() + (i)*(MAX_MENU_SIZE) - 1, MenuOptions("...", "+", nullptr));
+          opt.insert(opt.begin() + (i)*(MAX_MENU_SIZE), MenuOptions("...", "-", nullptr));
         }
-        else text +=" ";
-        text += String(options[i].first.c_str()) + "              ";
-        tft->setCursor(tftWidth*0.10+5,tft->getCursorY()+4);
-        tft->println(text.substring(0,(tftWidth*0.8 - 10)/(LW*FM) - 1));  
-        cont++;
+        if(index < (MAX_MENU_SIZE-1)) show_page=0;
+        else if(index >= (MAX_MENU_SIZE-1) && index < (MAX_MENU_SIZE-1) + nextPages*(MAX_MENU_SIZE-2))  { 
+          show_page = 1 + (index - firstPage)/(MAX_MENU_SIZE-2);
+        }
+        else show_page = num_pages - 1;
+        index = index + 2*show_page;
+        //Serial.printf("show_page: %d\n", show_page);
       }
-      if(cont>MAX_MENU_SIZE) goto Exit;
-    }
-    Exit:
-    if(options.size()>MAX_MENU_SIZE) menuSize = MAX_MENU_SIZE;
-    tft->drawRoundRect(tftWidth*0.10,tftHeight/2-menuSize*FONT_S/2 -5,tftWidth*0.8,FONT_S*menuSize+10,5,fgcolor);
+      #endif
+  
+      if (index >= MAX_MENU_SIZE) {
+          init = index - MAX_MENU_SIZE + 1;
+      }
+  
+      for (auto& o : opt) o.resetCoords();
+
+      int visibleCount = MAX_MENU_SIZE;
+      if(opt.size()<MAX_MENU_SIZE) visibleCount = opt.size();
+  
+      #ifdef HAS_TOUCH
+      if (index == 0 || index == show_page*MAX_MENU_SIZE+1 || index == opt.size()-1)
+      #else
+      if (index == 0 || index == opt.size()-1) 
+      #endif
+      {
+          tft->fillRoundRect(tftWidth * 0.10, tftHeight / 2 - visibleCount * FONT_S / 2 - 5,
+                             tftWidth * 0.8, FONT_S * visibleCount + 10, 5, bgcolor);
+      }
+  
+      tft->setTextColor(fgcolor, bgcolor);
+      tft->setTextSize(FM);
+      tft->setCursor(tftWidth * 0.10 + 5, tftHeight / 2 - visibleCount * FONT_S / 2);
+  
+      for (int i = show_page*MAX_MENU_SIZE; i < show_page*MAX_MENU_SIZE + visibleCount && i < opt.size(); ++i) {
+          if (i >= opt.size()) break; // Safety check for multi paged menus
+          auto& o = opt[i];
+          int u_offset = 0;
+          int d_offset = 0;
+          if(strcmp(o.text.c_str(), "+")==0) d_offset = 10;
+          if(strcmp(o.text.c_str(), "-")==0 || strcmp(o.text.c_str(), "--")==0) u_offset = 10;
+
+          o.setCoords(tftWidth * 0.10 + 5, tft->getCursorY() + 2 + u_offset, (tftWidth * 0.8 - 10), FM * LH + 2 + d_offset);
+  
+          String text = (i == index ? ">" : " ");
+          if (i == index) {
+              coord.x = o.x + FM * LW;
+              coord.y = o.y + 2;
+              coord.size = (o.w) / (LW * FM) - 1;
+              coord.fgcolor = fgcolor;
+              coord.bgcolor = bgcolor;
+          }
+  
+          text += String(o.name) + "              ";
+          tft->setCursor(o.x, tft->getCursorY() + 4);
+          tft->println(text.substring(0, (o.w) / (LW * FM) - 1));
+          Serial.println(text);
+      }
+  
+      tft->drawRoundRect(tftWidth * 0.10, tftHeight / 2 - visibleCount * FONT_S / 2 - 5,
+                         tftWidth * 0.8, FONT_S * visibleCount + 10, 5, fgcolor);
+  
   #ifdef E_PAPER_DISPLAY
-    tft->display(false);
-    tft->startCallback();
+      tft->display(false);
+      tft->startCallback();
+      delay(200);
   #endif
-    return coord;
-}
+  
+      return coord;
+  }
 
 /***************************************************************************************
 ** Function name: drawMainMenu
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
-void drawMainMenu(int index) {
+void drawMainMenu(std::vector<MenuOptions>& opt, int index) {
   #ifdef E_PAPER_DISPLAY
-    tft->stopCallback();
-    tft->setFullWindow();
+    tft->stopCallback(); tft->setFullWindow();
   #endif
-  int offset=0;
-  if(index>2) offset=index-2;
-  const int border = 10;
-  bool usb_av = false;
-  #ifdef ARDUINO_USB_MODE
-  if(sdcardMounted) usb_av = true;
-  #endif
-  const uint16_t colors[5] = {
-      static_cast<uint16_t>(sdcardMounted ? FGCOLOR : DARKGREY), 
-      static_cast<uint16_t>(!stopOta ? FGCOLOR : DARKGREY), 
-      static_cast<uint16_t>(FGCOLOR),
-      static_cast<uint16_t>(usb_av ? FGCOLOR : DARKGREY),
-      static_cast<uint16_t>(FGCOLOR)
-  };
-
-    const char* texts[5] = { "SD", "OTA", "WUI", "USB", "CFG" };
-#if TFT_HEIGHT<200
-    const char* messages[5] = { "Launch from SDCard", 
-                                "Online Installer", 
-                                "Start WebUI",
-                                "SD->USB Interface",
-                                "Launcher settings." };
-#else
-    const char* messages[5] = { "Launch from or mng SDCard", 
-                                "Install/download from M5Burner", 
-                                "Start Web User Interface",
-                                "Manage SD files through USB",
-                                "Change Launcher settings." };
-#endif
-    tft->fillRoundRect(6,26,tftWidth-12,tftHeight-12,5,BGCOLOR);
-    setTftDisplay(12, 12, FGCOLOR, 1, BGCOLOR);
-    
-#if TFT_HEIGHT<200
-    tft->print("Launcher " + String(LAUNCHER));
-    tft->setTextSize(FM);
-#else
-    tft->drawString("Launcher " + String(LAUNCHER),12,12);
-    tft->setTextSize(FG);
-#endif
-    for (int i = 0; i < 3; ++i) {
-        int x = border / 2 + i * ((tftWidth-20) / 3) + 10;
-        int y = 20 + border + 10;
-        int w = (tftWidth-20) / 3 - border;
-        int h = (tftHeight-20) / 2;
-        drawSection(x, y, w, h, colors[i+offset], texts[i+offset], index == (i + offset));
+    uint8_t size = opt.size();
+    if(size<1) { 
+      displayRedStripe("No options available");
+      return;
     }
+    int cols = (tftHeight > 90) ? 3 : 5; // Number of columns based on height
+    int rows = (size + cols - 1) / cols; // Calculate rows needed
+    int w = (tftWidth - 16) / cols;      // Width of each icon
+    int h = (tftHeight - (26 + LH * FG + 6)) / rows; // Height of each icon
+    
+    int f_size = FG;
+    if(tftHeight <= 90) f_size = FM;
+    tft->setTextSize(f_size);
 
-    setTftDisplay(-1, -1, FGCOLOR, 1, BGCOLOR);
-
-#if TFT_WIDTH<130
-    tft->drawCentreString(messages[index], tftWidth / 2, 28, 1);
-#else
-    tft->drawCentreString(messages[index], tftWidth / 2, tftHeight - 25, 1);
-#endif
-
+    for (int i = 0; i < size; ++i) {
+      int col = i % cols;
+      int row = i / cols;
+      int x = 8 + col * w;
+      int y = 28 + row * h;
+  
+      opt[i].x = x;
+      opt[i].y = y;
+      opt[i].w = w - 5;
+      opt[i].h = h - 5;
+  
+      if (i == index) {
+        // Selected item
+        tft->fillRoundRect(x + 6, y + 6, w - 6, h - 6, 5, DARKGREY);
+        tft->fillRoundRect(x, y, w - 6, h - 6, 5, opt[i].active ? FGCOLOR : LIGHTGREY);
+        tft->setTextColor(BGCOLOR, opt[i].active ? FGCOLOR : LIGHTGREY);
+        // Draw text in the center of the icon
+        tft->drawCentreString(opt[i].name, x + (w - 6) / 2, y + (h - 6) / 2 - LH * f_size / 2, 1);
+      } else {
+        // Non-selected item
+        tft->drawRoundRect(x, y, w , h , 5, BGCOLOR);
+        tft->drawRoundRect(x+1, y+1, w - 2 , h - 2 , 5, BGCOLOR);
+        tft->drawRoundRect(x+2, y+2, w - 4 , h - 4 , 5, BGCOLOR);
+        tft->fillRoundRect(x+3, y+3, w - 6, h - 6, 5, BGCOLOR);
+        tft->drawRoundRect(x+3, y+3, w - 6, h - 6, 5, opt[i].active ? FGCOLOR : DARKGREY);
+        tft->setTextColor(opt[i].active ? FGCOLOR : DARKGREY, BGCOLOR);
+        // Draw text in the center of the icon
+        tft->drawCentreString(opt[i].name, x + w / 2, y + h / 2 - LH * f_size / 2, 1);
+      }
+    }
+  
+    tft->setTextSize(FP);
+    tft->setTextColor(FGCOLOR, BGCOLOR);
+    // Draw the description of the selected item
+    tft->fillRect(10, tftHeight - (6 + LH * FP), tftWidth - 20, LH * FP, BGCOLOR);
+    tft->drawCentreString(opt[index].text, tftWidth / 2, tftHeight - (6 + LH * FP), 1);
+    // Draw Launcher version and battery value
+  #if TFT_HEIGHT<200
+    tft->drawString("Launcher",12,12);
+  #else
+    tft->drawString("Launcher " + String(LAUNCHER),12,12);
+  #endif
+    tft->setTextSize(f_size); 
     drawDeviceBorder();
     int bat = getBattery();
     if(bat>0) drawBatteryStatus(bat);
   #ifdef E_PAPER_DISPLAY
-    tft->display(false);
-    tft->startCallback();
+    tft->display(false); tft->startCallback();
   #endif
 }
-
-void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, bool isSelected) {
-    tft->setTextColor(isSelected ? BGCOLOR : color);
-    if (isSelected) {
-        tft->fillRoundRect(x+5, y+5, w, h, 5,  color + 0x2222);
-        tft->fillRoundRect(x, y, w, h, 5, color);
-    }
-    tft->drawRoundRect(x, y, w, h, 5, color);
-#if TFT_HEIGHT<200
-    tft->drawCentreString(text,x + w/2, y + h/2 - 6, 1);
-  #else
-    tft->drawCentreString(text, x + w/2, y + h/2 - 12, 1);
-#endif
-}
-
 void drawDeviceBorder() {
     tft->drawRoundRect(5, 5, tftWidth - 10, tftHeight - 10, 5, FGCOLOR);
     tft->drawLine(5, 25, tftWidth - 6, 25, FGCOLOR);
@@ -638,40 +683,97 @@ void drawBatteryStatus(uint8_t bat) {
 ** Function name: listFiles
 ** Description:   Função para desenhar e mostrar o menu principal
 ***************************************************************************************/
-#ifdef E_PAPER_DISPLAY
+#if defined(E_PAPER_DISPLAY)  && !defined(GxEPD2_DISPLAY)
   #define MAX_ITEMS 14
 #else
   #define MAX_ITEMS (int)(tftHeight-20)/(LH*FM)
 #endif
-Opt_Coord listFiles(int index, String fileList[][3]) {
+Opt_Coord listFiles(int index, String fileList[][3], std::vector<MenuOptions>& opt) {
+
   #ifdef E_PAPER_DISPLAY
     tft->stopCallback();
   #endif
     Opt_Coord coord;
+    opt.clear();
     tft->setCursor(10,10);
     tft->setTextSize(FM);
     int i=0;
     int arraySize = 0;
     while(fileList[arraySize][2]!="" && arraySize < MAXFILES) arraySize++;
-    int start=0;
-    if(index>=MAX_ITEMS) {
-        start=index-MAX_ITEMS+1;
-        if(start<0) start=0;
+
+    int num_pages = 1 + arraySize/MAX_ITEMS;
+    static int show_page = 0;
+    
+    #ifdef HAS_TOUCH  
+    // calcula o numero de paginas  
+    if(arraySize<=MAX_ITEMS) { num_pages=1; } 
+    else {
+      int firstPage = arraySize - (MAX_ITEMS - 1); // Primeira pagina tem MAX_ITEMS-1 de tamanho, pois substitui o ultimo por "..."
+      int nextPages = (arraySize - firstPage)/(MAX_ITEMS-2); // O restante do menu tem MAX_ITEMS-2 de tamanho, pois substitui o primeiro e o ultimo por "..."
+      int lastPage = (arraySize - firstPage - nextPages) > 0? 1 : 0; // A ultima pagina tem o restante do menu, que pode ser menor que MAX_ITEMS-2
+      num_pages = 1 + nextPages + lastPage;
     }
+    #endif
+    int start=0;
+    if(num_pages>1) {
+      for(int i=0; i<=num_pages; i++) { // check for the other pages
+        int ini,end;
+        #ifdef HAS_TOUCH
+        if(i==0){
+          ini = 0;
+          end = (MAX_ITEMS-1);
+        }
+        else { 
+          ini = 1 + i*(MAX_ITEMS-2); 
+          end = ini + (MAX_ITEMS-2);
+        }
+        #else
+        ini = i*(MAX_ITEMS-1); // index value at the top of the list, index starts at 0
+        end = (i+1)*(MAX_ITEMS-1);
+        #endif
+
+        if(index>=ini && index<end) {
+          start = ini;
+          //Serial.printf("\nnum_pages: %d, show_page: %d, index: %d\n", num_pages, i, index);
+          //Serial.printf("ini: %d, end: %d\n", ini, end);
+          if(index==ini || i!=show_page) tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
+          show_page = i;
+          break;
+        }
+      }
+    }
+
     int nchars = (tftWidth-20)/(6*tft->getTextsize());
     String txt=">";
     int j=0;
+    int Max_items = MAX_ITEMS;
+    #ifdef HAS_TOUCH
+    if(show_page==0 && num_pages>1) {
+      Max_items = MAX_ITEMS-1;
+    } else if(show_page>0 && num_pages>1) {
+      Max_items = MAX_ITEMS-2;
+    }
+    if(show_page>0) { 
+      opt.push_back(MenuOptions("", "-", nullptr,true,false,10+5*FM*LW,0,tftWidth,FM*LH+10));
+      tft->setTextColor(ALCOLOR, BGCOLOR);
+      tft->println("<ESC> | Page Up ...");
+    }
+    #endif
+
     while(i<arraySize) {
         if(i>=start && fileList[i][2]!="") {
-            tft->setCursor(10,tft->getCursorY());
+            uint16_t c_y = tft->getCursorY();
+            MenuOptions optItem = MenuOptions(String(i), "", nullptr,true,false,0,c_y,tftWidth,FM*LH);
+            tft->setCursor(10,c_y);
             if(fileList[i][2]=="folder") tft->setTextColor(FGCOLOR-0x1111, BGCOLOR);
             else if(fileList[i][2]=="operator") tft->setTextColor(ALCOLOR, BGCOLOR);
             else { tft->setTextColor(FGCOLOR,BGCOLOR); }
 
             if (index==i) { 
+              optItem.selected=true;
               txt=">";
               coord.x=10+FM*LW;
-              coord.y=tft->getCursorY();
+              coord.y=c_y;
               coord.size=nchars;
               coord.fgcolor=fileList[i][2]=="folder"? FGCOLOR-0x1111:FGCOLOR;
               coord.bgcolor=BGCOLOR;
@@ -679,11 +781,22 @@ Opt_Coord listFiles(int index, String fileList[][3]) {
             else txt=" ";
             txt+=fileList[i][0] + "                       ";
             tft->println(txt.substring(0,nchars));
+            opt.push_back(optItem);
             j++;
         }
         i++;
-        if (i==(start+MAX_ITEMS) || fileList[i][2]=="") break;
+        if (i==(start+Max_items) || fileList[i][2]=="") break;
     }
+  #ifdef HAS_TOUCH
+    if(num_pages != show_page) { 
+      tft->setTextColor(ALCOLOR, BGCOLOR);
+      tft->setCursor(10,tft->getCursorY());
+      opt.push_back(MenuOptions("", "+", nullptr,true,false,0,tft->getCursorY(),tftWidth,FM*LH+6));
+      tft->println("... Page Down ...");
+      
+    }
+
+  #endif
 
     #if defined(HAS_TOUCH)
     TouchFooter();
@@ -706,24 +819,62 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   log_i("Number of options: %d", options.size());
   int numOpt = options.size()-1;
   Opt_Coord coord;
-  coord=drawOptions(0,options, ALCOLOR, BGCOLOR);
+  std::vector<MenuOptions> optItems = { };
   LongPressTmp=millis();
   while(1){
     if (redraw) { 
-      coord=drawOptions(index,options, ALCOLOR, BGCOLOR);
+      optItems = { };
+      for (int i=0; i<options.size(); i++) {
+        MenuOptions optItem;
+        optItem.name = options[i].first.c_str();
+        optItem.action = options[i].second;
+        optItems.push_back(optItem);
+      }
+      coord=drawOptions(index,optItems, ALCOLOR, BGCOLOR);
       if(bright){
         setBrightness(100*(numOpt-index)/numOpt,false);
       }
       redraw=false;
-      #ifdef E_PAPER_DISPLAY
-      tft->display(false);
-      delay(200);
-      #endif
     }
     String txt=options[index].first.c_str();
     displayScrollingText(txt, coord);
 
     #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
+    if(touchPoint.pressed) {
+      int i=0;
+      bool finished = false;
+      for(auto item: optItems) {
+        if(item.contain(touchPoint.x, touchPoint.y)) {
+          SelPress = false;
+          PrevPress = false;
+          NextPress = false;
+          UpPress = false;
+          DownPress = false;
+          //Serial.printf("\nValue to sum: %s",item.text);
+          //Serial.printf("\n[+]actual index: %d\n",i);
+          if(strcmp(item.text.c_str(),"")!=0) {
+            if(strcmp(item.text.c_str(),"+")==0) index = i;
+            if(strcmp(item.text.c_str(),"--")==0) index = 0;
+            if(strcmp(item.text.c_str(),"-")==0) index = i - (MAX_MENU_SIZE-2);
+            if(index>=options.size()) index = options.size()-1;
+           // Serial.printf("\n[+]next index: %d\n",index);
+            break;
+          }
+          else {
+            Serial.printf("\nSelected: %s\n",item.name);
+            if(index==i) {
+              item.action();
+              finished = true;
+            } 
+            index=i;
+            break;
+          }
+        }
+        if(strcmp(item.text.c_str(),"")==0) i++;
+      }
+      redraw=true;
+      if(finished) break;
+    }
     if(check(PrevPress) || check(UpPress)) {
       if(index==0) index = options.size() - 1;
       else if(index>0) index--;
@@ -765,9 +916,10 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     }
 
     #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
-    if(check(EscPress)) break;
+    if(check(EscPress) || returnToMenu) break;
     #endif
   }
+  tft->fillScreen(BGCOLOR);
 }
 
 /*********************************************************************

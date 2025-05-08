@@ -307,7 +307,6 @@ void setup() {
   #if !defined(HEADLESS)
     //tft->setAttribute(PSRAM_ENABLE,true);
     tft->begin();
-
     #ifdef TFT_INVERSION_ON
     tft->invertDisplay(true);
     #endif
@@ -418,14 +417,44 @@ void setup() {
 #ifndef HEADLESS
 void loop() {
   bool redraw = true;
+  bool update_sd;
   int index = 0;
   int opt = 5; // there are 3 options> 1 list SD files, 2 OTA, 3 USB and 4 Config
   stopOta = false; // variable used in WebUI, and to prevent open OTA after webUI without restart
   getBrightness();
   if(!sdcardMounted) index=1; //if SD card is not present, paint SD square grey and auto select OTA
+  std::vector<MenuOptions> menuItems = {
+    { "SD", "Launch from or mng SDCard",[=]() { loopSD(false);}, sdcardMounted },
+    #ifndef NO_OTA
+    { "OTA", "Online Installer",        [=]() { ota_function();}},
+    #endif
+    { "WUI", "Start Web User Interface",[=]() { loopOptionsWebUi();}},
+    #ifdef ARDUINO_USB_MODE
+    { "USB", "SD->USB Interface",       [=]() { 
+      if(setupSdCard()) { 
+        MassStorage(); 
+        tft->drawPixel(0,0,0);
+        tft->fillScreen(BGCOLOR);
+      } 
+      else {
+        displayRedStripe("Insert SD Card");
+        delay(2000);
+      }
+    }, sdcardMounted},
+    #endif
+    { "CFG", "Change Launcher settings.",[=]() { settings_menu();} }
+  };
+  update_sd = sdcardMounted;
   while(1){
     if (redraw) { 
-      drawMainMenu(index); 
+      if(update_sd != sdcardMounted) {
+        for(auto o : menuItems) {
+          if(o.name == "SD") o.active = sdcardMounted;
+          if(o.name == "USB") o.active = sdcardMounted;
+        }
+        update_sd = sdcardMounted;
+      }
+      drawMainMenu(menuItems, index); 
       #if defined(HAS_TOUCH)
       TouchFooter();
       #endif      
@@ -436,7 +465,21 @@ void loop() {
         delay(200);
       #endif
     }
-
+    if(touchPoint.pressed) {
+      int i=0;
+      for(auto item : menuItems) {
+        if(item.contain(touchPoint.x,touchPoint.y)) {
+          #ifndef E_PAPER_DISPLAY
+          index=i;
+          drawMainMenu(menuItems, index); // Redraw the menu to show the selected item
+          #endif
+          item.action(); // Call the action associated with the selected menu item
+          returnToMenu = false;
+          redraw = true;
+        }
+        i++;
+      }
+    }
     if(check(PrevPress)) {
       if(index==0) index = opt - 1;
       else if(index>0) index--;
@@ -451,130 +494,8 @@ void loop() {
 
     // Select and run function 
     if(check(SelPress)) { 
-      if(index == 0) {  
-        if(setupSdCard()) { 
-          loopSD(false); 
-          tft->fillScreen(BGCOLOR);
-          redraw=true;
-        }
-        else {
-          displayRedStripe("Insert SD Card");
-          delay(3000);
-        }
-        
-      }
-      if(index == 1) {  
-        #ifndef DISABLE_OTA
-        if (!stopOta) {
-          if (WiFi.status() != WL_CONNECTED) {
-            int nets;
-            WiFi.disconnect(true);
-            WiFi.mode(WIFI_MODE_STA);
-            displayRedStripe("Scanning...");
-            nets=WiFi.scanNetworks();
-            options = { };
-            for(int i=0; i<nets; i++){
-              options.push_back({WiFi.SSID(i).c_str(), [=]() { wifiConnect(WiFi.SSID(i).c_str(),int(WiFi.encryptionType(i))); }});
-            }
-            options.push_back({"Hidden SSID", [=]() { String __ssid=keyboard("", 32, "Your SSID"); wifiConnect(__ssid.c_str(),8); }});
-            options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
-            loopOptions(options);
-            if (WiFi.status() == WL_CONNECTED) {
-              if(GetJsonFromM5()) loopFirmware();
-            }
-
-          } else {
-            //If it is already connected, download the JSON again... it loses the information once you step out of loopFirmware(), dkw
-            closeSdCard();
-            if(GetJsonFromM5()) loopFirmware();
-          }
-          tft->fillScreen(BGCOLOR);
-          redraw=true;
-        } 
-        else {
-          displayRedStripe("Restart to open OTA");
-          delay(3000);
-        } 
-        #else
-        displayRedStripe("Not M5 Device");
-        delay(3000);
-        #endif
-
-      }
-      if(index == 2) {
-        loopOptionsWebUi();
-        tft->fillScreen(BGCOLOR);
-        redraw=true;        
-      }
-
-      if(index == 3) {
-        #ifdef ARDUINO_USB_MODE
-        if(setupSdCard()) { 
-          MassStorage(); 
-          tft->drawPixel(0,0,0);
-          tft->fillScreen(BGCOLOR);
-        } 
-        else {
-          displayRedStripe("Insert SD Card");
-          delay(3000);
-        }
-        
-        #else
-          displayRedStripe("Only for ESP32-S3");
-          delay(2000);
-        #endif
-      }
-
-      if(index == 4) {  
-        options = {
-          #ifndef E_PAPER_DISPLAY
-          {"Charge Mode", [=](){ chargeMode(); }},
-          #endif
-          {"Brightness", [=]() { setBrightnessMenu();    saveConfigs();}},
-          {"Dim time", [=]()   { setdimmerSet();         saveConfigs();}},
-          #ifndef E_PAPER_DISPLAY
-          {"UI Color", [=]()   { setUiColor();           saveConfigs();}},
-          #endif
-        };
-        if(sdcardMounted) {
-          if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false);  saveConfigs();}});
-          else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true);   saveConfigs();}});
-        }
-        
-        if(askSpiffs) options.push_back({"Avoid Spiffs",        [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
-        else          options.push_back({"Ask Spiffs",          [=]() { gsetAskSpiffs(true, true);  saveConfigs();}});
-        #ifndef E_PAPER_DISPLAY
-        options.push_back(              {"Orientation",         [=]() { gsetRotation(true);         saveConfigs(); }});
-        #endif
-        #if !defined(CORE_4MB)
-        options.push_back(              {"Partition Change",    [=]() { partitioner(); }});
-        options.push_back(              {"List of Partitions",  [=]() { partList(); }});
-        #endif
-
-      #ifndef PART_04MB
-        options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
-      #endif
-
-        if(MAX_SPIFFS>0) options.push_back({"Backup SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
-        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Backup FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
-        if(MAX_FAT_vfs>0) options.push_back({"Backup FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
-        if(MAX_SPIFFS>0) options.push_back({ "Restore SPIFFS",  [=]() { restorePartition("spiffs"); }});
-        if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Restore FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
-        if(MAX_FAT_vfs>0) options.push_back({"Restore FAT Vfs",  [=]() { restorePartition("vfs"); }});
-
-        if(dev_mode) options.push_back({"Boot Animation",  [=]() { initDisplayLoop(); }});
-
-        options.push_back({"Restart",  [=]() { FREE_TFT ESP.restart(); }});
-
-        #if defined(STICK_C_PLUS2) || defined(T_EMBED) || defined(STICK_C_PLUS)
-        options.push_back({"Turn-off",  [=]() { powerOff(); }});
-        #endif
-        options.push_back({"Main Menu",  [=]() { returnToMenu=true; }});
-        loopOptions(options);
-        tft->fillScreen(BGCOLOR);
-        tft->fillScreen(BGCOLOR);
-        redraw=true;
-      }
+      menuItems.at(index).action(); // Call the action associated with the selected menu item
+      tft->fillScreen(BGCOLOR);
       returnToMenu = false;
       redraw = true;
     }

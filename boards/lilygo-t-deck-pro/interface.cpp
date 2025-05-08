@@ -48,9 +48,11 @@ void _setup_gpio() {
     digitalWrite(TOUCH_INT, LOW);
 
     pinMode(TOUCH_RST, OUTPUT);
-    digitalWrite(TOUCH_RST, HIGH);
-    delay(1);
     digitalWrite(TOUCH_RST, LOW);
+    delay(1);
+    digitalWrite(TOUCH_RST, HIGH);
+    
+    
 
     Serial.begin(115200);
 

@@ -33,12 +33,12 @@ class Ard_eSPI: public EPD_translate {
 #define BOARD_SPI_SCK  36
 #define BOARD_SPI_MOSI 33
 
-#define DARKGREY GxEPD_DARKGREY
-#define BLACK GxEPD_BLACK
-#define RED GxEPD_RED
-#define GREEN GxEPD_GREEN
-#define DARKCYAN GxEPD_GREEN
-#define LIGHTGREY GxEPD_LIGHTGREY
+#define DARKGREY 0x8888
+#define BLACK GxEPD_WHITE
+#define RED GxEPD_WHITE
+#define GREEN 0xAAAA
+#define DARKCYAN 0x6666
+#define LIGHTGREY 0x4444
 
 class Ard_eSPI : public GxEPD2_BW<GxEPD2_310_GDEQ031T10, GxEPD2_310_GDEQ031T10::HEIGHT> {
     public:

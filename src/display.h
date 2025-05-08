@@ -46,17 +46,17 @@ struct Opt_Coord {
 };
 void displayScrollingText(const String& text, Opt_Coord& coord);
 
-Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor);
-
-void drawSection(int x, int y, int w, int h, uint16_t color, const char* text, bool isSelected);
+//Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor);
+Opt_Coord drawOptions(int index,std::vector<MenuOptions>& opt, uint16_t fgcolor, uint16_t bgcolor);
 
 void drawDeviceBorder();
 
 void drawBatteryStatus(uint8_t bat);
 
-void drawMainMenu(int index = 0);
+void drawMainMenu(std::vector<MenuOptions>& opt, int index);
+//void drawMainMenu(int index = 0);
 
-Opt_Coord listFiles(int index, String fileList[][3]);
+Opt_Coord listFiles(int index, String fileList[][3], std::vector<MenuOptions>& opt);
 
 void TouchFooter(uint16_t color = FGCOLOR);
 

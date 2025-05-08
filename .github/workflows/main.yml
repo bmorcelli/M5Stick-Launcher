@@ -297,7 +297,7 @@
                 },
               }
             - {
-                vendor: "WIP",
+                vendor: "CYD",
                 name: "CYD-8048S043C",
                 description: "(ESP32S3, 4.3in, 800x480, Capacitive)",
                 link: "",
@@ -308,7 +308,7 @@
                 },
               }
             - {
-                vendor: "WIP",
+                vendor: "CYD",
                 name: "CYD-8048W550C",
                 description: "(ESP32S3, 5.5in, 800x480, Capacitive)",
                 link: "",
@@ -413,6 +413,17 @@
                 link: "https://lilygo.cc/products/t-deck",
                 family: "ESP32-S3",
                 env: "lilygo-t-deck",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              }
+            - {
+                vendor: "WIP",
+                name: "T-Deck Pro",
+                description: "e-Paper display",
+                link: "https://lilygo.cc/products/t-deck-pro",
+                family: "ESP32-S3",
+                env: "lilygo-t-deck-pro",
                 partitions: {
                   bootloader_addr: "0x0",
                 },

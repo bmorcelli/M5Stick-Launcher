@@ -102,7 +102,47 @@ END:
   delay(0);
 }
 
+/***************************************************************************************
+** Function name: ota_function
+** Description:   Start OTA function
+***************************************************************************************/
+void ota_function() {
+  #ifndef DISABLE_OTA
+  if (!stopOta) {
+    if (WiFi.status() != WL_CONNECTED) {
+      int nets;
+      WiFi.disconnect(true);
+      WiFi.mode(WIFI_MODE_STA);
+      displayRedStripe("Scanning...");
+      nets=WiFi.scanNetworks();
+      options = { };
+      for(int i=0; i<nets; i++){
+        options.push_back({WiFi.SSID(i).c_str(), [=]() { wifiConnect(WiFi.SSID(i).c_str(),int(WiFi.encryptionType(i))); }});
+      }
+      options.push_back({"Hidden SSID", [=]() { String __ssid=keyboard("", 32, "Your SSID"); wifiConnect(__ssid.c_str(),8); }});
+      options.push_back({"Main Menu", [=]() { returnToMenu=true; }});
+      loopOptions(options);
+      if (WiFi.status() == WL_CONNECTED) {
+        if(GetJsonFromM5()) loopFirmware();
+      }
 
+    } else {
+      //If it is already connected, download the JSON again... it loses the information once you step out of loopFirmware(), dkw
+      closeSdCard();
+      if(GetJsonFromM5()) loopFirmware();
+    }
+    tft->fillScreen(BGCOLOR);
+    redraw=true;
+  } 
+  else {
+    displayRedStripe("Restart to open OTA");
+    delay(3000);
+  } 
+  #else
+  displayRedStripe("Not M5 Device");
+  delay(3000);
+  #endif
+}
 
 
 #ifndef DISABLE_OTA

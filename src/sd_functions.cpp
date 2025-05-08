@@ -82,12 +82,12 @@ bool setupSdCard() {
   #endif
   {
    // sdcardSPI.end(); // Closes SPI connections and release pin header.
-    //Serial.println("Failed to mount SDCARD");
+    Serial.println("Failed to mount SDCARD");
     sdcardMounted = false;
     return false;
   }
   else {
-    //Serial.println("SDCARD mounted successfully");
+    Serial.println("SDCARD mounted successfully");
     sdcardMounted = true;
     return true;
   }
@@ -389,6 +389,10 @@ void readFs(String folder, String result[][3]) {
 **********************************************************************/
 String loopSD(bool filePicker) {
   Opt_Coord coord;
+  std::vector<MenuOptions> list;
+  int max_idx=0;
+  int min_idx=255;
+
   prog_handler = 0;
   String result = "";
   bool reload=false;
@@ -401,7 +405,7 @@ String loopSD(bool filePicker) {
   tft->drawRoundRect(5,5,tftWidth-10,tftHeight-10,5,FGCOLOR);
 
   readFs(Folder, fileList);
-  coord=listFiles(0, fileList);
+  coord=listFiles(0, fileList, list);
 
   for(int i=0; i<MAXFILES; i++) if(fileList[i][2]!="") maxFiles++; else break;
   LongPressTmp=millis();
@@ -419,12 +423,55 @@ String loopSD(bool filePicker) {
         tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
         tft->fillRoundRect(6,6,tftWidth-12,tftHeight-12,5,BGCOLOR);
       }
-      coord=listFiles(index, fileList);
+      coord=listFiles(index, fileList, list);
+
+      //Serial.println("\nContent of list object:");
+      max_idx=0;
+      min_idx=MAXFILES;
+      int tmp=0;
+      for(auto item: list) {
+        if(item.name!="") {
+          tmp=item.name.toInt();
+          Serial.print(tmp); Serial.print(" ");
+          if(tmp>max_idx) max_idx = tmp;
+          if(tmp<min_idx) min_idx = tmp;
+        } 
+      }
+      //Serial.printf("\nmax_idx: %d min_idx: %d\n", max_idx, min_idx);
+
       redraw = false;
     }
 
     displayScrollingText(fileList[index][0], coord);
 
+    #ifdef HAS_TOUCH
+    if(touchPoint.pressed) {
+      for(auto item: list) {
+        if(item.contain(touchPoint.x, touchPoint.y)) {
+          SelPress = false;
+          PrevPress = false;
+          NextPress = false;
+          UpPress = false;
+          DownPress = false;
+          EscPress = false;
+          if(item.name=="") {
+            if(item.text=="+") index = max_idx + 1;
+            if(item.text=="-") index = min_idx - 1;
+            if(index<0) index = 0;
+            //Serial.printf("\nPressed [%s], next index: %d\n",item.text,index);
+            redraw=true;
+            break;
+          }
+          else {
+            if(index==item.name.toInt()) SelPress = true;
+            else redraw=true;
+            index=item.name.toInt();
+            break;
+          }
+        }
+      }
+    }
+    #endif
     if(check(PrevPress) || check(UpPress)) {
       if(index==0) index = maxFiles - 1;
       else if(index>0) index--;

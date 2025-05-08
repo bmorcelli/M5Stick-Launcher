@@ -4,6 +4,8 @@
 #include "settings.h"
 #include "sd_functions.h"
 #include "mykeyboard.h"
+#include "onlineLauncher.h"
+#include "partitioner.h"
 
 /**************************************************************************************
 EEPROM ADDRESSES MAP
@@ -30,6 +32,53 @@ From 1 to 5: Nemo shared addresses
 (L -*) stands for Launcher addresses
 
 ***************************************************************************************/
+
+void settings_menu() {
+    options = {
+      #ifndef E_PAPER_DISPLAY
+      {"Charge Mode", [=](){ chargeMode(); }},
+      #endif
+      {"Brightness", [=]() { setBrightnessMenu();    saveConfigs();}},
+      {"Dim time", [=]()   { setdimmerSet();         saveConfigs();}},
+      #ifndef E_PAPER_DISPLAY
+      {"UI Color", [=]()   { setUiColor();           saveConfigs();}},
+      #endif
+    };
+    if(sdcardMounted) {
+      if(onlyBins) options.push_back({"All Files",  [=]() { gsetOnlyBins(true, false);  saveConfigs();}});
+      else         options.push_back({"Only Bins",  [=]() { gsetOnlyBins(true, true);   saveConfigs();}});
+    }
+    
+    if(askSpiffs) options.push_back({"Avoid Spiffs",        [=]() { gsetAskSpiffs(true, false); saveConfigs();}});
+    else          options.push_back({"Ask Spiffs",          [=]() { gsetAskSpiffs(true, true);  saveConfigs();}});
+    #ifndef E_PAPER_DISPLAY
+    options.push_back(              {"Orientation",         [=]() { gsetRotation(true);         saveConfigs(); }});
+    #endif
+    #if !defined(CORE_4MB)
+    options.push_back(              {"Partition Change",    [=]() { partitioner(); }});
+    options.push_back(              {"List of Partitions",  [=]() { partList(); }});
+    #endif
+
+  #ifndef PART_04MB
+    options.push_back({"Clear FAT",  [=]() { eraseFAT(); }});
+  #endif
+
+    if(MAX_SPIFFS>0) options.push_back({"Backup SPIFFS",  [=]() { dumpPartition("spiffs", "/bkp/spiffs.bin"); }});
+    if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Backup FAT sys",  [=]() { dumpPartition("sys", "/bkp/FAT_sys.bin"); }});    //Test only
+    if(MAX_FAT_vfs>0) options.push_back({"Backup FAT vfs",  [=]() { dumpPartition("vfs", "/bkp/FAT_vfs.bin"); }});
+    if(MAX_SPIFFS>0) options.push_back({ "Restore SPIFFS",  [=]() { restorePartition("spiffs"); }});
+    if(MAX_FAT_sys>0 && dev_mode) options.push_back({"Restore FAT Sys",  [=]() { restorePartition("sys"); }});                     //Test only
+    if(MAX_FAT_vfs>0) options.push_back({"Restore FAT Vfs",  [=]() { restorePartition("vfs"); }});
+    if(dev_mode) options.push_back({"Boot Animation",  [=]() { initDisplayLoop(); }});
+    options.push_back({"Restart",  [=]() { FREE_TFT ESP.restart(); }});
+    #if defined(STICK_C_PLUS2) || defined(T_EMBED) || defined(STICK_C_PLUS)
+    options.push_back({"Turn-off",  [=]() { powerOff(); }});
+    #endif
+    options.push_back({"Main Menu",  [=]() { returnToMenu=true; }});
+    loopOptions(options);
+    tft->drawPixel(0,0,0);
+    tft->fillScreen(BGCOLOR);
+}
 
 // This function comes from interface.h
 void _setBrightness(uint8_t brightval) { }

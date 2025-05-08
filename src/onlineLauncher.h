@@ -11,6 +11,8 @@
 
 void installFirmware(String fileAddr, uint32_t app_size, bool spiffs, uint32_t spiffs_offset, uint32_t spiffs_size, bool nb, bool fat, uint32_t fat_offset[2], uint32_t fat_size[2]);
 
+void ota_function();
+
 void downloadFirmware(String fileAddr, String fileName, String folder = "/downloads/");
 
 void wifiConnect(String ssid, int encryptation, bool isAP = false);
