@@ -444,6 +444,7 @@ void loop() {
     #endif
     { "CFG", "Change Launcher settings.",[=]() { settings_menu();} }
   };
+  opt=menuItems.size(); // number of options in the menu
   update_sd = sdcardMounted;
   while(1){
     if (redraw) { 
