@@ -1,1 +1,1 @@
-{"name":"V4-OG","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-Marauder-v4-OG.bin","offset":0}]}]}
+{"name":"V4-OG and V6","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-Marauder-v4-OG.bin","offset":0}]}]}
