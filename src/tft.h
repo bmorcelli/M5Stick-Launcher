@@ -88,6 +88,7 @@ class Ard_eSPI : public TFT_eSPI {
 #define BLACK TFT_BLACK
 #define RED TFT_RED
 #define GREEN TFT_GREEN
+#define LIGHTGREY TFT_LIGHTGREY
 class Ard_eSPI : public lgfx::LGFX_Device {
     lgfx::LOVYAN_PANEL  _panel_instance;
     lgfx::LOVYAN_BUS    _bus_instance;
