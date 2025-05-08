@@ -132,7 +132,6 @@ void ota_function() {
       if(GetJsonFromM5()) loopFirmware();
     }
     tft->fillScreen(BGCOLOR);
-    redraw=true;
   } 
   else {
     displayRedStripe("Restart to open OTA");
