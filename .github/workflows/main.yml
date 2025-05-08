@@ -319,7 +319,7 @@
                 },
               }     
             - {
-                vendor: "WIP",
+                vendor: "CYD",
                 name: "CYD-3248W535C",
                 description: "(ESP32S3, 3.5in, 320x480, Capacitive)",
                 link: "",
@@ -331,7 +331,7 @@
               }
             - {
                 vendor: "Marauder",
-                name: "V4-OG",
+                name: "V4-OG and V6",
                 description: "",
                 link: "",
                 family: "ESP32",
@@ -339,7 +339,29 @@
                 partitions: {
                   bootloader_addr: "0x1000",
                 },
-              }    
+              }
+            - {
+                vendor: "Marauder",
+                name: "V6.x",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "Marauder-v61",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "Marauder",
+                name: "V7",
+                description: "",
+                link: "",
+                family: "ESP32",
+                env: "Marauder-v7",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              } 
             - {
                 vendor: "Marauder",
                 name: "Mini",
@@ -380,6 +402,17 @@
                 link: "https://lilygo.cc/products/t-display-s3?_pos=1&_sid=d7b2ebc22&_ss=r&variant=42589373268149",
                 family: "ESP32-S3",
                 env: "lilygo-t-display-S3-pro",
+                partitions: {
+                  bootloader_addr: "0x0",
+                },
+              } 
+            - {
+                vendor: "WIP",
+                name: "T-Display-S3 AMOLED Plus",
+                description: "",
+                link: "https://lilygo.cc/products/t-display-s3-amoled",
+                family: "ESP32-S3",
+                env: "lilygo-t-display-S3-amoled",
                 partitions: {
                   bootloader_addr: "0x0",
                 },
@@ -437,6 +470,50 @@
                 env: "lilygo-t5-epaper-s3-pro",
                 partitions: {
                   bootloader_addr: "0x0",
+                },
+              }
+            - {
+                vendor: "WIP",
+                name: "Elecrow ESP32 2.4in",
+                description: "",
+                link: "https://www.elecrow.com/wiki/esp32-display-242727-intelligent-touch-screen-wi-fi26ble-240320-hmi-display.html",
+                family: "ESP32",
+                env: "elecrow-24B",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "WIP",
+                name: "Elecrow ESP32 2.8in",
+                description: "",
+                link: "https://www.elecrow.com/wiki/esp32-display-282727-intelligent-touch-screen-wi-fi26ble-240320-hmi-display.html",
+                family: "ESP32",
+                env: "elecrow-28B",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "WIP",
+                name: "Elecrow ESP32 3.5in",
+                description: "",
+                link: "https://www.elecrow.com/wiki/esp32-display-352727-intelligent-touch-screen-wi-fi26ble-320480-hmi-display.html",
+                family: "ESP32",
+                env: "elecrow-35B",
+                partitions: {
+                  bootloader_addr: "0x1000",
+                },
+              }
+            - {
+                vendor: "WIP",
+                name: "Elecrow ESP32 3.5in v2.2",
+                description: "",
+                link: "https://www.elecrow.com/wiki/esp32-display-352727-intelligent-touch-screen-wi-fi26ble-320480-hmi-display.html",
+                family: "ESP32",
+                env: "elecrow-35Bv2_2",
+                partitions: {
+                  bootloader_addr: "0x1000",
                 },
               }
 
@@ -537,6 +614,7 @@
             cyd="\n"
             marauder="\n"
             wip="\n"
+            elecrow="\n"
 
 
             # Itera sobre cada arquivo HTML na pasta de artefatos
@@ -562,6 +640,9 @@
                   "Launcher-WIP.html")
                     wip+="$content\n"
                     ;;
+                  "Launcher-Elecrow.html")
+                    elecrow+="$content\n"
+                    ;;
                 esac
                 echo "$file" # Exibe o caminho do arquivo processado
               fi
@@ -583,6 +664,9 @@
             html+="<ul class='device-list esp32'>"
             html+="$esp32"
             html+="</ul>"
+            html+="<ul class='device-list elecrow'>"
+            html+="$elecrow"
+            html+="</ul>"
             html+="<ul class='device-list wip'>"
             html+="$wip"
             html+="</ul>"
@@ -596,6 +680,8 @@
             echo "Lilygo Content: $lilygo"
             echo "ESP32 Content: $esp32"
             echo "CYD Content: $cyd"
+            echo "CYD Content: $elecrow"
+            echo "CYD Content: $wip"
 
             echo "$html" > ~/file.html
             cat ~/file.html

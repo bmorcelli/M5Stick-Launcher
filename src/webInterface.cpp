@@ -182,7 +182,13 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
             createDirRecursive(dirPath);
           }
           // Upload de arquivo único
+          TRY_AGAIN:
           request->_tempFile = SDM.open(uploadFolder + "/" + filename, "w");
+          if(!request->_tempFile) {
+            Serial.println("Fail creating file: " + String(filename));
+            vTaskDelay(5 / portTICK_PERIOD_MS);
+            goto TRY_AGAIN;
+          }
       } else {
         runOnce=false;
         // open the file on first call and store the file handle in the request object
