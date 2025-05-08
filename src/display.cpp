@@ -603,7 +603,7 @@ void drawMainMenu(std::vector<MenuOptions>& opt, int index) {
     int cols = (tftHeight > 90) ? 3 : 5; // Number of columns based on height
     int rows = (size + cols - 1) / cols; // Calculate rows needed
     int w = (tftWidth - 16) / cols;      // Width of each icon
-    int h = (tftHeight - (26 + LH * FG + 6)) / rows; // Height of each icon
+    int h = (tftHeight - (26 + LH * FP + 6)) / rows; // Height of each icon
     
     int f_size = FG;
     if(tftHeight <= 90) f_size = FM;
@@ -815,6 +815,7 @@ Opt_Coord listFiles(int index, String fileList[][3], std::vector<MenuOptions>& o
 **********************************************************************/
 void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>>& options, bool bright){
   bool redraw = true;
+  bool exit = false;
   int index = 0;
   log_i("Number of options: %d", options.size());
   int numOpt = options.size()-1;
@@ -842,7 +843,6 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
     if(touchPoint.pressed) {
       int i=0;
-      bool finished = false;
       for(auto item: optItems) {
         if(item.contain(touchPoint.x, touchPoint.y)) {
           SelPress = false;
@@ -864,7 +864,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
             Serial.printf("\nSelected: %s\n",item.name);
             if(index==i) {
               item.action();
-              finished = true;
+              exit = true;
             } 
             index=i;
             break;
@@ -873,7 +873,6 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
         if(strcmp(item.text.c_str(),"")==0) i++;
       }
       redraw=true;
-      if(finished) break;
     }
     if(check(PrevPress) || check(UpPress)) {
       if(index==0) index = options.size() - 1;
@@ -895,7 +894,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
         }
         if(millis()-LongPressTmp>200) tft->drawArc(tftWidth/2, tftHeight/2, 25,15,0,360*(millis()-(LongPressTmp+200))/500,FGCOLOR-0x1111);
         if(millis()-LongPressTmp>700) { // longpress detected to exit
-          break;
+          exit=true;
         } else goto WAITING;
 
       }
@@ -916,7 +915,9 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
     }
 
     #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
-    if(check(EscPress) || returnToMenu) break;
+    if(check(EscPress) || returnToMenu || exit) break;
+    #else
+    if(exit) break;
     #endif
   }
   tft->fillScreen(BGCOLOR);
