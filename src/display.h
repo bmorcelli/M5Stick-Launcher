@@ -47,7 +47,7 @@ struct Opt_Coord {
 void displayScrollingText(const String& text, Opt_Coord& coord);
 
 //Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, uint16_t fgcolor, uint16_t bgcolor);
-Opt_Coord drawOptions(int index,std::vector<MenuOptions>& opt, uint16_t fgcolor, uint16_t bgcolor);
+Opt_Coord drawOptions(int index,const std::vector<std::pair<std::string, std::function<void()>>>& options, std::vector<MenuOptions>& opt, uint16_t fgcolor, uint16_t bgcolor);
 
 void drawDeviceBorder();
 

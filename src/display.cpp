@@ -485,96 +485,110 @@ tft->setFullWindow();
   #define FONT_S (FM*LH+4)
   #define MAX_MENU_SIZE (int)(tftHeight/25)
 #endif
-Opt_Coord drawOptions(int idx, std::vector<MenuOptions>& opt, uint16_t fgcolor, uint16_t bgcolor) {
+Opt_Coord drawOptions(int idx,const std::vector<std::pair<std::string, std::function<void()>>>& option, std::vector<MenuOptions>& opt, uint16_t fgcolor, uint16_t bgcolor) {
       int index = idx;
   #ifdef E_PAPER_DISPLAY
       tft->stopCallback();
   #endif
   
       Opt_Coord coord;
-      int realSize = opt.size();
-      int init = 0;
+      opt.clear();
+      int arraySize = opt.size();
+      int visibleCount = MAX_MENU_SIZE;
       int num_pages=0;
       int show_page=0;
       #ifndef HAS_TOUCH  
-      num_pages = 1 + realSize/MAX_MENU_SIZE;
+      num_pages = 1 + arraySize/MAX_MENU_SIZE;
       show_page = index/MAX_MENU_SIZE;
       #else
-      if(realSize<=MAX_MENU_SIZE) num_pages=1;
+      if(arraySize<=MAX_MENU_SIZE) num_pages=1;
       else {
-        int firstPage = realSize - (MAX_MENU_SIZE - 1); // Primeira pagina tem MAX_MENU_SIZE-1 de tamanho, pois substitui o ultimo por "..."
-        int nextPages = (realSize - firstPage)/(MAX_MENU_SIZE-2); // O restante do menu tem MAX_MENU_SIZE-2 de tamanho, pois substitui o primeiro e o ultimo por "..."
-        int lastPage = (realSize - firstPage - nextPages) > 0? 1 : 0; // A ultima pagina tem o restante do menu, que pode ser menor que MAX_MENU_SIZE-2
+        int firstPage = arraySize - (MAX_MENU_SIZE - 1); // Primeira pagina tem MAX_MENU_SIZE-1 de tamanho, pois substitui o ultimo por "..."
+        int nextPages = (arraySize - firstPage)/(MAX_MENU_SIZE-2); // O restante do menu tem MAX_MENU_SIZE-2 de tamanho, pois substitui o primeiro e o ultimo por "..."
+        int lastPage = (arraySize - firstPage - nextPages) > 0? 1 : 0; // A ultima pagina tem o restante do menu, que pode ser menor que MAX_MENU_SIZE-2
         num_pages = 1 + nextPages + lastPage;
-        //Serial.printf("\nnum_pages: %d, firstPage: %d, nextPages: %d, lastPage: %d\n", num_pages, firstPage, nextPages, lastPage);
-        //Serial.printf("realSize: %d, MAX_MENU_SIZE: %d, index: %d\n", realSize, MAX_MENU_SIZE, index);
-
-        int num_adds = 2*(1 + nextPages);
-
-        opt.insert(opt.begin() + MAX_MENU_SIZE - 1, MenuOptions("...", "+", nullptr));
-        opt.insert(opt.begin() + MAX_MENU_SIZE, MenuOptions("...", "--", nullptr));
-        for(int i = 2; i <= nextPages; i++) {
-          opt.insert(opt.begin() + (i)*(MAX_MENU_SIZE) - 1, MenuOptions("...", "+", nullptr));
-          opt.insert(opt.begin() + (i)*(MAX_MENU_SIZE), MenuOptions("...", "-", nullptr));
-        }
-        if(index < (MAX_MENU_SIZE-1)) show_page=0;
-        else if(index >= (MAX_MENU_SIZE-1) && index < (MAX_MENU_SIZE-1) + nextPages*(MAX_MENU_SIZE-2))  { 
-          show_page = 1 + (index - firstPage)/(MAX_MENU_SIZE-2);
-        }
-        else show_page = num_pages - 1;
-        index = index + 2*show_page;
-        //Serial.printf("show_page: %d\n", show_page);
       }
       #endif
-  
-      if (index >= MAX_MENU_SIZE) {
-          init = index - MAX_MENU_SIZE + 1;
-      }
-  
-      for (auto& o : opt) o.resetCoords();
+      int start=0;
+      if(num_pages>1) {
+        for(int i=0; i<=num_pages; i++) { // check for the other pages
+          int ini,end;
+          #ifdef HAS_TOUCH
+          if(i==0){
+            ini = 0;
+            end = (MAX_MENU_SIZE-1);
+          }
+          else { 
+            ini = 1 + i*(MAX_MENU_SIZE-2); 
+            end = ini + (MAX_MENU_SIZE-2);
+          }
+          #else
+          ini = i*(MAX_MENU_SIZE-1); // index value at the top of the list, index starts at 0
+          end = (i+1)*(MAX_MENU_SIZE-1);
+          #endif
 
-      int visibleCount = MAX_MENU_SIZE;
-      if(opt.size()<MAX_MENU_SIZE) visibleCount = opt.size();
-  
+          if(index>=ini && index<end) {
+            start = ini;
+            //Serial.printf("\nnum_pages: %d, show_page: %d, index: %d\n", num_pages, i, index);
+            //Serial.printf("ini: %d, end: %d\n", ini, end);
+            if(index==ini || i!=show_page) 
+              tft->fillRoundRect(tftWidth * 0.10, tftHeight / 2 - visibleCount * FONT_S / 2 - 5,
+                                 tftWidth * 0.8, FONT_S * visibleCount + 10, 5, bgcolor);
+            show_page = i;
+            break;
+          }
+        }
+      }
+
+      int nchars = (tftWidth*0.8)/(6*tft->getTextsize());
+      String txt=">";
+      int j=0;
+      int Max_items = MAX_MENU_SIZE;
       #ifdef HAS_TOUCH
-      if (index == 0 || index == show_page*MAX_MENU_SIZE+1 || index == opt.size()-1)
-      #else
-      if (index == 0 || index == opt.size()-1) 
-      #endif
-      {
-          tft->fillRoundRect(tftWidth * 0.10, tftHeight / 2 - visibleCount * FONT_S / 2 - 5,
-                             tftWidth * 0.8, FONT_S * visibleCount + 10, 5, bgcolor);
+      if(show_page==0 && num_pages>1) {
+        Max_items = MAX_MENU_SIZE-1;
+      } else if(show_page>0 && num_pages>1) {
+        Max_items = MAX_MENU_SIZE-2;
       }
-  
+      if(show_page>0) { 
+        opt.push_back(MenuOptions("", "-", nullptr,true,false,10+5*FM*LW,0,tftWidth,FM*LH+10));
+        tft->setTextColor(ALCOLOR, BGCOLOR);
+        tft->println("... Page Up ...");
+        j++;
+      }
+      #endif
+
+      
+      if(opt.size()<MAX_MENU_SIZE) visibleCount = opt.size();
+
       tft->setTextColor(fgcolor, bgcolor);
       tft->setTextSize(FM);
       tft->setCursor(tftWidth * 0.10 + 5, tftHeight / 2 - visibleCount * FONT_S / 2);
-  
-      for (int i = show_page*MAX_MENU_SIZE; i < show_page*MAX_MENU_SIZE + visibleCount && i < opt.size(); ++i) {
-          if (i >= opt.size()) break; // Safety check for multi paged menus
-          auto& o = opt[i];
-          int u_offset = 0;
-          int d_offset = 0;
-          if(strcmp(o.text.c_str(), "+")==0) d_offset = 10;
-          if(strcmp(o.text.c_str(), "-")==0 || strcmp(o.text.c_str(), "--")==0) u_offset = 10;
-
-          o.setCoords(tftWidth * 0.10 + 5, tft->getCursorY() + 2 + u_offset, (tftWidth * 0.8 - 10), FM * LH + 2 + d_offset);
-  
-          String text = (i == index ? ">" : " ");
-          if (i == index) {
-              coord.x = o.x + FM * LW;
-              coord.y = o.y + 2;
-              coord.size = (o.w) / (LW * FM) - 1;
-              coord.fgcolor = fgcolor;
-              coord.bgcolor = bgcolor;
-          }
-  
-          text += String(o.name) + "              ";
-          tft->setCursor(o.x, tft->getCursorY() + 4);
-          tft->println(text.substring(0, (o.w) / (LW * FM) - 1));
-          Serial.println(text);
+      int i=0;
+      while(i<arraySize && j<visibleCount) {
+        if(i>=start) {
+            uint16_t c_y = tft->getCursorY();
+            MenuOptions optItem = MenuOptions(String(i), "", nullptr,true,false,0,c_y,tftWidth,FM*LH);
+            tft->setCursor(10,c_y);
+            if (index==i) { 
+              optItem.selected=true;
+              txt=">";
+              coord.x=10+FM*LW;
+              coord.y=c_y;
+              coord.size=nchars;
+              coord.fgcolor=fgcolor;
+              coord.bgcolor=bgcolor;
+            }
+            else txt=" ";
+            txt+=String(option[i].first.c_str()) + "                       ";
+            tft->println(txt.substring(0,nchars));
+            opt.push_back(optItem);
+            j++;
+        }
+        j++;
+        i++;
+        if (i==(start+Max_items)) break;
       }
-  
       tft->drawRoundRect(tftWidth * 0.10, tftHeight / 2 - visibleCount * FONT_S / 2 - 5,
                          tftWidth * 0.8, FONT_S * visibleCount + 10, 5, fgcolor);
   
@@ -820,18 +834,25 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
   log_i("Number of options: %d", options.size());
   int numOpt = options.size()-1;
   Opt_Coord coord;
-  std::vector<MenuOptions> optItems = { };
+  std::vector<MenuOptions> list;
+  int max_idx=0;
+  int min_idx=255;
   LongPressTmp=millis();
   while(1){
     if (redraw) { 
-      optItems = { };
-      for (int i=0; i<options.size(); i++) {
-        MenuOptions optItem;
-        optItem.name = options[i].first.c_str();
-        optItem.action = options[i].second;
-        optItems.push_back(optItem);
+      list = { };
+      coord=drawOptions(index, options, list, ALCOLOR, BGCOLOR);
+      max_idx=0;
+      min_idx=MAXFILES;
+      int tmp=0;
+      for(auto item: list) {
+        if(item.name!="") {
+          tmp=item.name.toInt();
+          Serial.print(tmp); Serial.print(" ");
+          if(tmp>max_idx) max_idx = tmp;
+          if(tmp<min_idx) min_idx = tmp;
+        } 
       }
-      coord=drawOptions(index,optItems, ALCOLOR, BGCOLOR);
       if(bright){
         setBrightness(100*(numOpt-index)/numOpt,false);
       }
@@ -842,37 +863,30 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
 
     #if defined(T_EMBED) || defined(HAS_TOUCH) || defined(HAS_KEYBOARD)
     if(touchPoint.pressed) {
-      int i=0;
-      for(auto item: optItems) {
+      for(auto item: list) {
         if(item.contain(touchPoint.x, touchPoint.y)) {
           SelPress = false;
           PrevPress = false;
           NextPress = false;
           UpPress = false;
           DownPress = false;
-          //Serial.printf("\nValue to sum: %s",item.text);
-          //Serial.printf("\n[+]actual index: %d\n",i);
-          if(strcmp(item.text.c_str(),"")!=0) {
-            if(strcmp(item.text.c_str(),"+")==0) index = i;
-            if(strcmp(item.text.c_str(),"--")==0) index = 0;
-            if(strcmp(item.text.c_str(),"-")==0) index = i - (MAX_MENU_SIZE-2);
-            if(index>=options.size()) index = options.size()-1;
-           // Serial.printf("\n[+]next index: %d\n",index);
+          EscPress = false;
+          if(item.name=="") {
+            if(item.text=="+") index = max_idx + 1;
+            if(item.text=="-") index = min_idx - 1;
+            if(index<0) index = 0;
+            //Serial.printf("\nPressed [%s], next index: %d\n",item.text,index);
+            redraw=true;
             break;
           }
           else {
-            Serial.printf("\nSelected: %s\n",item.name);
-            if(index==i) {
-              item.action();
-              exit = true;
-            } 
-            index=i;
+            if(index==item.name.toInt()) SelPress = true;
+            else redraw=true;
+            index=item.name.toInt();
             break;
           }
         }
-        if(strcmp(item.text.c_str(),"")==0) i++;
       }
-      redraw=true;
     }
     if(check(PrevPress) || check(UpPress)) {
       if(index==0) index = options.size() - 1;
