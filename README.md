@@ -62,8 +62,17 @@ Application Launcher for M5Stack, Lilygo, CYDs, Marauder and ESP32 devices.
 ## To-Do list
 Things that needs to be done in next updates
      * [ ] OTA Pagination (multiple firmware list files)
+     * [ ] LVGL for e-paper displays
 
 ## Changelog
+* 2.4.8:
+     * [x] Enhancements on Touchscreen devices for responsive file lists and menu options
+     * [x] New Main menu with all items, with items touchable.
+     * [x] Port to Lilygo T-Deck Pro (e-paper display)
+     * [x] fixed ports to [Marauder v4, v6, v7, mini.](https://github.com/bmorcelli/Launcher/issues/146)
+     * [x] Ports to [8048S043C, 8048W550C](https://github.com/bmorcelli/Launcher/issues/108) 
+     * [x] fix for [2432s032C misaligned touchscreen ](https://github.com/bmorcelli/Launcher/issues/149)
+
 * 2.4.7:
      * [x] WebUi: Multi file upload through drag/drop or file/folder selector, now it supports folder upload, and sorting.
      * [x] StickC blackscreen fix

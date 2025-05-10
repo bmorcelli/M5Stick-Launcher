@@ -471,10 +471,14 @@ void loop() {
       for(auto item : menuItems) {
         if(item.contain(touchPoint.x,touchPoint.y)) {
           #ifndef E_PAPER_DISPLAY
-          index=i;
-          drawMainMenu(menuItems, index); // Redraw the menu to show the selected item
-          #endif
+          if(i==index) item.action();
+          else { 
+            index=i;
+            drawMainMenu(menuItems, index); // Redraw the menu to show the selected item
+          }
+          #else
           item.action(); // Call the action associated with the selected menu item
+          #endif
           returnToMenu = false;
           redraw = true;
         }
