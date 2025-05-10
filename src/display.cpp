@@ -506,8 +506,8 @@ Opt_Coord drawOptions(int idx,const std::vector<std::pair<std::string, std::func
         int nextPages = remains/(MAX_MENU_SIZE-2); // O restante do menu tem MAX_MENU_SIZE-2 de tamanho, pois substitui o primeiro e o ultimo por "..."
         int lastPage = (arraySize - remains - nextPages*(MAX_MENU_SIZE-2)) > 0? 1 : 0; // A ultima pagina tem o restante do menu, que pode ser menor que MAX_MENU_SIZE-2
         num_pages = 1 + nextPages + lastPage;
-        Serial.printf("\rRemain items after 1st page: %d, nextPage: %d, lastPage: %d, arraySize: %d, Const: %d\n",
-          remains, nextPages, lastPage, arraySize, MAX_MENU_SIZE);
+        //Serial.printf("\rRemain items after 1st page: %d, nextPage: %d, lastPage: %d, arraySize: %d, Const: %d\n",
+        //  remains, nextPages, lastPage, arraySize, MAX_MENU_SIZE);
       }
       #endif
       int start=0;
@@ -530,8 +530,8 @@ Opt_Coord drawOptions(int idx,const std::vector<std::pair<std::string, std::func
 
           if(index>=ini && index<end) {
             start = ini;
-            Serial.printf("num_pages: %d, show_page: %d, index: %d\n", num_pages, i, index);
-            Serial.printf("ini: %d, end: %d\n", ini, end);
+            //Serial.printf("num_pages: %d, show_page: %d, index: %d\n", num_pages, i, index);
+            //Serial.printf("ini: %d, end: %d\n", ini, end);
             if(index==ini || i!=show_page) 
               tft->fillRoundRect(tftWidth * 0.10, tftHeight / 2 - visibleCount * FONT_S / 2 - 5,
                                  tftWidth * 0.8, FONT_S * visibleCount + 10, 5, bgcolor);
@@ -587,13 +587,13 @@ Opt_Coord drawOptions(int idx,const std::vector<std::pair<std::string, std::func
             else txt=" ";
             txt+=String(fileList[i].first.c_str()) + "                       ";
             tft->println(txt.substring(0,nchars));
-            Serial.println(txt.substring(0,nchars));
+            //Serial.println(txt.substring(0,nchars));
             opt.push_back(optItem);
             j++;
         }
         i++;
         if (i==(start+Max_items)) { 
-          Serial.printf("Stopped at start+Max_items: %d + %d", start, Max_items);
+          //Serial.printf("Stopped at start+Max_items: %d + %d", start, Max_items);
           break;
         }
       }
@@ -643,9 +643,18 @@ void drawMainMenu(std::vector<MenuOptions>& opt, int index) {
     for (int i = 0; i < size; ++i) {
       int col = i % cols;
       int row = i / cols;
-      int x = 8 + col * w;
       int y = 28 + row * h;
-  
+      int xOffset = 0;
+
+      // Última linha incompleta: centralizar
+      if (row == rows - 1 && (size % cols) != 0 && (size % cols) < cols) {
+          int itemsInLastRow = size % cols;
+          int totalWidthUsed = itemsInLastRow * w;
+          xOffset = ((tftWidth - 16) - totalWidthUsed) / 2;
+      }
+      
+      int x = 8 + xOffset + col * w;
+        
       opt[i].x = x;
       opt[i].y = y;
       opt[i].w = w - 5;
@@ -743,8 +752,8 @@ Opt_Coord listFiles(int index, String fileList[][3], std::vector<MenuOptions>& o
       int nextPages = remains/(MAX_ITEMS-2); // O restante do menu tem MAX_MENU_SIZE-2 de tamanho, pois substitui o primeiro e o ultimo por "..."
       int lastPage = (arraySize - remains - nextPages*(MAX_ITEMS-2)) > 0? 1 : 0; // A ultima pagina tem o restante do menu, que pode ser menor que MAX_MENU_SIZE-2
       num_pages = 1 + nextPages + lastPage;
-      Serial.printf("\rRemain items after 1st page: %d, nextPage: %d, lastPage: %d, arraySize: %d, Const: %d\n",
-        remains, nextPages, lastPage, arraySize, MAX_ITEMS);
+      //Serial.printf("\rRemain items after 1st page: %d, nextPage: %d, lastPage: %d, arraySize: %d, Const: %d\n",
+      //  remains, nextPages, lastPage, arraySize, MAX_ITEMS);
     }
     #endif
     int start=0;
@@ -876,7 +885,7 @@ void loopOptions(const std::vector<std::pair<std::string, std::function<void()>>
       for(auto item: list) {
         if(item.name!="") {
           tmp=item.name.toInt();
-          Serial.print(tmp); Serial.print(" ");
+          //Serial.print(tmp); //Serial.print(" ");
           if(tmp>max_idx) max_idx = tmp;
           if(tmp<min_idx) min_idx = tmp;
         } 

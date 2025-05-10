@@ -471,16 +471,22 @@ void loop() {
       for(auto item : menuItems) {
         if(item.contain(touchPoint.x,touchPoint.y)) {
           #ifndef E_PAPER_DISPLAY
-          if(i==index) item.action();
+          if(i==index) { 
+            item.action();
+            tft->drawPixel(0,0,0);
+            tft->fillScreen(BGCOLOR);
+          }
           else { 
             index=i;
             drawMainMenu(menuItems, index); // Redraw the menu to show the selected item
+            break;
           }
           #else
           item.action(); // Call the action associated with the selected menu item
           #endif
           returnToMenu = false;
           redraw = true;
+          break;
         }
         i++;
       }
@@ -500,6 +506,7 @@ void loop() {
     // Select and run function 
     if(check(SelPress)) { 
       menuItems.at(index).action(); // Call the action associated with the selected menu item
+      tft->drawPixel(0,0,0);
       tft->fillScreen(BGCOLOR);
       returnToMenu = false;
       redraw = true;

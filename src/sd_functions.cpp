@@ -432,7 +432,7 @@ String loopSD(bool filePicker) {
       for(auto item: list) {
         if(item.name!="") {
           tmp=item.name.toInt();
-          Serial.print(tmp); Serial.print(" ");
+          // Serial.print(tmp); Serial.print(" ");
           if(tmp>max_idx) max_idx = tmp;
           if(tmp<min_idx) min_idx = tmp;
         } 
