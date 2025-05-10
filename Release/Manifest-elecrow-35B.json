@@ -1,1 +1,1 @@
-{"name":"Elecrow ESP32 3.5in","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-elecrow-35B.bin","offset":0}]}]}
+{"name":"Elecrow ESP32 3.5in","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-elecrow-35B.bin","offset":0}]}]}

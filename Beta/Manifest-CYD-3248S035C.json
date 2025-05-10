@@ -1,1 +1,1 @@
-{"name":"CYD-3248S035C","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-CYD-3248S035C.bin","offset":0}]}]}
+{"name":"CYD-3248S035C","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-CYD-3248S035C.bin","offset":0}]}]}

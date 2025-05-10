@@ -1,1 +1,1 @@
-{"name":"CYD-3248W535C","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-CYD-3248W535C.bin","offset":0}]}]}
+{"name":"CYD-3248W535C","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-CYD-3248W535C.bin","offset":0}]}]}

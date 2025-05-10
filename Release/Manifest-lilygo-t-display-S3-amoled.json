@@ -1,1 +1,1 @@
-{"name":"T-Display-S3 AMOLED Plus","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-lilygo-t-display-S3-amoled.bin","offset":0}]}]}
+{"name":"T-Display-S3 AMOLED Plus","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-lilygo-t-display-S3-amoled.bin","offset":0}]}]}

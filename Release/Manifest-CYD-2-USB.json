@@ -1,1 +1,1 @@
-{"name":"CYD-2432S028_inv","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-CYD-2-USB.bin","offset":0}]}]}
+{"name":"CYD-2432S028_inv","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-CYD-2-USB.bin","offset":0}]}]}

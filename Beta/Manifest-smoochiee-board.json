@@ -1,1 +1,1 @@
-{"name":"Smoochie Board","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-smoochiee-board.bin","offset":0}]}]}
+{"name":"Smoochie Board","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-smoochiee-board.bin","offset":0}]}]}

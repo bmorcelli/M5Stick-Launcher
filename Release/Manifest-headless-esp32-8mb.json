@@ -1,1 +1,1 @@
-{"name":"ESP32-8mb","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-headless-esp32-8mb.bin","offset":0}]}]}
+{"name":"ESP32-8mb","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-headless-esp32-8mb.bin","offset":0}]}]}

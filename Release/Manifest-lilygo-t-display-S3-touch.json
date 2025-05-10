@@ -1,1 +1,1 @@
-{"name":"T-Display-S3","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-lilygo-t-display-S3-touch.bin","offset":0}]}]}
+{"name":"T-Display-S3","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-lilygo-t-display-S3-touch.bin","offset":0}]}]}

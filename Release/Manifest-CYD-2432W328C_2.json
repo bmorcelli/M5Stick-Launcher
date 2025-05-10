@@ -1,1 +1,1 @@
-{"name":"CYD-2432W328C_inv","builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-CYD-2432W328C_2.bin","offset":0}]}]}
+{"name":"CYD-2432W328C_inv","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32","improv":false,"parts":[{"path":"bins/Launcher-CYD-2432W328C_2.bin","offset":0}]}]}

@@ -1,1 +1,1 @@
-{"name":"CYD-8048W550C","builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-CYD-8048W550C.bin","offset":0}]}]}
+{"name":"CYD-8048W550C","new_install_prompt_erase": true,"builds":[{"chipFamily":"ESP32-S3","improv":false,"parts":[{"path":"bins/Launcher-CYD-8048W550C.bin","offset":0}]}]}
